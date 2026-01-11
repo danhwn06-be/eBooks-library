@@ -1,0 +1,18 @@
+# Tắt tính năng MultiViews để tránh xung đột với Router (Apache tự động tìm file trùng tên)
+Options -MultiViews
+
+# Bật module mod_rewrite của Apache để xử lý URL
+RewriteEngine On
+
+# Thiết lập đường dẫn cơ sở cho việc viết lại URL (cần thiết khi chạy trong thư mục con)
+RewriteBase /eBooks-library/public
+
+# Kiểm tra nếu yêu cầu KHÔNG phải là một file thực tế tồn tại (như css, js, ảnh)
+RewriteCond %{REQUEST_FILENAME} !-f
+# Kiểm tra nếu yêu cầu KHÔNG phải là một thư mục thực tế tồn tại
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Chuyển hướng tất cả các yêu cầu còn lại về index.php và truyền đường dẫn vào tham số 'url'
+# [QSA] (Query String Append): Giữ lại các tham số GET cũ nếu có
+# [L] (Last): Dừng xử lý các quy tắc rewrite tiếp theo
+RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
