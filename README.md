@@ -32,7 +32,7 @@ A library management system built with **native PHP** following the **MVC (Model
 *   **Frontend:** HTML, CSS.
 *   **Server:** Apache (XAMPP).
 
-## 📂 Folder Structure
+## Folder Structure
 
 ```text
 eBooks-library/
@@ -47,7 +47,7 @@ eBooks-library/
 └── index.php           # Entry point
 ```
 
-## 📦 Installation Guide
+## Installation Guide
 
 1.  **Clone the Project:**
     Place the project folder into your Web Server's root directory (e.g., `c:\xampp\htdocs\eBooks-library`).
@@ -70,4 +70,5 @@ eBooks-library/
 4.  **Run the Application:**
 
     *   Open your browser and navigate to: `http://localhost/eBooks-library`
+
 
