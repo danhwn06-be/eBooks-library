@@ -2,18 +2,18 @@
 
 A library management system built with **native PHP** following the **MVC (Model-View-Controller)** pattern. This project provides an efficient solution for managing books, members, and the borrowing/returning process.
 
-## 🚀 Introduction
+## Introduction
 
 **eBooks-library** is a lightweight web application, independent of large frameworks, designed to help learners understand the internal workings of the MVC pattern, PDO, and relational database structures.
 
-## 👥 Project Team
+## Project Team
 
 *   **Hồ Văn Đàn**
 *   **Nguyễn Hữu Tổng Đạt**
 *   **Hồ Thị Như**
 *   **Hồ Văn Tiết**
 
-## ✨ Key Features
+## Key Features
 
 *   **Inventory Management:** Managing book titles, adding/editing/deleting copies, and tracking stock status.
 *   **Member Management:** Creating new member accounts, updating profile information, and managing membership status.
@@ -25,12 +25,12 @@ A library management system built with **native PHP** following the **MVC (Model
 *   **Reports & Analytics:** Dashboard overview and detailed statistical reports on borrowing trends and new members.
 *   **System Administration & Security:** Authentication, role-based authorization [Admin vs. Member], and session management.
 
-## 🛠️ Technologies Used
+## Technologies Used
 
-*   **Language:** PHP (OOP, MVC Pattern).
+*   **Language:** PHP (MVC Pattern).
 *   **Database:** MySQL (Using PDO & Singleton Pattern).
-*   **Frontend:** HTML5, CSS3 (Grid Layout).
-*   **Server:** Apache (XAMPP/WAMP/Laragon).
+*   **Frontend:** HTML, CSS.
+*   **Server:** Apache (XAMPP).
 
 ## 📂 Folder Structure
 
@@ -70,3 +70,4 @@ eBooks-library/
 4.  **Run the Application:**
 
     *   Open your browser and navigate to: `http://localhost/eBooks-library`
+
