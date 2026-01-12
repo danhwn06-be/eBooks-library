@@ -2,7 +2,7 @@
 class App
 {
     // Controller mặc định
-    protected $controller = 'BookController';
+    protected $controller = 'HomeController';
     // Method mặc định
     protected $method = 'index';
     // Mảng tham số

@@ -7,5 +7,4 @@ require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/App.php';
 
-// Khởi tạo Router để điều hướng request
-$router = new App();
+$app = new App();
