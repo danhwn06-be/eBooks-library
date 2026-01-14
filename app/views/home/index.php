@@ -1,5 +1,6 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 <?php require APP_ROOT . '/app/views/inc/carousel.php'; ?>
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
 
 <section class="filter-section">
     <div class="container">
