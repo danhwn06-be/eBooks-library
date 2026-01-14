@@ -48,9 +48,9 @@
             <div class="footer-col contact">
                 <h3>Contact</h3>
                 <ul>
-                    <li><i class="fa-solid fa-location-dot"></i> No.123, ABC Street, XYZ District, Da Nang</li>
-                    <li><i class="fa-solid fa-phone"></i> (+84) 373 532 152</li>
-                    <li><i class="fa-solid fa-envelope"></i> Thuvientructuyengroup6@projectsbasic.PNV.com</li>
+                    <li><i class="fa-solid fa-location-dot"></i> No.XXX, To Hien Thanh Street, Son Tra District, Da Nang</li>
+                    <li><i class="fa-solid fa-phone"></i> (+84) 123 456 789</li>
+                    <li><i class="fa-solid fa-envelope"></i> admin@ebookslibrary.com</li>
                     <li><i class="fa-solid fa-clock"></i> Monday - Saturday: <strong>8:00 - 17:00</strong></li>
                 </ul>
             </div>
@@ -61,8 +61,6 @@
         <p>The library management system was developed for Group 6 of the Basic Web Project.</p></b>
     </div>
 </footer>
-<!-- COPYRIGHT -->
-
 
 <script src="<?php echo URL_ROOT; ?>/js/main.js"></script>
 </body>
