@@ -1,0 +1,223 @@
+/* ===== FOOTER STYLES ===== */
+.site-footer {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding-top: 50px;
+    margin-top: 60px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 4 COLUMNS LAYOUT - Giống Figma */
+.footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr; /* Tỷ lệ 4 cột như Figma */
+    gap: 50px;
+    margin-bottom: 40px;
+}
+
+/* Cột About + Social */
+.footer-col.about-social {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.footer-col h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 12px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.footer-col h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: #4A5BDE;
+}
+
+/* About text */
+.footer-col.about p {
+    color: #bdc3c7;
+    line-height: 1.7;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+/* Social links */
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #4A5BDE;
+    color: #ecf0f1;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 18px;
+}
+
+.social-links a:hover {
+    background-color: #3498db;
+    transform: translateY(-3px);
+}
+
+/* Lists styling */
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 16px;
+}
+
+.footer-col ul li a {
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 16px;
+    display: inline-block;
+    padding: 3px 0;
+}
+
+.footer-col ul li a:hover {
+    color: #4A5BDE;
+    transform: translateX(5px);
+}
+
+/* Contact section - Giống Figma */
+.footer-col.contact ul {
+    margin-top: 10px;
+}
+
+.footer-col.contact ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    padding-left: 0;
+    color: #bdc3c7;
+}
+
+.footer-col.contact ul li i {
+    color: #4A5BDE;
+    font-size: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.footer-col.contact ul li strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* Phone number style */
+.footer-col.contact ul li:nth-child(2) {
+    font-size: 17px;
+    font-weight: 500;
+}
+
+/* Copyright bar */
+.copyright-bar {
+    background-color: #ffffff;
+    padding: 25px 0;
+    text-align: center;
+    margin-top: 60px;
+    border-top: 1px solid #34495e;
+}
+
+.copyright-bar p {
+    color: #000000;
+    margin: 8px 0;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.copyright-bar p:first-child {
+    font-weight: 600;
+    color: #000000;
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .footer-content {
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 992px) {
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+    }
+    
+    .footer-col.about-social {
+        grid-column: 1 / span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .footer-col.about-social {
+        grid-column: 1;
+    }
+    
+    .site-footer {
+        padding-top: 40px;
+    }
+    
+    .copyright-bar {
+        padding: 20px 0;
+        margin-top: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-links {
+        justify-content: center;
+    }
+    
+    .footer-col h3 {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .footer-col.about p {
+        font-size: 15px;
+    }
+    
+    .footer-content {
+        gap: 30px;
+    }
+}
