@@ -48,7 +48,7 @@
                         </div>
 
                         <div class="book-cover-placeholder">
-                            <img src="<?php echo !empty($book['image_url']) ? URL_ROOT . '/images/' . htmlspecialchars($book['image_url']) : URL_ROOT . '/images/default-book.jpg'; ?>"
+                            <img src="<?php echo !empty($book['image_url']) ? URL_ROOT . '/images/books/' . htmlspecialchars($book['image_url']) : URL_ROOT . '/images/books/default-book.jpg'; ?>"
                                 alt="<?php echo htmlspecialchars($book['title']); ?>">
                         </div>
 
