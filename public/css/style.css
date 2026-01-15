@@ -911,3 +911,159 @@ body {
 
 
 /* ================= END OF HERO SLIDER ================= */
+
+/* ===== BOOK DETAIL (NAMESPACE bd-) ===== */
+.bd-wrapper {
+  max-width: 920px;
+  margin: 20px auto;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+  align-items: start;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ===== IMAGE BOX ===== */
+.bd-image-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.bd-image-box img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* ===== INFO CARD ===== */
+.bd-card {
+  background: #ededed;
+  border-radius: 16px;
+  padding: 22px 24px;
+  border: 1px solid #d0d0d0;
+}
+
+/* INFO */
+.bd-info {
+  width: 100%;
+}
+
+/* TITLE */
+.bd-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* SUB */
+.bd-sub {
+  margin: 4px 0 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.bd-dot {
+  margin: 0 6px;
+  color: #777;
+}
+
+/* VERSION BAR */
+.bd-versions {
+  display: inline-block;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 14px;
+  margin: 6px 0 14px;
+}
+
+/* INFO BOXES */
+.bd-info-boxes {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.bd-info-box {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.bd-info-box span {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.bd-info-box strong {
+  font-size: 14px;
+  color: #111;
+}
+
+/* BUTTON */
+.bd-btn-reserve {
+  display: inline-block;
+  margin-top: 6px;
+  background: #4a5bdc;
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.bd-btn-reserve:hover {
+  background: #3948b8;
+}
+
+/* ===== DESCRIPTION ===== */
+.bd-desc {
+  max-width: 920px;
+  margin: 14px auto 0;
+  background: #e6ecff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.bd-desc p {
+  margin: 0;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .bd-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .bd-image-box {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+
+  .bd-info-boxes {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bd-info-box {
+    flex: 0 0 45%;
+  }
+}
+
+/* ===== END OF BOOK DETAIL ===== */
