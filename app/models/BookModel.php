@@ -12,7 +12,7 @@ class BookModel
     public function getBooksWithPagination($limit, $offset)
     {
         $sql = "SELECT 
-            b.book_id, b.title, b.author, b.isbn, b.image_url, COUNT(bc.copy_id) AS total_copies, COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+                b.book_id, b.title, b.author, b.isbn, b.image_url, COUNT(bc.copy_id) AS total_copies, COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
             FROM Books b 
             LEFT JOIN BookCopies bc ON b.book_id = bc.book_id GROUP BY b.book_id 
             ORDER BY b.created_at DESC
@@ -55,5 +55,29 @@ class BookModel
         } catch (PDOException $e) {
             return [];
         }
+    }
+
+    // Lấy chi tiết 1 cuốn sách theo ID
+    public function getBookById($id)
+    {
+        $sql = "SELECT 
+                b.*,
+                c.category_name,
+                COUNT(bc.copy_id) AS total_copies,
+                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies
+            FROM Books b
+            LEFT JOIN Categories c ON b.category_id = c.category_id
+            LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
+            WHERE b.book_id = :id
+            GROUP BY b.book_id";
+
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->bindValue(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch();
+        } catch (PDOException) {
+            return false;
+        };
     }
 }

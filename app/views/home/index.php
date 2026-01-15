@@ -1,10 +1,9 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 <?php require APP_ROOT . '/app/views/inc/carousel.php'; ?>
-<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
 
 <section class="filter-section">
     <div class="container">
-        <form action="<?php echo URL_ROOT; ?>/books/filter" method="GET" class="filter-form">
+        <form action="<?php echo URL_ROOT; ?>/book/filter" method="GET" class="filter-form">
             <div class="form-group">
                 <select name="category" id="category">
                     <option value="">All genres</option>
@@ -48,8 +47,9 @@
                         </div>
 
                         <div class="book-cover-placeholder">
-                            <img src="<?php echo !empty($book['image_url']) ? URL_ROOT . '/images/books/' . htmlspecialchars($book['image_url']) : URL_ROOT . '/images/books/default-book.jpg'; ?>"
-                                alt="<?php echo htmlspecialchars($book['title']); ?>">
+                            <a href="<?php echo URL_ROOT; ?>/book/detail/<?php echo $book['book_id']; ?>">
+                                <img src="<?php echo !empty($book['image_url']) ? URL_ROOT . '/images/books/' . htmlspecialchars($book['image_url']) : URL_ROOT . '/images/books/default-book.jpg'; ?>"
+                                alt="<?php echo htmlspecialchars($book['title']); ?>"></a>
                         </div>
 
                         <div class="card-body">
@@ -64,10 +64,10 @@
                         </div>
 
                         <div class="card-footer">
-                            <a href="<?php echo URL_ROOT; ?>/books/detail/<?php echo $book['book_id']; ?>" class="btn-details">See details</a>
+                            <a href="<?php echo URL_ROOT; ?>/book/detail/<?php echo $book['book_id']; ?>" class="btn-details">See details</a>
 
                             <?php if ($book['available_copies'] > 0): ?>
-                                <a href="<?php echo URL_ROOT; ?>/books/reserve/<?php echo $book['book_id']; ?>" class="btn-reservation">Reservations</a>
+                                <a href="<?php echo URL_ROOT; ?>/book/reserve/<?php echo $book['book_id']; ?>" class="btn-reservation">Reservations</a>
                             <?php else: ?>
                                 <button class="btn-reservation" disabled style="opacity: 0.5; cursor: not-allowed;">Unavailable</button>
                             <?php endif; ?>
