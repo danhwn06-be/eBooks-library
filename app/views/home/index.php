@@ -56,7 +56,7 @@
                             <h3 class="book-title"><?php echo htmlspecialchars($book['title']); ?></h3>
                             <p class="book-author"><?php echo htmlspecialchars($book['author']); ?></p>
                             <p class="book-isbn">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></p>
-                        </div>
+                        </div><hr>
 
                         <div class="book-meta">
                             <span><?php echo $book['available_copies']; ?> versions available</span>

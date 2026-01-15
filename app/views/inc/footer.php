@@ -40,7 +40,7 @@
                     <li><a href="#">Book reservations</a></li>
                     <li><a href="#">Renew membership card</a></li>
                     <li><a href="#">Look up documents</a></li>
-                    <li><a href="#">Notifications of overdue books</a></li>
+                    <li><a href="#">Overdue Notices</a></li>
                 </ul>
             </div>
 
@@ -48,7 +48,7 @@
             <div class="footer-col contact">
                 <h3>Contact</h3>
                 <ul>
-                    <li><i class="fa-solid fa-location-dot"></i> No.XXX, To Hien Thanh Street, Son Tra District, Da Nang</li>
+                    <li><i class="fa-solid fa-location-dot"></i> No.XXX, Son Tra District, Da Nang</li>
                     <li><i class="fa-solid fa-phone"></i> (+84) 123 456 789</li>
                     <li><i class="fa-solid fa-envelope"></i> admin@ebookslibrary.com</li>
                     <li><i class="fa-solid fa-clock"></i> Monday - Saturday: <strong>8:00 - 17:00</strong></li>
