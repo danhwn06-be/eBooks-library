@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const images = [];
+  const images = ['carousel-1.avif', 'carousel-2.avif', 'carousel-3.webp'];
 
   // Lấy các phần từ cần thiết từ DOM
   const slideImg = document.querySelector(".slide-content img");
@@ -46,5 +46,5 @@ document.addEventListener("DOMContentLoaded", function () {
   // Tự động chạy
   setInterval(() => {
     if (nextBtn) nextBtn.click();
-  });
+  }, 5000);
 });
