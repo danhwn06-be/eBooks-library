@@ -36,4 +36,26 @@ class BookModel {
         $row = $stmt->fetch();
         return $row['total'];
     }
+
+    // Hiển thị tất cả sách
+    public function getAllBooks()
+    {
+        $sql = "SELECT * FROM books";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    //Tìm kiếm sách bằng tên sách
+    public function searchByTitle($keyword)
+    {
+        $sql = "SELECT * FROM books
+                WHERE title LIKE :kw";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            'kw' => "%$keyword%"
+        ]);
+
+        return $stmt ->fetchAll();
+    }
 }

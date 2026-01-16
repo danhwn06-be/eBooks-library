@@ -2,7 +2,7 @@
 // Thông số kết nối Database
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', '091006');
 define('DB_NAME', 'library_db');
 
 // Thông tin chung về ứng dụng
