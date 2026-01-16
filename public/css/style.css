@@ -913,6 +913,16 @@ body {
 /* ================= END OF HERO SLIDER ================= */
 
 /* ===== BOOK DETAIL (NAMESPACE bd-) ===== */
+.bd-home-detail {
+    font-size: 14px;
+    color: #000000;
+    text-align: justify;
+    
+}
+.tile-bx {
+    color: #000000;
+    font-weight: bold;
+}
 .bd-wrapper {
   max-width: 920px;
   margin: 20px auto;
@@ -924,25 +934,24 @@ body {
 }
 
 /* ===== IMAGE BOX ===== */
-.bd-image-box {
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
 .bd-image-box img {
-  width: 100%;
-  border-radius: 8px;
-  object-fit: cover;
+  width: 175px;
+  height: 275px;
+  border-radius: 15px;
+  border: 2px solid #000000;
+    object-fit: cover;
+
+  
 }
 
 /* ===== INFO CARD ===== */
 .bd-card {
-  background: #ededed;
+  background: #D8D6D6;
   border-radius: 16px;
-  padding: 22px 24px;
-  border: 1px solid #d0d0d0;
+  padding: 16px 22px;
+  border: 1px solid #000000;
+  width: auto;
+  height: 275px;
 }
 
 /* INFO */
@@ -962,23 +971,28 @@ body {
 .bd-sub {
   margin: 4px 0 6px;
   font-size: 14px;
+  font-weight: 600;
   color: #333;
-}
-
-.bd-dot {
-  margin: 0 6px;
-  color: #777;
+   display: flex;
+  align-items: center;
+   gap: 8px;
+   flex-wrap: wrap;
+   font-family: 'Inter', sans-serif;
 }
 
 /* VERSION BAR */
 .bd-versions {
-  display: inline-block;
-  background: #fff;
-  border: 1px solid #bbb;
-  border-radius: 8px;
+  display: flex;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 15px;
   padding: 6px 14px;
   font-size: 14px;
   margin: 6px 0 14px;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+
 }
 
 /* INFO BOXES */
@@ -990,37 +1004,43 @@ body {
 
 .bd-info-box {
   flex: 1;
-  background: #fff;
-  border: 1px solid #bbb;
-  border-radius: 8px;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 15px;
   padding: 10px 14px;
   text-align: center;
 }
 
 .bd-info-box span {
   display: block;
-  font-size: 12px;
-  color: #666;
+  font-size: 15px;
+  color: #191313;
   margin-bottom: 2px;
+  font-weight: 500;
 }
 
 .bd-info-box strong {
   font-size: 14px;
-  color: #111;
+  color: #000000;
+  font-weight: 400;
 }
 
 /* BUTTON */
 .bd-btn-reserve {
-  display: inline-block;
-  margin-top: 6px;
-  background: #4a5bdc;
+    display: block;
+  background: #4A5BDE;
   color: #fff;
-  border-radius: 10px;
+  border-radius: 15px;
   padding: 8px 28px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
+  width: 40%;
+  text-align: center;
   text-decoration: none;
   transition: 0.2s ease;
+  border: 1px solid #000000;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .bd-btn-reserve:hover {
@@ -1031,12 +1051,14 @@ body {
 .bd-desc {
   max-width: 920px;
   margin: 14px auto 0;
-  background: #e6ecff;
+  background: #CED3FF;
   border-radius: 16px;
   padding: 20px 24px;
   color: #222;
   font-size: 14px;
+  font-weight: 500;
   line-height: 1.65;
+  gap: 12px;
 }
 
 .bd-desc p {
@@ -1045,25 +1067,5 @@ body {
   text-justify: inter-word;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .bd-wrapper {
-    grid-template-columns: 1fr;
-  }
-
-  .bd-image-box {
-    max-width: 220px;
-    margin: 0 auto;
-  }
-
-  .bd-info-boxes {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .bd-info-box {
-    flex: 0 0 45%;
-  }
-}
 
 /* ===== END OF BOOK DETAIL ===== */

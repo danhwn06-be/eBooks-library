@@ -2,10 +2,11 @@
 
 <div class="container main-container">
 
-  <div class="breadcrumb bd-breadcrumb">
-    <a href="<?php echo URL_ROOT; ?>">Home</a>
-    <a href="<?php echo URL_ROOT; ?>book/">Books</a>
-    <span><?php echo $data['book']['title']; ?></span>
+  <div>
+    <div class="fa-solid fa-house">    </div> <b class="bd-home-detail"><a href="<?php echo URL_ROOT; ?>">Home</a>
+    /
+    <a href="<?php echo URL_ROOT; ?>book/">Books</a> /</b>
+    <span class="tile-bx"><?php echo $data['book']['title']; ?></span>
   </div>
 
   <div class="bd-wrapper">
@@ -23,7 +24,6 @@
 
         <p class="bd-sub">
           by <strong><?php echo $data['book']['author']; ?></strong>
-          <span class="bd-dot">•</span>
           Category: <strong><?php echo $data['book']['category_name']; ?></strong>
         </p>
 
