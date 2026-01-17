@@ -1046,7 +1046,33 @@ body {
 .bd-btn-reserve:hover {
   background: #3948b8;
 }
+/* Nút disabled - đẹp hơn */
+.bd-btn-reserve.disabled {
+  background: rgba(83, 134, 209, 0.45);
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  cursor: not-allowed;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  opacity: 0.9;
+  position: relative;
+}
 
+/* Thêm hiệu ứng "không khả dụng" */
+.bd-btn-reserve.disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 45%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 55%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 2s infinite;
+}
 /* ===== DESCRIPTION ===== */
 .bd-desc {
   max-width: 920px;
