@@ -34,8 +34,8 @@
             </div>
 
             <div class="search-bar">
-                <form action="<?php echo URL_ROOT; ?>/book/search" method="GET">
-                    <input type="text" name="q" placeholder="Search for books, author and ISBNs...">
+                <form action="<?php echo URL_ROOT; ?>/home/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search for books, author and ISBNs...">
                     <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
             </div>

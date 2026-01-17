@@ -21,6 +21,8 @@ class HomeController extends Controller
             'books' => $books,
             'categories' => $categories,
             'current_page' => 'home',
+            'keyword' => '',
+            'noResult' => false,
             'pagination' => [
                 'current_page' => $page,
                 'total_pages' => $totalPages
@@ -37,7 +39,7 @@ class HomeController extends Controller
         //kiểm tra từ khóa mà người dùng nhập vào
         $keyword = isset($_GET['keyword']) ? trim ($_GET['keyword']) : "";
         //xử lý nếu từ khóa trống sẽ trả về tất cả sách
-        if ($keyword === " ") {
+        if ($keyword === "") {
             $books = $bookModel->getAllBooks();
             $pageTitle = 'Tất cả sách';
         } else {
@@ -52,7 +54,7 @@ class HomeController extends Controller
         $categories = $bookModel->getAllCategories();
 
         $data = [
-            'title' => 'Search Result',
+            'title' => $pageTitle,
             'books' => $books,
             'categories' => $categories,
             'current_page' => 'home',

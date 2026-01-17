@@ -47,18 +47,33 @@ class BookModel
     // Hiển thị tất cả sách
     public function getAllBooks()
     {
-        $sql = "SELECT * FROM books";
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll();
+        $sql = "SELECT 
+                b.book_id, b.title, b.author, b.isbn, b.image_url, COUNT(bc.copy_id) AS total_copies, COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+            FROM Books b 
+            LEFT JOIN BookCopies bc ON b.book_id = bc.book_id GROUP BY b.book_id 
+            ORDER BY b.created_at DESC";
+
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 
-    //Tìm kiếm sách bằng tên sách
+    //Tìm kiếm sách bằng tên sách, tác giả hoặc ISBN
     public function searchByTitle($keyword)
     {
-        $sql = "SELECT * FROM books
-                WHERE title LIKE :kw";
+        $sql = "SELECT 
+                b.book_id, b.title, b.author, b.isbn, b.image_url, COUNT(bc.copy_id) AS total_copies, COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+            FROM Books b 
+            LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
+            WHERE b.title LIKE :kw OR b.author LIKE :kw OR b.isbn LIKE :kw
+            GROUP BY b.book_id 
+            ORDER BY b.created_at DESC";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute([
             'kw' => "%$keyword%"
         ]);

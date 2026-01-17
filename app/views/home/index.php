@@ -30,10 +30,14 @@
 
 <main class="book-list-section">
     <div class="container">
-        <h2 class="section-title">All the books in the library</h2>
+        <h2 class="section-title">
+            <?php echo isset($data['keyword']) && $data['keyword'] !== '' ? 'Kết quả tìm kiếm cho: ' . $data['keyword'] : 'All the books in the library'; ?>
+        </h2>
 
         <div class="book-grid">
-            <?php if (empty($data['books'])): ?>
+            <?php if ($data['noResult']): ?>
+                <p>Không tìm thấy sách nào phù hợp với từ khóa "<?php echo $data['keyword']; ?>".</p>
+            <?php elseif (empty($data['books'])): ?>
                 <p>No books found.</p>
             <?php else: ?>
                 <?php foreach ($data['books'] as $book): ?>
@@ -77,6 +81,7 @@
             <?php endif; ?>
         </div>
 
+        <?php if ($data['pagination'] && $data['pagination']['total_pages'] > 1): ?>
         <div class="pagination-container">
             <?php
             $current = $data['pagination']['current_page'];
@@ -101,6 +106,7 @@
                 <span class="page-btn next disabled"><i class="fa-solid fa-chevron-right"></i></span>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
 </main>
 
