@@ -488,7 +488,7 @@ body {
     font-size: 14px;
 }
 
-/* SỬA QUAN TRỌNG: Dropdown menu phải ẩn mặc định */
+/* Dropdown menu phải ẩn mặc định */
 .dropdown-menu {
     display: none !important; /* THÊM !important */
     position: absolute;
