@@ -40,10 +40,6 @@ class BookController extends Controller
         $this->view('book/detail', $data);
     }
 
-    // public function search() {
-
-    // }
-
     public function search()
     {
         $bookModel = $this->model('BookModel');

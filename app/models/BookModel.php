@@ -59,10 +59,7 @@ class BookModel
                 WHERE title LIKE :kw";
 
         $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->execute([
-            'kw' => "%$keyword%"
-        ]);
-
+        $stmt->execute(['kw' => "%$keyword%"]);
         return $stmt ->fetchAll();
     }
 
