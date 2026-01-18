@@ -44,6 +44,28 @@ class BookModel
         }
     }
 
+    // Hiển thị tất cả sách
+    public function getAllBooks()
+    {
+        $sql = "SELECT * FROM books";
+        $stmt = $this->db->getConnection()->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    //Tìm kiếm sách bằng tên sách
+    public function searchByTitle($keyword)
+    {
+        $sql = "SELECT * FROM books
+                WHERE title LIKE :kw";
+
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute([
+            'kw' => "%$keyword%"
+        ]);
+
+        return $stmt ->fetchAll();
+    }
+
     // Lấy danh sách tất cả danh mục
     public function getAllCategories()
     {
@@ -79,13 +101,5 @@ class BookModel
         } catch (PDOException) {
             return false;
         };
-    }
-
-    public function searchBooks($keyword) {
-
-    }
-
-    public function filterBooks($filters) {
-        
     }
 }

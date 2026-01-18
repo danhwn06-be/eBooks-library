@@ -1,7 +1,7 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 <?php require APP_ROOT . '/app/views/inc/carousel.php'; ?>
 
-<php? if (isset($data['show-filter']) && $data['show-filter'] === true): ?>
+<?php if (isset($data['show-filter']) && $data['show-filter'] === true): ?>
 <section class="filter-section">
     <div class="container">
         <form action="<?php echo URL_ROOT; ?>/book/filter" method="GET" class="filter-form">
@@ -79,6 +79,7 @@
             <?php endif; ?>
         </div>
 
+        <?php if (!empty($data['pagination']) && $data['pagination']['total_pages'] > 1): ?>
         <div class="pagination-container">
             <?php
             $current = $data['pagination']['current_page'];
@@ -103,6 +104,7 @@
                 <span class="page-btn next disabled"><i class="fa-solid fa-chevron-right"></i></span>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
 </main>
 
