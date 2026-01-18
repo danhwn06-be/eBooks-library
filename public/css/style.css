@@ -4,6 +4,9 @@
     color: #ecf0f1;
     padding-top: 10px;
     margin-top: 10px;
+     width: 1200px;
+    height: 500px;
+     margin: 10px auto;
 }
 
 .container {
@@ -12,6 +15,7 @@
     max-width: 1000px; 
     margin-left: auto;
     margin-right: auto;
+    
 }
 
 /* 4 COLUMNS LAYOUT - Giống Figma */
@@ -214,6 +218,8 @@
     }
 }
 
+
+
 /* ===== END OF FOOTER STYLES ===== */
 /* ===== HEADER STYLES ===== */
 /* ===== RESET & BASE ===== */
@@ -242,6 +248,9 @@ body {
     color: #ecf0f1;
     padding: 10px 0;
     font-size: 14px;
+    width: 1200px;
+    height: 42px;
+     margin: 10px auto;
 }
 
 .top-bar .container {
@@ -424,11 +433,15 @@ body {
 .main-nav {
     background-color: #4A5BDE;
     padding: 0;
+    width: 1200px;
+    height: 64px;
+     margin: 10px auto;
 }
 
 .main-nav .container {
     display: flex;
     justify-content: center;
+    
 }
 
 .main-nav ul {
@@ -475,12 +488,9 @@ body {
     font-size: 14px;
 }
 
-.dropdown:hover .dropdown-menu {
-    display: block;
-}
-
+/* Dropdown menu phải ẩn mặc định */
 .dropdown-menu {
-    display: none;
+    display: none !important; /* THÊM !important */
     position: absolute;
     top: 100%;
     left: 0;
@@ -489,17 +499,38 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     border-radius: 0 0 8px 8px;
     z-index: 1000;
+    opacity: 0; /* THÊM */
+    visibility: hidden; /* THÊM */
+    transform: translateY(-10px); /* THÊM */
+    transition: all 0.3s ease; /* THÊM */
+}
+
+/* SỬA: Hiển thị dropdown khi hover */
+.dropdown:hover .dropdown-menu {
+    display: block !important; /* THÊM !important */
+    opacity: 1; /* THÊM */
+    visibility: visible; /* THÊM */
+    transform: translateY(0); /* THÊM */
+}
+
+/* SỬA: Thêm padding cho dropdown items */
+.dropdown-menu li {
+    margin: 0;
 }
 
 .dropdown-menu a {
-    color: #4A5BDE;
+    color: #FFFFFF !important; /* Màu chữ trắng */
     padding: 12px 20px;
-    border-bottom: 1px solid #131212;
+    border-bottom: 1px solid #333333; /* Viền tối hơn */
+    background-color: #000000;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .dropdown-menu a:hover {
-    background-color: #000000;
-    color: #4A5BDE;
+    background-color: #4A5BDE !important; /* Màu nền khi hover */
+    color: #FFFFFF !important;
+    transform: translateX(5px);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -563,6 +594,23 @@ body {
     .logo-icon {
         font-size: 24px;
     }
+    
+    /* Responsive cho dropdown */
+    .dropdown-menu {
+        position: static !important;
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+        display: none !important;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .dropdown:hover .dropdown-menu {
+        display: block !important;
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
 @media (max-width: 480px) {
@@ -587,7 +635,6 @@ body {
         height: 40px;
     }
 }
-
 
 /* ================= FILTER ================= */
 .filter-section{
@@ -616,7 +663,8 @@ body {
     grid-column: 1 / 4; 
 }
 .form-group.submit-group { 
-    grid-column: 1 / 4; 
+    grid-column: 4 / 5; 
+    grid-row: 1;
 }
 
 .filter-form select,
@@ -865,6 +913,7 @@ body {
     border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.15);
     background: #000;
+    
 }
 
 /* Image */

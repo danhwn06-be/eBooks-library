@@ -9,9 +9,37 @@ class BookController extends Controller
     }
 
     // Hàm mặc định (nếu gõ /books sau URL)
-    public function index()
+   public function index()
     {
-        header('Location: ' . URL_ROOT);
+        $filters = [
+            'category' => $_GET['category'] ?? '',
+            'year'     => $_GET['year'] ?? '',
+            'author'   => $_GET['author'] ?? ''
+        ];
+
+        // Kiểm tra xem người dùng có đang thực hiện lọc không
+        if (array_filter($filters)) {
+            $books = $this->bookModel->getFilteredBooks($filters);
+            $totalBooks = count($books);
+        } else {
+            $page = $_GET['page'] ?? 1;
+            $limit = 6;
+            $offset = ($page - 1) * $limit;
+            $books = $this->bookModel->getBooksWithPagination($limit, $offset);
+            $totalBooks = $this->bookModel->getTotalBookCount();
+        }
+
+        $data = [
+            'books' => $books,
+            'categories' => $this->bookModel->getAllCategories(),
+            'current_page' => 'home',
+            'pagination' => [
+                'current_page' => $_GET['page'] ?? 1,
+                'total_pages' => ceil($totalBooks / 6)
+            ]
+        ];
+
+        $this->view('home/index', $data);
     }
 
     // Hàm xem chi tiết: /books/detail/{id}
@@ -34,7 +62,8 @@ class BookController extends Controller
         $data = [
             'title' => $book['title'],
             'book' => $book,
-            'current_page' => 'books'
+            'current_page' => 'books',
+            'categories' => $this->bookModel->getAllCategories()
         ];
 
         $this->view('book/detail', $data);

@@ -47,4 +47,12 @@ document.addEventListener("DOMContentLoaded", function () {
   setInterval(() => {
     if (nextBtn) nextBtn.click();
   }, 5000);
+
+  // Chặn người dùng gõ ký tự chữ (chỉ cho gõ số)
+  const yearField = document.querySelector('input[name="year"]');
+  if (yearField) {
+    yearField.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+  }
 });
