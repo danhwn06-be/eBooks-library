@@ -18,10 +18,10 @@
                 </select>
             </div>
             <div class="form-group">
-                <input type="text" name="year" value="<?php echo isset($_GET['year']) ? htmlspecialchars($_GET['year']) : ''; ?>"placeholder="Enter the year of publication...">
+                <input type="text" name="year" inputmode="numeric" pattern="[0-9]*" value="<?php echo isset($_GET['year']) ? htmlspecialchars($_GET['year']) : ''; ?>" placeholder="Enter the year of publication...">
             </div>
             <div class="form-group full-width-group">
-                <input type="text" name="author" value="<?php echo isset($_GET['author']) ? htmlspecialchars($_GET['author']) : ''; ?>" placeholder="Enter author's name...">
+                <input type="text" name="author" pattern="^[a-zA-Z0-9\s]*$" title="Author name should not contain special characters" value="<?php echo isset($_GET['author']) ? htmlspecialchars($_GET['author']) : ''; ?>" placeholder="Enter author's name...">
             </div>
             <div class="form-group submit-group"></div>
             <button type="submit" class="btn-confirm">Confirm</button>
