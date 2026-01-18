@@ -4,6 +4,9 @@
     color: #ecf0f1;
     padding-top: 10px;
     margin-top: 10px;
+     width: 1200px;
+    height: 500px;
+     margin: 10px auto;
 }
 
 .container {
@@ -12,6 +15,7 @@
     max-width: 1000px; 
     margin-left: auto;
     margin-right: auto;
+    
 }
 
 /* 4 COLUMNS LAYOUT - Giống Figma */
@@ -242,6 +246,9 @@ body {
     color: #ecf0f1;
     padding: 10px 0;
     font-size: 14px;
+    width: 1200px;
+    height: 42px;
+     margin: 10px auto;
 }
 
 .top-bar .container {
@@ -424,11 +431,15 @@ body {
 .main-nav {
     background-color: #4A5BDE;
     padding: 0;
+    width: 1200px;
+    height: 64px;
+     margin: 10px auto;
 }
 
 .main-nav .container {
     display: flex;
     justify-content: center;
+    
 }
 
 .main-nav ul {
@@ -616,7 +627,8 @@ body {
     grid-column: 1 / 4; 
 }
 .form-group.submit-group { 
-    grid-column: 1 / 4; 
+    grid-column: 4 / 5; 
+    grid-row: 1;
 }
 
 .filter-form select,
@@ -865,6 +877,7 @@ body {
     border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.15);
     background: #000;
+    
 }
 
 /* Image */
