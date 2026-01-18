@@ -475,12 +475,9 @@ body {
     font-size: 14px;
 }
 
-.dropdown:hover .dropdown-menu {
-    display: block;
-}
-
+/* SỬA QUAN TRỌNG: Dropdown menu phải ẩn mặc định */
 .dropdown-menu {
-    display: none;
+    display: none !important; /* THÊM !important */
     position: absolute;
     top: 100%;
     left: 0;
@@ -489,17 +486,38 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     border-radius: 0 0 8px 8px;
     z-index: 1000;
+    opacity: 0; /* THÊM */
+    visibility: hidden; /* THÊM */
+    transform: translateY(-10px); /* THÊM */
+    transition: all 0.3s ease; /* THÊM */
+}
+
+/* SỬA: Hiển thị dropdown khi hover */
+.dropdown:hover .dropdown-menu {
+    display: block !important; /* THÊM !important */
+    opacity: 1; /* THÊM */
+    visibility: visible; /* THÊM */
+    transform: translateY(0); /* THÊM */
+}
+
+/* SỬA: Thêm padding cho dropdown items */
+.dropdown-menu li {
+    margin: 0;
 }
 
 .dropdown-menu a {
-    color: #4A5BDE;
+    color: #FFFFFF !important; /* Màu chữ trắng */
     padding: 12px 20px;
-    border-bottom: 1px solid #131212;
+    border-bottom: 1px solid #333333; /* Viền tối hơn */
+    background-color: #000000;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .dropdown-menu a:hover {
-    background-color: #000000;
-    color: #4A5BDE;
+    background-color: #4A5BDE !important; /* Màu nền khi hover */
+    color: #FFFFFF !important;
+    transform: translateX(5px);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -563,6 +581,23 @@ body {
     .logo-icon {
         font-size: 24px;
     }
+    
+    /* Responsive cho dropdown */
+    .dropdown-menu {
+        position: static !important;
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+        display: none !important;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .dropdown:hover .dropdown-menu {
+        display: block !important;
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
 @media (max-width: 480px) {
@@ -587,7 +622,6 @@ body {
         height: 40px;
     }
 }
-
 
 /* ================= FILTER ================= */
 .filter-section{
@@ -1095,3 +1129,4 @@ body {
 
 
 /* ===== END OF BOOK DETAIL ===== */
+

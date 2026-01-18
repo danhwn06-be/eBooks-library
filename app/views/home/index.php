@@ -9,7 +9,8 @@
                     <option value="">All genres</option>
                     <?php if (!empty($data['categories'])): ?>
                         <?php foreach ($data['categories'] as $cat): ?>
-                            <option value="<?php echo $cat['category_id']; ?>">
+                            <option value="<?php echo $cat['category_id']; ?>"
+                                <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['category_id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($cat['category_name']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -17,10 +18,10 @@
                 </select>
             </div>
             <div class="form-group">
-                <input type="text" placeholder="Enter the year of publication...">
+                <input type="text" name="year" value="<?php echo isset($_GET['year']) ? htmlspecialchars($_GET['year']) : ''; ?>"placeholder="Enter the year of publication...">
             </div>
             <div class="form-group full-width-group">
-                <input type="text" placeholder="Enter author's name...">
+                <input type="text" name="author" value="<?php echo isset($_GET['author']) ? htmlspecialchars($_GET['author']) : ''; ?>" placeholder="Enter author's name...">
             </div>
             <div class="form-group submit-group"></div>
             <button type="submit" class="btn-confirm">Confirm</button>
@@ -34,7 +35,11 @@
 
         <div class="book-grid">
             <?php if (empty($data['books'])): ?>
-                <p>No books found.</p>
+                <div class="no-results">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 50px; color: #ccc; margin-bottom: 20px;"></i>
+                    <h3>Oops! No books found</h3>
+                    <p>We couldn't find any books matching your filters. Please try again with different keywords or genres.</p>
+                </div>
             <?php else: ?>
                 <?php foreach ($data['books'] as $book): ?>
                     <div class="book-card">

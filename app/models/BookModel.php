@@ -80,4 +80,60 @@ class BookModel
             return false;
         };
     }
+
+    public function getFilteredBooks($f)
+    {
+        $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
+                COUNT(bc.copy_id) AS total_copies, 
+                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+                FROM Books b 
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
+                WHERE 1=1";
+
+        if (!empty($f['category'])) $sql .= " AND b.category_id = :cat";
+        if (!empty($f['year']))     $sql .= " AND b.publication_year = :year";
+        if (!empty($f['author']))   $sql .= " AND b.author LIKE :auth";
+
+        $sql .= " GROUP BY b.book_id ORDER BY b.created_at DESC";
+
+        $stmt = $this->db->getConnection()->prepare($sql);
+
+        if (!empty($f['category'])) $stmt->bindValue(':cat', $f['category']);
+        if (!empty($f['year']))     $stmt->bindValue(':year', $f['year']);
+        if (!empty($f['author']))   $stmt->bindValue(':auth', "%" . $f['author'] . "%");
+
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Lấy sách theo Category ID
+    public function getBooksByCategoryId($cat_id) {
+        $sql = "SELECT b.book_id, b.title, b.author, b.image_url, 
+                COUNT(bc.copy_id) AS total_copies, 
+                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+                FROM Books b 
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
+                WHERE b.category_id = :cat_id
+                GROUP BY b.book_id";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Lấy tên Category theo ID
+    public function getCategoryNameById($cat_id) {
+        $sql = "SELECT category_name FROM Categories WHERE category_id = :cat_id";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return $row ? $row['category_name'] : '';
+    }
+
+    // Method để lấy database instance (cần cho CategoryController)
+    public function getDb() 
+    {
+        return $this->db;
+    }
 }

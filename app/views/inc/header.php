@@ -50,9 +50,24 @@
     <nav class="main-nav">
         <div class="container">
             <ul>
-                <li><a href="<?php echo URL_ROOT; ?>" class="<?php echo ($data['current_page'] == 'home') ? 'active' : ''; ?>"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li>
+                    <a href="<?php echo URL_ROOT; ?>" class="<?php echo ($data['current_page'] == 'home') ? 'active' : ''; ?>">
+                        <i class="fa-solid fa-house"></i> Home
+                    </a>
+                </li>
                 <li class="dropdown">
-                    <a href=""><i class="fa-solid fa-book"></i> Category <i class="fa-solid fa-caret-down"></i></a>
+                    <a href="<?php echo URL_ROOT; ?>/category" class="<?php echo ($data['current_page'] == 'category') ? 'active' : ''; ?>">
+                        <i class="fa-solid fa-book"></i> Category <i class="fa-solid fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <?php foreach ($data['categories'] as $cat): ?>
+                            <li>
+                                <a href="<?php echo URL_ROOT; ?>/category/index/<?php echo $cat['category_id']; ?>">
+                                    <?php echo $cat['category_name']; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
                 <li><a href="#"><i class="fa-solid fa-user"></i> About us</a></li>
             </ul>
