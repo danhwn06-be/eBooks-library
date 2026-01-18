@@ -27,10 +27,10 @@ A library management system built with **native PHP** following the **MVC (Model
 
 ## Technologies Used
 
-*   **Language:** PHP (OOP, MVC Pattern).
+*   **Language:** PHP (MVC Pattern).
 *   **Database:** MySQL (Using PDO & Singleton Pattern).
-*   **Frontend:** HTML5, CSS3 (Grid Layout).
-*   **Server:** Apache (XAMPP/WAMP/Laragon).
+*   **Frontend:** HTML, CSS, JS.
+*   **Server:** Apache (XAMPP).
 
 ## Folder Structure
 
@@ -70,3 +70,7 @@ eBooks-library/
 4.  **Run the Application:**
 
     *   Open your browser and navigate to: `http://localhost/eBooks-library`
+
+
+
+

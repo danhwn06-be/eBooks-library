@@ -1,6 +1,7 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 <?php require APP_ROOT . '/app/views/inc/carousel.php'; ?>
 
+<php? if (isset($data['show-filter']) && $data['show-filter'] === true): ?>
 <section class="filter-section">
     <div class="container">
         <form action="<?php echo URL_ROOT; ?>/book/filter" method="GET" class="filter-form">
@@ -26,6 +27,7 @@
             <button type="submit" class="btn-confirm">Confirm</button>
         </form>
     </div>
+    <?php endif; ?>
 </section>
 
 <main class="book-list-section">
