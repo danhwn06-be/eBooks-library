@@ -3,7 +3,7 @@
 
 <section class="filter-section">
     <div class="container">
-        <form action="<?php echo URL_ROOT; ?>/category/index" method="GET" class="filter-form">
+        <form action="<?php echo URL_ROOT; ?>/book/index" method="GET" class="filter-form">
             <div class="form-group">
                 <select name="category" id="category">
                     <option value="">All genres</option>
