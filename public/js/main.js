@@ -56,3 +56,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+// Chức năng hiển thị/ẩn mật khẩu
+document.addEventListener("click", function (e) {
+  if (e.target.closest(".toggle-password")) {
+    const input = e.target
+      .closest(".password-group")
+      .querySelector("input");
+
+    input.type = input.type === "password" ? "text" : "password";
+  }
+});
