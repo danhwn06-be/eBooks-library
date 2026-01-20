@@ -13,11 +13,11 @@ class UsersController extends Controller
             $user = $userModel->login($email, $password);
 
             if ($user) {
-                $_SESSION['user_id'] = $user->id;
-                $_SESSION['user_name'] = $user->name;
+                $_SESSION['user_id'] = $user->user_id;
+                $_SESSION['user_name'] = $user->full_name;
                 $_SESSION['user_role'] = $user->role;
 
-                if ($user->role === 'admin') {
+                if ($user->role === 'Admin') {
                     header('Location: ' . URL_ROOT . '/admin/dashboard');
                 } else {
                     header('Location: ' . URL_ROOT . '/home');

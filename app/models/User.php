@@ -18,7 +18,7 @@ class User
 
         $user = $stmt->fetch();
 
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && password_verify($password, $user['password_hash'])) {
             return (object) $user;
         }
 
