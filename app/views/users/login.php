@@ -8,7 +8,7 @@
         <div class="login-card">
             <div class="login-header">
                 <div class="logo">
-                    <i class="fa-solid fa-book-open"></i>
+                    <i class="fa-solid fa-book-open">E-BOOK LIBRARY</i>
                 </div>
                 <h2>E-BOOK LIBRARY</h2>
                 <p class="subtitle">Log in</p>
@@ -50,8 +50,8 @@
             <div class="login-footer">
                 <p>
                     Don't have an account yet?
-                    <a href="<?php echo URL_ROOT; ?>/users/register">Register here</a>
                 </p>
+                <a href="<?php echo URL_ROOT; ?>/users/register">Register here</a>
             </div>
         </div>
 
