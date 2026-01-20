@@ -47,7 +47,6 @@ failed_login_attempts INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Ngày đăng ký [cite: 19]
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- =============================================
 -- 2. Bảng Books: Metadata đầu sách
 -- Đáp ứng: TC-01, TC-07
