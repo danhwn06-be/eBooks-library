@@ -9,11 +9,13 @@ class User
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function login($email, $password)
+    public function login($login, $password)
     {
-        $sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
+        $sql = "SELECT * FROM users 
+                WHERE email = :login OR phone = :login 
+                LIMIT 1";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':login', $login);
         $stmt->execute();
 
         $user = $stmt->fetch();
