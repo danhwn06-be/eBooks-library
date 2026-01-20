@@ -2,9 +2,10 @@
 
 class UsersController extends Controller
 {
-    public function login()
+        public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             $email = $_POST['email'];
             $password = $_POST['password'];
 
@@ -14,13 +15,18 @@ class UsersController extends Controller
             if ($user) {
                 $_SESSION['user_id'] = $user->id;
                 $_SESSION['user_name'] = $user->name;
+                $_SESSION['user_role'] = $user->role;
 
-                header('Location: ' . URL_ROOT . '/home');
+                if ($user->role === 'admin') {
+                    header('Location: ' . URL_ROOT . '/admin/dashboard');
+                } else {
+                    header('Location: ' . URL_ROOT . '/home');
+                }
                 exit;
-            } else {
-                $data['error'] = 'Email or password is incorrect';
-                $this->view('users/login', $data);
             }
+
+            $data['error'] = 'Email or password is incorrect! Please try again.';
+            $this->view('users/login', $data);
         } else {
             $this->view('users/login');
         }
