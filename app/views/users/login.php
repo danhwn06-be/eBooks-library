@@ -6,13 +6,19 @@
         <div class="login-overlay"></div>
 
         <div class="login-card">
-            <div class="login-header">
+        <div class="login-header">
+            <div class="brand-section">
+                <span class="brand-name">eBook library</span>
                 <div class="logo">
-                    <i class="fa-solid fa-book-open">E-BOOK LIBRARY</i>
+                    <i class="fa-solid fa-book-open"></i>
                 </div>
+            </div>
+
+            <div class="title-section">
                 <h2>E-BOOK LIBRARY</h2>
                 <p class="subtitle">Log in</p>
             </div>
+        </div>
 
             <?php if (!empty($data['error'])) : ?>
                 <div class="login-error">
