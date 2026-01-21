@@ -1,4 +1,7 @@
 <?php
+
+use PgSql\Lob;
+
 class BookModel
 {
     private $db;
@@ -47,7 +50,7 @@ class BookModel
     // Hiển thị tất cả sách
     public function getAllBooks()
     {
-        $sql = "SELECT * FROM books";
+        $sql = "SELECT * FROM Books";
         $stmt = $this->db->getConnection()->query($sql);
         return $stmt->fetchAll();
     }
@@ -159,5 +162,30 @@ class BookModel
     public function getDb() 
     {
         return $this->db;
+    }
+
+    /* Get BOOK cho admin */
+    public function getBooksForAdmin() {
+        $sql = "SELECT
+            b.book_id,
+            b.isbn,
+            b.title,
+            b.author,
+            b.image_url,
+            b.publisher,
+            b.publication_year,
+            b.description,
+            b.created_at,
+            c.category_name,
+            COUNT(bc.copy_id) as total_copies
+        FROM Books b
+        LEFT JOIN Categories c ON b.category_id = c.category_id
+        LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
+        GROUP BY b.book_id
+        ORDER BY b.book_id DESC";
+
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }
