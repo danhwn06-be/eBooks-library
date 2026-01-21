@@ -1324,68 +1324,40 @@ body {
 .auth-buttons .user-name {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    padding: 10px 24px;
+    background: #4A5BDE;
+    color: #ffffff !important;
+    border: 2px solid #3948b8;
+    border-radius: 999px;
     font-size: 20px;
     font-weight: 600;
-    color: #c40000;
-    white-space: nowrap;
     line-height: 1;
 }
 
 /* Icon tay vẫy */
 .auth-buttons .user-name i {
-    font-size: 26px;
-    color: #c40000;
-    display: inline-block;
-    transform: rotate(-25deg);
-    margin-top: -2px;
+    font-size: 22px;
 }
 
 /* ===== PROFILE BUTTON ===== */
-.auth-buttons .btn-profile {
+.auth-buttons a.btn-profile {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 30px;
-    background: #4f63e6;
-    color: #ffffff;
+    background: #c40000 !important;
+    color: #ffffff !important;
+    border: 2px solid #940919;
     border-radius: 999px;
     font-size: 20px;
     font-weight: 600;
-    text-decoration: none;
-    border: none;
     line-height: 1;
 }
 
-.auth-buttons .btn-profile i {
-    font-size: 22px;
+/* Hover */
+.auth-buttons a.btn-profile:hover {
+    background: #940919 !important;
 }
 
-.auth-buttons .btn-profile:hover {
-    background: #940919;
-}
-
-/* ===== LOGOUT BUTTON ===== */
-.auth-buttons .btn-outline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 30px;
-    background: #ffffff;
-    color: #000000;
-    border: 2px solid #9a9a00;
-    border-radius: 999px;
-    font-size: 20px;
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1;
-}
-
-.auth-buttons .btn-outline i {
-    font-size: 22px;
-}
-
-.auth-buttons .btn-outline:hover {
-    background: #f7f7f7;
-}
 /* ===== END OF AUTH BUTTONS AFTER LOGIN ===== */

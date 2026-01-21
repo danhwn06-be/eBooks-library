@@ -44,7 +44,7 @@
             <?php if (isset($_SESSION['user_id'])) : ?>
                 <span class="user-name">
                     <i class="fa-solid fa-hand"></i>
-                    Hi, <strong><?php echo $_SESSION['user_name']; ?></strong>
+                    Hi, <strong><?php echo $_SESSION['user_name']; ?>!</strong>
                 </span>
                 <a href="<?php echo URL_ROOT; ?>/users/profile" class="btn btn-profile">
                     <i class="fa-solid fa-user"></i> Profile
