@@ -41,8 +41,22 @@
             </div>
 
             <div class="auth-buttons">
-                <a href="<?php echo URL_ROOT; ?>/users/login" class="btn btn-outline"><i class="fa-solid fa-right-to-bracket"></i> Log in</a>
-                <a href="<?php echo URL_ROOT; ?>/users/register" class="btn btn-primary">Register</a>
+            <?php if (isset($_SESSION['user_id'])) : ?>
+                <span class="user-name">
+                    Hi, <strong><?php echo $_SESSION['user_name']; ?></strong>
+                </span>
+
+                <a href="<?php echo URL_ROOT; ?>/users/logout" class="btn btn-outline">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            <?php else : ?>
+                <a href="<?php echo URL_ROOT; ?>/users/login" class="btn btn-outline">
+                    <i class="fa-solid fa-right-to-bracket"></i> Log in
+                </a>
+                <a href="<?php echo URL_ROOT; ?>/users/register" class="btn btn-primary">
+                    Register
+                </a>
+            <?php endif; ?>
             </div>
         </div>
     </header>
