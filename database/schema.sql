@@ -89,7 +89,7 @@ CREATE TABLE BookCopies (
 -- Borrowed: Đang được mượn
 -- Lost/Maintenance: Không thể mượn
 
-status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance') DEFAULT 'Available',
+    status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance') DEFAULT 'Available',
     
     condition_note TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -70,8 +70,13 @@ body {
     border-bottom: 3px solid #3b44cc;
 }
 
-.icon-red { color: #ef4444}
-.icon-blue { color: #3b44cc}
+.icon-red {
+    color: #ef4444
+}
+
+.icon-blue {
+    color: #3b44cc
+}
 
 .nav-right {
     display: flex;
@@ -145,7 +150,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-add:hover {
@@ -156,8 +161,10 @@ body {
     margin: 15px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
-    overflow: hidden; /* For rounder corners */
-    overflow-x: auto; /* Trượt nếu quá rộng */
+    overflow: hidden;
+    /* For rounder corners */
+    overflow-x: auto;
+    /* Trượt nếu quá rộng */
     background: white;
 }
 
@@ -227,6 +234,7 @@ td {
     align-items: center;
     gap: 5px;
     white-space: nowrap;
+    text-decoration: none !important;
 }
 
 .action-buttons {
@@ -235,7 +243,8 @@ td {
 }
 
 .btn-edit {
-    background-color: #eab308; /* Yellow */
+    background-color: #eab308;
+    /* Yellow */
     color: white;
     border: none;
     padding: 6px 10px;
@@ -250,7 +259,8 @@ td {
 }
 
 .btn-delete {
-    background-color: #ef4444; /* Red */
+    background-color: #ef4444;
+    /* Red */
     color: white;
     border: none;
     padding: 6px 10px;
@@ -263,3 +273,48 @@ td {
     gap: 4px;
     text-decoration: none;
 }
+
+/* COPIES */
+.container {
+    padding: 30px 40px;
+    flex: 1;
+}
+
+/* Book Metadata Section */
+.book-info-section {
+    margin-bottom: 25px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 12px;
+}
+
+.metadata-list {
+    margin-bottom: 18px;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-row {
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #000;
+}
+
+.meta-label {
+    font-style: italic;
+    font-weight: 400;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.meta-value {
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* Figma text looks slightly italic/slanted */

@@ -68,7 +68,7 @@ class BookModel
 
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute(['kw' => "%$keyword%"]);
-        return $stmt ->fetchAll();
+        return $stmt->fetchAll();
     }
 
     // Lấy danh sách tất cả danh mục
@@ -134,7 +134,8 @@ class BookModel
     }
 
     // Lấy sách theo Category ID
-    public function getBooksByCategoryId($cat_id) {
+    public function getBooksByCategoryId($cat_id)
+    {
         $sql = "SELECT b.book_id, b.title, b.author, b.image_url, 
                 COUNT(bc.copy_id) AS total_copies, 
                 COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
@@ -149,7 +150,8 @@ class BookModel
     }
 
     // Lấy tên Category theo ID
-    public function getCategoryNameById($cat_id) {
+    public function getCategoryNameById($cat_id)
+    {
         $sql = "SELECT category_name FROM Categories WHERE category_id = :cat_id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
@@ -159,13 +161,15 @@ class BookModel
     }
 
     // Method để lấy database instance (cần cho CategoryController)
-    public function getDb() 
+    public function getDb()
     {
         return $this->db;
     }
 
     /* Get BOOK cho admin */
-    public function getBooksForAdmin() {
+    // Lấy sách để hiển thị cho dashboard
+    public function getBooksForAdmin()
+    {
         $sql = "SELECT
             b.book_id,
             b.isbn,
@@ -185,6 +189,20 @@ class BookModel
         ORDER BY b.book_id DESC";
 
         $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Lấy thông tin cơ bản của cuốn sách: public function getBookById($id) {};
+
+    // Lấy danh sách các bản sao của sách đó
+    public function getCopiesByBookId($bookId)
+    {
+        $sql = "SELECT *
+            FROM BookCopies
+            WHERE book_id = :book_id";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':book_id', $bookId);
         $stmt->execute();
         return $stmt->fetchAll();
     }
