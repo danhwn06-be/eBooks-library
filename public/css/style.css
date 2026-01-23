@@ -1144,3 +1144,85 @@ body {
 
 
 /* ===== END OF BOOK DETAIL ===== */
+
+/* ===== PROFILE ===== */
+.profile-container {
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.profile-top {
+    display: flex;
+    gap: 30px;
+}
+
+/* LEFT CARD */
+.profile-card {
+    width: 260px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.avatar {
+    width: 90px;
+    border-radius: 50%;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+}
+
+/* RIGHT INFO */
+.profile-info {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.info-grid label {
+    font-size: 13px;
+    color: #888;
+}
+
+/* HISTORY TABLE */
+.profile-history {
+    margin-top: 40px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.profile-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.profile-history th,
+.profile-history td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-detail {
+    background: #2ecc71;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
