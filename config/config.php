@@ -31,3 +31,7 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 // Cấu hình hiển thị lỗi (Dành cho môi trường Development, nên tắt khi Production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
+// Đây là cấu hình hiển thị lỗi cho môi trường Production
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+ini_set('display_errors', 1);
