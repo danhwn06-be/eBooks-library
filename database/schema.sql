@@ -47,7 +47,6 @@ failed_login_attempts INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Ngày đăng ký [cite: 19]
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- =============================================
 -- 2. Bảng Books: Metadata đầu sách
 -- Đáp ứng: TC-01, TC-07
@@ -89,7 +88,7 @@ CREATE TABLE BookCopies (
 -- Borrowed: Đang được mượn
 -- Lost/Maintenance: Không thể mượn
 
-status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance') DEFAULT 'Available',
+    status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance') DEFAULT 'Available',
     
     condition_note TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
