@@ -46,12 +46,14 @@
                     <i class="fa-solid fa-hand"></i>
                     Hi, <strong><?php echo $_SESSION['user_name']; ?>!</strong>
                 </span>
-                <a href="<?php echo URL_ROOT; ?>/users/profile" class="btn btn-profile">
-                    <i class="fa-solid fa-user"></i> Profile
-                </a>
-                <a href="<?php echo URL_ROOT; ?>/users/logout" class="btn btn-outline">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
+                <div class="user-actions">
+                    <a href="<?php echo URL_ROOT; ?>/users/profile" class="btn btn-profile">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+                    <a href="<?php echo URL_ROOT; ?>/users/logout" class="btn btn-outline">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
             <?php else : ?>
                 <a href="<?php echo URL_ROOT; ?>/users/login" class="btn btn-outline">
                     <i class="fa-solid fa-right-to-bracket"></i> Log in
