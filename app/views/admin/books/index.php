@@ -58,12 +58,16 @@
                                 </a>
                             </td>
                             <td>
-                                <div class="action-buttons" style="display: flex; gap: 10px;">
-                                    <a class="btn-edit" href="<?php echo URL_ROOT; ?>/admin/edit/<?php echo $book['book_id']; ?>" title="Edit">
-                                        <i class="fa-regular fa-pen-to-square" style="color: white"></i> Edit
+                                <div class="action-buttons">
+                                    <a href="<?php echo URL_ROOT; ?>/admin/edit/<?php echo $book['book_id']; ?>" class="btn-edit" title="Edit">
+                                        <i class="fa-regular fa-pen-to-square"></i> Edit
                                     </a>
-                                    <a class="btn-delete" href="<?php echo URL_ROOT; ?>/admin/delete/<?php echo $book['book_id']; ?>" title="Delete" onclick="return confirm('Delete this book?');">
-                                        <i class="fa-regular fa-trash-can" style="color: white;"></i> Delete
+
+                                    <a href="<?php echo URL_ROOT; ?>/admin/delete/<?php echo $book['book_id']; ?>"
+                                        class="btn-delete"
+                                        title="Delete"
+                                        onclick="return confirm('Are you sure you want to delete this book? This implies deleting all its copies too.');">
+                                        <i class="fa-regular fa-trash-can"></i> Delete
                                     </a>
                                 </div>
                             </td>
