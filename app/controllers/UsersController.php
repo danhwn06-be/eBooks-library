@@ -23,7 +23,7 @@ class UsersController extends Controller
                 $_SESSION['user_role'] = $user->role;
 
                 if ($user->role === 'Admin') {
-                    header('Location: ' . URL_ROOT . '/admin/dashboard');
+                    header('Location: ' . URL_ROOT . '/admin/books');
                 } else {
                     header('Location: ' . URL_ROOT);
                 }
@@ -36,9 +36,28 @@ class UsersController extends Controller
 
         $this->view('users/login');
     }
+    
     public function logout()
     {
-        session_unset();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+
         session_destroy();
         header('Location: ' . URL_ROOT);
         exit;
