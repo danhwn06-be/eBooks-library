@@ -1,90 +1,55 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 
-<div class="profile-container">
-    <div class="profile-top">
-        <!-- LEFT -->
-        <div class="profile-card">
-            <!-- <img src="/public/images/avatar.png" class="avatar"> -->
+<div class="container profile-container">
+    <div class="profile-header">
+        <h2>Hồ sơ độc giả</h2>
+    </div>
 
-            <h3><?= $data['user']['full_name'] ?></h3>
-            <p class="bio">Love Cat and Dog</p>
-
-            <div class="profile-stats">
-                <div>
-                    <strong>Borrowed</strong>
-                    <span><?= count($data['history']) ?></span>
-                </div>
-                <div>
-                    <strong>Reading</strong>
-                    <span>2</span>
-                </div>
+    <div class="profile-content">
+        <div class="user-info-card">
+            <div class="avatar-placeholder">
+                <?php echo strtoupper(substr($data['user']->full_name, 0, 1)); ?>
             </div>
+            <h3><?php echo $data['user']->full_name; ?></h3>
+            <p><strong>Email:</strong> <?php echo $data['user']->email; ?></p>
+            <p><strong>Số điện thoại:</strong> <?php echo $data['user']->phone_number ?? 'Chưa cập nhật'; ?></p>
+            <p><strong>Ngày tham gia:</strong> <?php echo date('d/m/Y', strtotime($data['user']->created_at)); ?></p>
+            
+            <a href="<?php echo URL_ROOT; ?>/user/edit_profile" class="btn btn-primary">Chỉnh sửa thông tin</a>
         </div>
-        <!-- RIGHT -->
-        <div class="profile-info">
-            <div class="info-header">
-                <h3>Account Details</h3>
-                <a href="/profile/edit" class="btn-edit">Edit profile</a>
-            </div>
 
-            <div class="info-grid">
-                <div>
-                    <label>Email Address</label>
-                    <p><?= $user['email'] ?></p>
-                </div>
-
-                <div>
-                    <label>Member Code</label>
-                    <p><?= $data['user']['member_code'] ?></p>
-                </div>
-
-                <div>
-                    <label>Location</label>
-                    <p><?= $data['user']['address'] ?></p>
-                </div>
-
-                <div>
-                    <label>Password</label>
-                    <p>********</p>
-                </div>
-            </div>
+        <div class="borrow-history">
+            <h3>Lịch sử mượn sách</h3>
+            <?php if (empty($data['borrow_history'])): ?>
+                <p>Bạn chưa mượn cuốn sách nào.</p>
+            <?php else: ?>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tên sách</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($data['borrow_history'] as $history): ?>
+                            <tr>
+                                <td><?php echo $history->title; ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($history->borrow_date)); ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($history->due_date)); ?></td>
+                                <td>
+                                    <span class="badge status-<?php echo strtolower($history->status); ?>">
+                                        <?php echo $history->status; ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
         </div>
     </div>
 </div>
-
-<div class="profile-history">
-    <h3>Borrowing and repaying history</h3>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Book ID</th>
-                <th>Information</th>
-                <th>Borrowed date</th>
-                <th>Return date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($data['history'] as $item): ?>
-                <tr>
-                    <td><?= $item['book_code'] ?></td>
-                    <td><?= $item['title'] ?></td>
-                    <td><?= $item['borrow_date'] ?></td>
-                    <td><?= $item['return_date'] ?></td>
-                    <td>
-                        <a href="/book/detail/<?= $item['book_id'] ?>" class="btn-detail">
-                            See Details
-                        </a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-
-
-
-
 
 <?php require APP_ROOT . "/app/views/inc/footer.php"; ?>

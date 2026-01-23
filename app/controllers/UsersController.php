@@ -2,6 +2,48 @@
 
 class UsersController extends Controller
 {
+    private $userModel;
+
+    public function __construct()
+    {
+        // Kiểm tra đăng nhập ngay tại đây để bảo mật
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . URL_ROOT . '/user/login');
+            exit;
+        }
+        $this->userModel = $this->model('User');
+    }
+
+    // Trang hồ sơ cá nhân: /user/profile
+    public function profile()
+    {
+        // 1. Kiểm tra xem đã đăng nhập chưa
+        if (!isset($_SESSION['user_id'])) {
+            // Chưa đăng nhập thì đá về trang login
+            header('Location: ' . URL_ROOT . '/user/login');
+            return;
+        }
+
+        // 2. Lấy ID từ session
+        $userId = $_SESSION['user_id'];
+
+        // 3. Gọi Model để lấy thông tin chi tiết user
+        $user = $this->userModel->getUserById($userId);
+        
+        // Lấy lịch sử mượn sách (nếu cần hiển thị trong profile)
+        $borrowHistory = $this->userModel->getBorrowHistory($userId);
+
+        $data = [
+            'title' => 'Hồ sơ cá nhân',
+            'user' => $user,
+            'borrow_history' => $borrowHistory,
+            'current_page' => 'profile'
+        ];
+
+        // 4. Trả về View
+        $this->view('user/profile', $data);
+    }
+
     public function login()
     {
         if (isset($_SESSION['user_id'])) {
@@ -61,5 +103,19 @@ class UsersController extends Controller
         session_destroy();
         header('Location: ' . URL_ROOT);
         exit;
+    }
+
+    // Đây là hàm sẽ chạy khi bạn gõ /profile/index hoặc /profile
+    public function index() {
+        $userId = $_SESSION['user_id'];
+        $user = $this->userModel->getUserById($userId);
+
+        $data = [
+            'user' => $user,
+            'title' => 'Trang cá nhân'
+        ];
+
+        // Gọi đúng file view bạn đã tạo
+        $this->view('user/profile', $data);
     }
 }
