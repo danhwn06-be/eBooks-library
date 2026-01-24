@@ -59,4 +59,21 @@ class User
             return [];
         }
     }
+
+    public function updateUser($data)
+    {
+        $this->db->query("UPDATE Users SET full_name = :name, email = :email, phone_number = :phone, address = :address WHERE user_id = :id");
+    
+        // Bind các giá trị
+        $this->db->bind(':name', $data['full_name']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':phone', $data['phone_number']);
+        $this->db->bind(':address', $data['address']);
+        $this->db->bind(':id', $data['user_id']);
+        // Thực thi câu lệnh
+        if ($this->db->execute()) {
+            return true;
+        }
+        return false;
+    }
 }

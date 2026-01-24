@@ -6,31 +6,21 @@ class UsersController extends Controller
 
     public function __construct()
     {
-        // Kiểm tra đăng nhập ngay tại đây để bảo mật
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT . '/user/login');
-            exit;
-        }
         $this->userModel = $this->model('User');
     }
 
-    // Trang hồ sơ cá nhân: /user/profile
+    // Trang hồ sơ cá nhân: /users/profile
     public function profile()
     {
         // 1. Kiểm tra xem đã đăng nhập chưa
         if (!isset($_SESSION['user_id'])) {
-            // Chưa đăng nhập thì đá về trang login
-            header('Location: ' . URL_ROOT . '/user/login');
+            // Sửa đường dẫn redirect khớp với header.php của bạn là /users/login
+            header('Location: ' . URL_ROOT . '/users/login');
             return;
         }
 
-        // 2. Lấy ID từ session
         $userId = $_SESSION['user_id'];
-
-        // 3. Gọi Model để lấy thông tin chi tiết user
         $user = $this->userModel->getUserById($userId);
-        
-        // Lấy lịch sử mượn sách (nếu cần hiển thị trong profile)
         $borrowHistory = $this->userModel->getBorrowHistory($userId);
 
         $data = [
@@ -40,8 +30,8 @@ class UsersController extends Controller
             'current_page' => 'profile'
         ];
 
-        // 4. Trả về View
-        $this->view('user/profile', $data);
+        // ĐÚNG: Vào thư mục views/profile/index.php
+        $this->view('profile/index', $data);
     }
 
     public function login()
@@ -52,12 +42,9 @@ class UsersController extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $email = trim($_POST['email']);
             $password = $_POST['password'];
-
-            $userModel = $this->model('User');
-            $user = $userModel->login($email, $password);
+            $user = $this->userModel->login($email, $password);
 
             if ($user) {
                 $_SESSION['user_id']   = $user->user_id;
@@ -73,6 +60,7 @@ class UsersController extends Controller
             }
 
             $data['error'] = 'Email or password is incorrect! Please try again.';
+            // ĐÚNG: Vào thư mục views/users/login.php
             $this->view('users/login', $data);
         }
 
@@ -84,38 +72,69 @@ class UsersController extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
         $_SESSION = [];
-
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
-            );
+            setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
         }
-
         session_destroy();
         header('Location: ' . URL_ROOT);
         exit;
     }
 
-    // Đây là hàm sẽ chạy khi bạn gõ /profile/index hoặc /profile
+    // Phương thức mặc định nếu truy cập /users hoặc /users/index
     public function index() {
+        // Chuyển hướng thẳng sang hàm profile để tránh viết lặp code
+        $this->profile();
+    }
+
+    // Hàm edit() hồ sơ
+    public function edit()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . URL_ROOT . '/users/login');
+            exit;
+        }
+
         $userId = $_SESSION['user_id'];
-        $user = $this->userModel->getUserById($userId);
 
-        $data = [
-            'user' => $user,
-            'title' => 'Trang cá nhân'
-        ];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
-        // Gọi đúng file view bạn đã tạo
-        $this->view('user/profile', $data);
+            $data = [
+                'user_id' => $userId,
+                'full_name' => trim($_POST['full_name']),
+                'email' => trim($_POST['email']),
+                'phone_number' => trim($_POST['phone_number']),
+                'address' => trim($_POST['address']),
+                'full_name_err' => '',
+                'email_err' => ''
+            ];
+
+            if (empty($data['full_name'])) $data['full_name_err'] = 'Vui lòng nhập tên.';
+            if (empty($data['email'])) $data['email_err'] = 'Vui lòng nhập email.';
+
+            if (empty($data['full_name_err']) && empty($data['email_err'])) {
+                if ($this->userModel->updateUser($data)) {
+                    $_SESSION['user_name'] = $data['full_name'];
+                    // Chuyển hướng về lại trang profile (hàm profile bên trên)
+                    header('Location: ' . URL_ROOT . '/users/profile?status=success');
+                } else {
+                    die('Đã xảy ra lỗi khi cập nhật.');
+                }
+            } else {
+                // ĐÚNG: Vào thư mục views/profile/edit.php
+                $this->view('profile/edit', $data);
+            }
+
+        } else {
+            $user = $this->userModel->getUserById($userId);
+            $data = [
+                'user' => $user,
+                'title' => 'Chỉnh sửa hồ sơ'
+            ];
+            // ĐÚNG: Vào thư mục views/profile/edit.php
+            $this->view('profile/edit', $data);
+        }
     }
 }

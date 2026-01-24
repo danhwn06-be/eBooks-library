@@ -1,53 +1,99 @@
 <?php require APP_ROOT . '/app/views/inc/header.php'; ?>
 
-<div class="container profile-container">
-    <div class="profile-header">
-        <h2>Hồ sơ độc giả</h2>
-    </div>
-
-    <div class="profile-content">
-        <div class="user-info-card">
-            <div class="avatar-placeholder">
-                <?php echo strtoupper(substr($data['user']->full_name, 0, 1)); ?>
+<div class="container profile-wrapper">
+    
+    <div class="profile-top-section">
+        <div class="profile-card profile-card-left">
+            <div class="avatar-wrapper">
+                <img src="<?php echo URL_ROOT; ?>/public/img/default-avatar.png" alt="User Avatar" class="profile-img">
             </div>
-            <h3><?php echo $data['user']->full_name; ?></h3>
-            <p><strong>Email:</strong> <?php echo $data['user']->email; ?></p>
-            <p><strong>Số điện thoại:</strong> <?php echo $data['user']->phone_number ?? 'Chưa cập nhật'; ?></p>
-            <p><strong>Ngày tham gia:</strong> <?php echo date('d/m/Y', strtotime($data['user']->created_at)); ?></p>
+            <h2 class="profile-name"><?php echo $data['user']->full_name; ?></h2>
             
-            <a href="<?php echo URL_ROOT; ?>/user/edit_profile" class="btn btn-primary">Chỉnh sửa thông tin</a>
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <span class="stat-label">BORROWED</span>
+                    <span class="stat-value">5</span> </div>
+                <div class="stat-box">
+                    <span class="stat-label">READING</span>
+                    <span class="stat-value">2</span>
+                </div>
+            </div>
         </div>
 
-        <div class="borrow-history">
-            <h3>Lịch sử mượn sách</h3>
-            <?php if (empty($data['borrow_history'])): ?>
-                <p>Bạn chưa mượn cuốn sách nào.</p>
-            <?php else: ?>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Tên sách</th>
-                            <th>Ngày mượn</th>
-                            <th>Hạn trả</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach($data['borrow_history'] as $history): ?>
-                            <tr>
-                                <td><?php echo $history->title; ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($history->borrow_date)); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($history->due_date)); ?></td>
-                                <td>
-                                    <span class="badge status-<?php echo strtolower($history->status); ?>">
-                                        <?php echo $history->status; ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
+        <div class="profile-card profile-card-right">
+            <div class="card-header">
+                <div class="header-title">
+                    <i class="fas fa-user-alt"></i> Account Details
+                </div>
+                <a href="<?php echo URL_ROOT; ?>/users/edit" class="btn-edit-profile">
+                    <i class="fas fa-pencil-alt"></i> Edit profile
+                </a>
+            </div>
+
+            <div class="account-details-grid">
+                <div class="info-group">
+                    <label>EMAIL ADDRESS</label>
+                    <p><?php echo $data['user']->email; ?></p>
+                </div>
+                <div class="info-group">
+                    <label>MEMBER CODE</label>
+                    <p>MB<?php echo str_pad($data['user']->user_id, 3, '0', STR_PAD_LEFT); ?></p>
+                </div>
+                <div class="info-group">
+                    <label>LOCATION</label>
+                    <p><?php echo $data['user']->address ?? 'My Khe, An Hai, Son Tra, Da Nang'; ?></p>
+                </div>
+                <div class="info-group">
+                    <label>PHONE NUMBER</label>
+                    <p><?php echo $data['user']->phone_number ?? '0123 456 789'; ?></p>
+                </div>
+                <div class="info-group full-width">
+                    <label>PASSWORD</label>
+                    <div class="password-wrapper">
+                        <span>••••••••••••••</span>
+                        <i class="fas fa-eye-slash toggle-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3 class="section-title">Borrowing and repaying history</h3>
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Book ID</th>
+                        <th>Information</th>
+                        <th>Borrowed date</th>
+                        <th>Return date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>HTLK917</td>
+                        <td class="book-info">
+                            <i class="fas fa-book book-icon"></i> Peter Pan
+                        </td>
+                        <td>16/01/2026</td>
+                        <td>20/01/2026</td>
+                        <td><a href="#" class="btn-see-details">See Details</a></td>
+                    </tr>
+                    <tr>
+                        <td>BHMF351</td>
+                        <td class="book-info">
+                            <i class="fas fa-book book-icon"></i> The story of Pinocchio
+                        </td>
+                        <td>16/01/2026</td>
+                        <td>20/01/2026</td>
+                        <td><a href="#" class="btn-see-details">See Details</a></td>
+                    </tr>
+                    <tr class="empty-row"><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="empty-row"><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
