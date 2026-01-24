@@ -66,3 +66,40 @@ document.addEventListener("click", function (e) {
     input.type = input.type === "password" ? "text" : "password";
   }
 });
+
+document.querySelector('.login-form').addEventListener('submit', function(e) {
+    const account = document.getElementsByName('email')[0].value.trim();
+    const password = document.getElementsByName('password')[0].value;
+    const confirm = document.getElementsByName('confirm_password')[0].value;
+    
+    // Regex định dạng
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/; 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    let isEmail = emailRegex.test(account);
+    let isPhone = phoneRegex.test(account);
+
+    // Validate định dạng
+    if (!isEmail && !isPhone) {
+        alert("Please enter a valid email address or phone number.");
+        e.preventDefault();
+        return;
+    }
+    // Validate độ dài mật khẩu
+    if (password.length < 8) {
+        alert("Please enter at least 8 characters.");
+        e.preventDefault();
+        return;
+    }
+    //  Validate độ phức tạp mật khẩu
+    if (!passwordRegex.test(password)) {
+        alert("Password must include: uppercase, lowercase, number and special character.");
+        e.preventDefault();
+        return;
+    }
+    if (password !== confirm) {
+        alert("Confirm password does not match.");
+        e.preventDefault();
+    }
+});
