@@ -4,7 +4,7 @@ class UsersController extends Controller
 {
     public function index() 
     {
-        $this->register(); // Mặc định hiển thị trang đăng ký
+        $this->register(); 
     }
 
     public function register() 
