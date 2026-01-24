@@ -37,7 +37,7 @@
                 </div>
                 <div class="info-group">
                     <label>MEMBER CODE</label>
-                    <p>MB<?php echo str_pad($data['user']->user_id, 3, '0', STR_PAD_LEFT); ?></p>
+                    <p><?php echo str_pad($data['user']->member_code, 3, '0', STR_PAD_LEFT); ?></p>
                 </div>
                 <div class="info-group">
                     <label>LOCATION</label>
