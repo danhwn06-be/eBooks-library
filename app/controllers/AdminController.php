@@ -2,10 +2,12 @@
 class AdminController extends Controller
 {
     private $bookModel;
+    private $userModel;
 
     public function __construct()
     {
         $this->bookModel = $this->model('BookModel');
+        $this->userModel = $this->model('User');
     }
 
     // Trang Dashboard quản lý sách
@@ -255,4 +257,122 @@ class AdminController extends Controller
             die('Cannot delete this copy (Maybe borrowed?)');
         }
     }
+
+    // --- HIỂN THỊ DANH SÁCH ---
+    public function users() {
+        $users = $this->userModel->getAllUsers();
+        $data = [
+            'users' => $users
+        ];
+        $this->view('admin/users/index', $data);
+    }
+
+    // --- THÊM NGƯỜI DÙNG MỚI ---
+public function addUser() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $_POST = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+            $data = [
+                // XÓA dòng nhận member_code ở đây
+                'full_name' => trim($_POST['full_name'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'address' => trim($_POST['address'] ?? ''),
+                'phone_number' => trim($_POST['phone_number'] ?? ''),
+                'password' => trim($_POST['password'] ?? ''),
+                'confirm_password' => trim($_POST['confirm_password'] ?? ''),
+                'email_err' => '',
+                'password_err' => '',
+                'confirm_password_err' => ''
+            ];
+
+            // Validation (Giữ nguyên)
+            if (empty($data['email'])) { $data['email_err'] = 'Please enter email'; }
+            else {
+                if ($this->userModel->findUserByEmail($data['email'])) {
+                    $data['email_err'] = 'Email is already taken';
+                }
+            }
+            if (empty($data['password'])) { $data['password_err'] = 'Please enter password'; }
+            if ($data['password'] != $data['confirm_password']) { $data['confirm_password_err'] = 'Passwords do not match'; }
+
+            if (empty($data['email_err']) && empty($data['password_err']) && empty($data['confirm_password_err'])) {
+                
+                // Hash mật khẩu
+                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+
+                // Gọi hàm thêm user (Hàm này sẽ tự động sinh Member Code và insert vào DB)
+                if ($this->userModel->addUser($data)) {
+                    header('Location: ' . URL_ROOT . '/admin/users');
+                } else {
+                    die('Something went wrong');
+                }
+            } else {
+                $this->view('admin/users/add', $data);
+            }
+        } else {
+            // Init data (Không cần khởi tạo member_code nữa)
+            $data = [
+                'full_name' => '', 'email' => '', 
+                'address' => '', 'phone_number' => '', 'password' => '', 'confirm_password' => ''
+            ];
+            $this->view('admin/users/add', $data);
+        }
+    }
+
+    // --- SỬA NGƯỜI DÙNG ---
+    public function editUser($id) {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $_POST = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+            $data = [
+                'user_id' => $id ?? null,
+                'full_name' => trim($_POST['full_name'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'address' => trim($_POST['address'] ?? ''),
+                'phone_number' => trim($_POST['phone_number'] ?? ''),
+                'password' => trim($_POST['password'] ?? ''), // Mật khẩu mới (nếu có)
+                'confirm_password' => trim($_POST['confirm_password'] ?? ''),
+                'user' => $this->userModel->getUserById($id) // Để giữ lại data cũ nếu lỗi
+            ];
+
+            // Xử lý password nếu người dùng nhập mới
+            if (!empty($data['password'])) {
+                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            }
+
+            if ($this->userModel->updateUser($data)) {
+                header('Location: ' . URL_ROOT . '/admin/users');
+            } else {
+                die('Something went wrong');
+            }
+
+        } else {
+            // Lấy thông tin user hiện tại
+            $user = $this->userModel->getUserById($id);
+            // Kiểm tra user có tồn tại không
+            if(!$user) { header('Location: ' . URL_ROOT . '/admin/users'); }
+
+            $data = [
+                'user_id' => $id,
+                'member_code' => $user->member_code ?? 'MB'.str_pad($user->user_id, 3, '0', STR_PAD_LEFT),
+                'full_name' => $user->full_name,
+                'email' => $user->email,
+                'address' => $user->address,
+                'phone_number' => $user->phone_number,
+                'user' => $user
+            ];
+            $this->view('admin/users/edit', $data);
+        }
+    }
+
+    // --- XÓA NGƯỜI DÙNG ---
+    public function deleteUser($id) {
+        if ($this->userModel->deleteUser($id)) {
+            header('Location: ' . URL_ROOT . '/admin/users');
+        } else {
+            die('Something went wrong');
+        }
+    }
+
+    
 }
