@@ -2,12 +2,70 @@
 
 class UsersController extends Controller
 {
-    private $userModel;
+        private $userModel;
 
     public function __construct()
     {
         $this->userModel = $this->model('User');
     }
+
+        public function index() 
+    {
+        $this->register(); // Mặc định hiển thị trang đăng ký
+    }
+
+    public function register() 
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userModel = $this->model('User');
+            $account = trim($_POST['email']); 
+            
+            $data = [
+                'account'   => $account,
+                'full_name' => trim($_POST['full_name']),
+                'address'   => trim($_POST['address']),
+                'password'  => $_POST['password'],
+                'confirm_password' => $_POST['confirm_password'],
+                'error'     => ''
+            ];
+
+            // Nhận diện loại field 
+            $isEmail = filter_var($account, FILTER_VALIDATE_EMAIL);
+            $isPhone = preg_match('/^(0|84)[3|5|7|8|9][0-9]{8}$/', $account);
+            $field = $isEmail ? 'email' : ($isPhone ? 'phone_number' : null);
+
+            if (!$field) {
+                $data['error'] = "Invalid email or phone number format.";
+            } 
+            // Validate mật khẩu server-side
+            elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $data['password'])) {
+                $data['error'] = "Password must be at least 8 characters with uppercase, number and symbol.";
+            }
+            // Kiểm tra tồn tại
+            elseif ($userModel->findUserByField($field, $account)) {
+                $data['error'] = "This " . $field . " is already in use.";
+            }
+
+            if (empty($data['error'])) {
+                // Mã hóa và lưu
+                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+                $data['field_type'] = $field; 
+
+                if ($userModel->register($data)) {
+                    // Chuyển hướng khi thành công
+                    header('Location: ' . URL_ROOT . '/users/login?status=success');
+                    exit;
+                } else {
+                    // Nếu câu lệnh SQL thất bại (thường do database chưa cho phép NULL)
+                    $data['error'] = "Something went wrong. Please check your database settings.";
+                }
+            }
+            $this->view('users/register', $data);
+        } else {
+            $this->view('users/register', ['error' => '']);
+        }
+    }
+
 
     // Trang hồ sơ cá nhân: /users/profile
     public function profile()
@@ -82,10 +140,10 @@ class UsersController extends Controller
         exit;
     }
 
-    public function index() {
-        // Chuyển hướng thẳng sang hàm profile để tránh viết lặp code
-        $this->profile();
-    }
+    // public function index() {
+    //     // Chuyển hướng thẳng sang hàm profile để tránh viết lặp code
+    //     $this->profile();
+    // }
 
     // Hàm edit() hồ sơ
 // File: app/controllers/UsersController.php
