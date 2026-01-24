@@ -1321,48 +1321,73 @@ body {
 /* ===== AUTH BUTTONS AFTER LOGIN ===== */
 .auth-buttons {
     display: flex;
-    align-items: center;
-    gap: 18px;
+    flex-direction: row;
+    align-items: center; 
+    gap: 20px; 
 }
 
-/* Hi, Username */
+.auth-buttons:has(.user-actions) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
 .auth-buttons .user-name {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 24px;
-    background: #4A5BDE;
-    color: #ffffff !important;
-    border: 2px solid #3948b8;
-    border-radius: 999px;
+    color: #AF0000;
     font-size: 20px;
     font-weight: 600;
     line-height: 1;
+    margin: 0;
 }
-
-/* Icon tay vẫy */
 .auth-buttons .user-name i {
     font-size: 22px;
 }
 
-/* ===== PROFILE BUTTON ===== */
-.auth-buttons a.btn-profile {
+.user-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 30px;
-    background: #c40000 !important;
-    color: #ffffff !important;
-    border: 2px solid #940919;
-    border-radius: 999px;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1;
+    gap: 12px;
 }
 
-/* Hover */
-.auth-buttons a.btn-profile:hover {
-    background: #940919 !important;
+/* Style chung cho nút */
+.auth-buttons .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.auth-buttons .btn-profile {
+    background: #4A5BDE !important;
+    color: #ffffff !important;
+    border: 2px solid #4A5BDE;
+}
+
+.auth-buttons .btn-profile:hover {
+    background: #3948b5 !important;
+}
+
+.auth-buttons .btn-outline {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #4A5BDE !important;
+}
+
+.auth-buttons .btn-outline i {
+    color: #1A237E;
+    font-weight: 900;
+}
+
+.auth-buttons .btn-outline:hover {
+    background: #f0f2ff !important;
 }
 
 /* ===== END OF AUTH BUTTONS AFTER LOGIN ===== */
