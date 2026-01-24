@@ -20,6 +20,12 @@
             </div>
         </div>
 
+            <?php if (isset($_GET['status']) && $_GET['status'] == 'success') : ?>
+                <div class="alert alert-success" style="color: green; text-align: center; margin-bottom: 10px;">
+                    Registration successful! You can now log in.
+                </div>
+            <?php endif; ?>
+            
             <?php if (!empty($data['error'])) : ?>
                 <div class="login-error">
                     <?php echo $data['error']; ?>
