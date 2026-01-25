@@ -68,4 +68,49 @@
     </div>
 </div>
 
+<style>
+    .pwd-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .pwd-input-container input {
+        width: 100%;
+        padding-right: 40px; /* Chừa chỗ cho con mắt */
+    }
+    .toggle-pwd {
+        position: absolute;
+        right: 15px;
+        cursor: pointer;
+        color: #666;
+        z-index: 10;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Lấy tất cả các nút có class .toggle-pwd
+    const toggleButtons = document.querySelectorAll('.toggle-pwd');
+
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // 2. Tìm ô input nằm ngay trước icon con mắt đó
+            const input = this.previousElementSibling;
+            
+            if (input && input.tagName === 'INPUT') {
+                // 3. Kiểm tra trạng thái hiện tại
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                
+                // 4. Đổi kiểu input
+                input.setAttribute('type', type);
+                
+                // 5. Đổi icon (Mở mắt <-> Nhắm mắt)
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            }
+        });
+    });
+});
+</script>
+
 <?php require APP_ROOT . "/app/views/inc/footer.php"; ?>

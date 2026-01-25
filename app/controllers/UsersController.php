@@ -68,28 +68,34 @@ class UsersController extends Controller
     }
 
 
-    // Trang hồ sơ cá nhân: /users/profile
-    public function profile()
+public function profile()
     {
-        // 1. Kiểm tra xem đã đăng nhập chưa
+        // 1. Kiểm tra đăng nhập
+        
         if (!isset($_SESSION['user_id'])) {
-            // Sửa đường dẫn redirect khớp với header.php là /users/login
             header('Location: ' . URL_ROOT . '/users/login');
             return;
         }
 
         $userId = $_SESSION['user_id'];
+        
+        // 2. Lấy thông tin User
         $user = $this->userModel->getUserById($userId);
+        
+        // 3. Lấy dữ liệu thống kê & Lịch sử
         $borrowHistory = $this->userModel->getBorrowHistory($userId);
+        $countReading = $this->userModel->countReading($userId);       // Số sách đang đọc
+        $countBorrowed = $this->userModel->countTotalBorrowed($userId); // Tổng số sách đã mượn
 
         $data = [
             'title' => 'Hồ sơ cá nhân',
             'user' => $user,
             'borrow_history' => $borrowHistory,
+            'count_reading' => $countReading,   // Truyền sang view
+            'count_borrowed' => $countBorrowed, // Truyền sang view
             'current_page' => 'profile'
         ];
 
-        // ĐÚNG: Vào thư mục views/profile/index.php
         $this->view('profile/index', $data);
     }
 

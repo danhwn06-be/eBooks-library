@@ -149,7 +149,7 @@ class BookModel
     // --- COPY OPERATIONS ---
     public function updateCopy($data)
     {
-        $sql = "UPDATE BookCopies SET status = :status, quality = :quality WHERE copy_id = :id";
+        $sql = "UPDATE BookCopies SET status = :status, condition_note = :quality WHERE copy_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':status', $data['status']);
         $stmt->bindValue(':quality', $data['quality']);
@@ -290,14 +290,14 @@ class BookModel
     // 1. Thêm bản sao mới
     public function addCopy($data)
     {
-        $sql = "INSERT INTO BookCopies (book_id, copy_code, status, quality) 
+        $sql = "INSERT INTO BookCopies (book_id, copy_code, status, condition_note) 
                 VALUES (:book_id, :copy_code, :status, :quality)";
 
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':book_id', $data['book_id']);
         $stmt->bindValue(':copy_code', $data['copy_code']);
         $stmt->bindValue(':status', $data['status']);
-        $stmt->bindValue(':quality', $data['quality']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
+        $stmt->bindValue(':quality', $data['condition_note']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
 
         return $stmt->execute();
     }
