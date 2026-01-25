@@ -34,7 +34,7 @@ class User
         $stmt->bindParam(':address', $data['address']);
         $stmt->bindParam(':password', $data['password']);
 
-        return $stmt->execute();
+        return $stmt->execute();    
     }
 
     // Cập nhật hàm Login để nhận diện cả 2 loại tài khoản
@@ -67,26 +67,7 @@ class User
         return $stmt->fetch();
     }
 
-    public function getBorrowHistory($userId)
-    {
-        $sql = "SELECT b.title, l.borrow_date, l.due_date, l.return_date, l.status 
-                FROM Loans l
-                JOIN BookCopies bc ON l.copy_id = bc.copy_id
-                JOIN Books b ON bc.book_id = b.book_id
-                WHERE l.user_id = :user_id
-                ORDER BY l.borrow_date DESC";
-        
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':user_id', $userId);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-
-    // --- HÀM MỚI: Tự động sinh mã Member Code ---
+    // Tự động sinh mã Member Code ---
     // Logic: Lấy mã cuối cùng (ví dụ MEM0005) -> tách số 5 -> cộng 1 thành 6 -> tạo mã MEM0006
     private function generateMemberCode() {
         $sql = "SELECT member_code FROM users ORDER BY user_id DESC LIMIT 1";
@@ -194,5 +175,79 @@ class User
         $stmt->bindValue(':email', $email);
         $stmt->execute();
         return $stmt->rowCount() > 0;
+    }
+
+    // 1. Đếm số sách ĐANG mượn (Reading) - Chưa trả
+    public function countReading($userId) {
+        $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id AND status = 'Active'";
+        $stmt = $this->db->prepare($sql);   
+        $stmt->bindValue(':user_id', $userId);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result ? $result->count : 0;
+    }
+
+    // 2. Đếm tổng số sách ĐÃ mượn trong quá khứ (Borrowed) - Tính cả đang mượn và đã trả
+    public function countTotalBorrowed($userId) {
+        $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':user_id', $userId);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result ? $result->count : 0;
+    }
+
+    // 3. Cập nhật hàm getBorrowHistory (Lấy thêm book_id để hiển thị)
+public function getBorrowHistory($userId)
+    {
+        // Thêm DISTINCT để tránh trùng lặp dòng nếu dữ liệu JOIN bị nhân đôi
+        $sql = "SELECT DISTINCT b.book_id, b.title, l.loan_id, l.borrow_date, l.due_date, l.return_date, l.status 
+                FROM Loans l
+                JOIN BookCopies bc ON l.copy_id = bc.copy_id
+                JOIN Books b ON bc.book_id = b.book_id
+                WHERE l.user_id = :user_id
+                ORDER BY l.borrow_date DESC";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    // --- 4. HÀM MỚI: Thêm lượt mượn (Xử lý logic 14 ngày) ---
+    // Bạn cần gọi hàm này trong Controller khi Admin thực hiện mượn sách
+    public function createLoan($data) {
+        
+        // Logic xử lý ngày trả (Due Date)
+        if (empty($data['due_date'])) {
+            // Nếu người dùng không yêu cầu (để trống), tự động cộng 14 ngày
+            $dueDate = date('Y-m-d', strtotime('+14 days'));
+        } else {
+            // Nếu có yêu cầu, dùng ngày người dùng nhập
+            $dueDate = $data['due_date'];
+        }
+
+        // Ngày mượn mặc định là hôm nay
+        $borrowDate = date('Y-m-d');
+
+        $sql = "INSERT INTO Loans (user_id, copy_id, borrow_date, due_date, status) 
+                VALUES (:user_id, :copy_id, :borrow_date, :due_date, 'Active')";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $data['user_id']);
+            $stmt->bindValue(':copy_id', $data['copy_id']);
+            $stmt->bindValue(':borrow_date', $borrowDate);
+            $stmt->bindValue(':due_date', $dueDate);
+            
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            return false;
+        }
+    
     }
 }

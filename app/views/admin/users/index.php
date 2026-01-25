@@ -44,8 +44,8 @@
                             <td><?php echo $user['account_locked_until'] ?? 'NULL'; ?></td>
                             <td><?php echo $user['created_at']; ?></td>
                             
-                            <td title="<?php echo $user['password'] ?? ''; ?>">
-                                <?php echo substr($user['password'] ?? '', 0, 8) . '...'; ?>
+                            <td title="<?php echo $user['password_hash'] ?? ''; ?>">
+                                <?php echo substr($user['password_hash'] ?? '', 0, 8) . '...'; ?>
                             </td>
 
                             <td>
