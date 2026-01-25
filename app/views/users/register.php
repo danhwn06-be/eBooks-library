@@ -25,10 +25,16 @@
             
             <form action="<?php echo URL_ROOT; ?>/users/register" method="POST" class="login-form">
                 <div class="form-group">
-                    <input type="text" name="email" placeholder="Email/phoneNumbers..." class="input-blue">
+                    <input type="text" name="email" placeholder="Email..." class="input-blue">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="phone_number" placeholder="Phone number..." class="input-blue">
                 </div>
                 <div class="form-group">
                     <input type="text" name="full_name" placeholder="Full-name..." class="input-blue">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="user_name" placeholder="User name..." class="input-blue">
                 </div>
                 <div class="form-group">
                     <input type="text" name="address" placeholder="Address..." class="input-blue">

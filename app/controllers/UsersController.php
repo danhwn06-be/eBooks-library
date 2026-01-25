@@ -14,50 +14,51 @@ class UsersController extends Controller
         $this->register(); 
     }
 
-    public function register() 
-    {
+    public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $userModel = $this->model('User');
-            $account = trim($_POST['email']); 
-            
             $data = [
-                'account'   => $account,
-                'full_name' => trim($_POST['full_name']),
-                'address'   => trim($_POST['address']),
-                'password'  => $_POST['password'],
+                'email'        => trim($_POST['email']),
+                'phone_number' => trim($_POST['phone_number']),
+                'full_name'    => trim($_POST['full_name']),
+                'user_name'    => trim($_POST['user_name']),
+                'address'      => trim($_POST['address']),
+                'password'     => $_POST['password'],
                 'confirm_password' => $_POST['confirm_password'],
-                'error'     => ''
+                'error'        => ''
             ];
 
-            // Nhận diện loại field 
-            $isEmail = filter_var($account, FILTER_VALIDATE_EMAIL);
-            $isPhone = preg_match('/^(0|84)[3|5|7|8|9][0-9]{8}$/', $account);
-            $field = $isEmail ? 'email' : ($isPhone ? 'phone_number' : null);
-
-            if (!$field) {
-                $data['error'] = "Invalid email or phone number format.";
+            // Kiểm tra không được để trống các trường bắt buộc
+            if (empty($data['email']) || empty($data['phone_number']) || empty($data['user_name']) || empty($data['full_name'])) {
+                $data['error'] = "Please fill in all required fields (Email, Phone, Username, Fullname).";
             } 
-            // Validate mật khẩu server-side
+            // Kiểm tra định dạng Email
+            elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $data['error'] = "Invalid email format.";
+            }
+            // Kiểm tra định dạng Phone
+            elseif (!preg_match('/^(0|84)[3|5|7|8|9][0-9]{8}$/', $data['phone_number'])) {
+                $data['error'] = "Invalid Vietnamese phone number format.";
+            }
+            // Kiểm tra Username tồn tại
+            elseif ($this->userModel->findUserByField('user_name', $data['user_name'])) {
+                $data['error'] = "Username is already taken.";
+            }
+            // Kiểm tra Email tồn tại
+            elseif ($this->userModel->findUserByField('email', $data['email'])) {
+                $data['error'] = "Email is already in use.";
+            }
+            // Kiểm tra Password 
             elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $data['password'])) {
                 $data['error'] = "Password must be at least 8 characters with uppercase, number and symbol.";
             }
-            // Kiểm tra tồn tại
-            elseif ($userModel->findUserByField($field, $account)) {
-                $data['error'] = "This " . $field . " is already in use.";
-            }
 
             if (empty($data['error'])) {
-                // Mã hóa và lưu
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-                $data['field_type'] = $field; 
-
-                if ($userModel->register($data)) {
-                    // Chuyển hướng khi thành công
+                if ($this->userModel->register($data)) {
                     header('Location: ' . URL_ROOT . '/users/login?status=success');
                     exit;
                 } else {
-                    // Nếu câu lệnh SQL thất bại (thường do database chưa cho phép NULL)
-                    $data['error'] = "Something went wrong. Please check your database settings.";
+                    $data['error'] = "Something went wrong during registration.";
                 }
             }
             $this->view('users/register', $data);

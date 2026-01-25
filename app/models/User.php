@@ -9,8 +9,9 @@ class User
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // LMS-139: Kiểm tra trùng lặp (Email hoặc Phone)
-    public function findUserByField($field, $value) {
+    // Kiểm tra trùng lặp (Email hoặc Phone)
+    public function findUserByField($field, $value) 
+    {
         $sql = "SELECT * FROM users WHERE $field = :value";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':value', $value);
@@ -18,42 +19,44 @@ class User
         return $stmt->rowCount() > 0;
     }
 
-    // LMS-140: Lưu thông tin người dùng
-    public function register($data) {
-        // Xác định cột nào lấy giá trị, cột nào để NULL
-        $email = ($data['field_type'] === 'email') ? $data['account'] : null;
-        $phone = ($data['field_type'] === 'phone_number') ? $data['account'] : null;
+    // Lưu thông tin người dùng
+    public function register($data) 
+    {
+        // Tự sinh mã Member Code từ hàm đã có của bạn
+        $member_code = $this->generateMemberCode();
 
-        $sql = "INSERT INTO users (email, phone_number, full_name, address, password_hash, role) 
-                VALUES (:email, :phone, :full_name, :address, :password, 'Member')";
+        $sql = "INSERT INTO users (member_code, email, phone_number, full_name, user_name, address, password_hash, role) 
+                VALUES (:member_code, :email, :phone, :full_name, :user_name, :address, :password, 'Member')";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':phone', $phone);
+        $stmt->bindParam(':member_code', $member_code);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':phone', $data['phone_number']);
         $stmt->bindParam(':full_name', $data['full_name']);
+        $stmt->bindParam(':user_name', $data['user_name']);
         $stmt->bindParam(':address', $data['address']);
         $stmt->bindParam(':password', $data['password']);
 
         return $stmt->execute();
     }
 
-    // Cập nhật hàm Login để nhận diện cả 2 loại tài khoản
+    // Cập nhật Login: Cho phép đăng nhập bằng 1 trong 3 trường
     public function login($account, $password) {
-        $sql = "SELECT * FROM users WHERE email = :account OR phone_number = :account LIMIT 1";
+        $sql = "SELECT * FROM users WHERE email = :acc OR phone_number = :acc OR user_name = :acc LIMIT 1";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':account', $account);
+        $stmt->bindParam(':acc', $account);
         $stmt->execute();
 
-        $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password_hash'])) {
-            return (object) $user;
+        $user = $stmt->fetch(PDO::FETCH_OBJ);
+        if ($user && password_verify($password, $user->password_hash)) {
+            return $user;
         }
         return false;
     }
 
     public function getUserById($id)
     {
-        $sql = "SELECT user_id, member_code, full_name, email, password_hash, phone_number, address, created_at
+        $sql = "SELECT user_id, member_code, full_name, user_name, email, password_hash, phone_number, address, created_at
                 FROM users 
                 WHERE user_id = :user_id";
         try {

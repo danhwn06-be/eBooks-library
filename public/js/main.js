@@ -68,23 +68,28 @@ document.addEventListener("click", function (e) {
 });
 
 document.querySelector('.login-form').addEventListener('submit', function(e) {
-    const account = document.getElementsByName('email')[0].value.trim();
+    const email = document.getElementsByName('email')[0].value.trim();
+    const phone = document.getElementsByName('phone_number')[0].value.trim();
+    const userName = document.getElementsByName('user_name')[0].value.trim();
+    const fullName = document.getElementsByName('full_name')[0].value.trim();
     const password = document.getElementsByName('password')[0].value;
-    const confirm = document.getElementsByName('confirm_password')[0].value;
-    
-    // Regex định dạng
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/; 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    let isEmail = emailRegex.test(account);
-    let isPhone = phoneRegex.test(account);
-
-    // Validate định dạng
-    if (!isEmail && !isPhone) {
-        alert("Please enter a valid email address or phone number.");
+    // Kiểm tra bắt buộc
+    if (!email || !phone || !userName || !fullName || !password) {
+        alert("All fields marked are required.");
         e.preventDefault();
         return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/;
+
+    if (!emailRegex.test(email)) {
+        alert("Invalid email format.");
+        e.preventDefault();
+    } else if (!phoneRegex.test(phone)) {
+        alert("Invalid phone number format.");
+        e.preventDefault();
     }
     // Validate độ dài mật khẩu
     if (password.length < 8) {
