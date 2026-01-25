@@ -17,12 +17,12 @@
             
             <div style="position:relative;">
                 <input type="password" name="password" placeholder="Password..." class="custom-input">
-                <i class="fas fa-eye-slash" style="position:absolute; right:15px; top:15px; color:white;"></i>
+                <i class="toggle-password" style="position:absolute; right:15px; top:15px; color:white; cursor: pointer;"></i>
             </div>
             
             <div style="position:relative;">
                 <input type="password" name="confirm_password" placeholder="Confirm password..." class="custom-input">
-                <i class="fas fa-eye-slash" style="position:absolute; right:15px; top:15px; color:white;"></i>
+                <i class="toggle-password" style="position:absolute; right:15px; top:15px; color:white; cursor: pointer;"></i>
             </div>
 
             <button type="submit" class="btn-confirm">Confirm</button>

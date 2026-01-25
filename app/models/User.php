@@ -9,8 +9,12 @@ class User
         $this->db = Database::getInstance()->getConnection();
     }
 
+    // =========================================================================
+    // 1. COMMON & UTILITIES (CÁC HÀM DÙNG CHUNG)
+    // =========================================================================
+
     // Kiểm tra trùng lặp (Email hoặc Phone)
-    public function findUserByField($field, $value) 
+    public function findUserByField($field, $value)
     {
         $sql = "SELECT * FROM users WHERE $field = :value";
         $stmt = $this->db->prepare($sql);
@@ -19,29 +23,40 @@ class User
         return $stmt->rowCount() > 0;
     }
 
-    // Lưu thông tin người dùng
-    public function register($data) 
+    public function findUserByEmail($email)
     {
-        // Tự sinh mã Member Code từ hàm đã có của bạn
-        $member_code = $this->generateMemberCode();
-
-        $sql = "INSERT INTO users (member_code, email, phone_number, full_name, user_name, address, password_hash, role) 
-                VALUES (:member_code, :email, :phone, :full_name, :user_name, :address, :password, 'Member')";
-        
+        $sql = "SELECT * FROM users WHERE email = :email";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':member_code', $member_code);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':phone', $data['phone_number']);
-        $stmt->bindParam(':full_name', $data['full_name']);
-        $stmt->bindParam(':user_name', $data['user_name']);
-        $stmt->bindParam(':address', $data['address']);
-        $stmt->bindParam(':password', $data['password']);
-
-        return $stmt->execute();    
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
     }
 
-    // Cập nhật Login: Cho phép đăng nhập bằng 1 trong 3 trường
-    public function login($account, $password) {
+    // Tự động sinh mã Member Code
+    private function generateMemberCode()
+    {
+        $sql = "SELECT member_code FROM users ORDER BY member_code DESC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $lastUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($lastUser && !empty($lastUser['member_code'])) {
+            $lastNumber = (int)substr($lastUser['member_code'], 3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return 'MEM' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+    }
+
+    // =========================================================================
+    // 2. AUTHENTICATION (ĐĂNG KÝ & ĐĂNG NHẬP)
+    // =========================================================================
+
+    // Đăng nhập bằng email, phone, hoặc username
+    public function login($account, $password)
+    {
         $sql = "SELECT * FROM users WHERE email = :acc OR phone_number = :acc OR user_name = :acc LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':acc', $account);
@@ -54,10 +69,34 @@ class User
         return false;
     }
 
+    // Đăng ký người dùng mới (Member)
+    public function register($data)
+    {
+        $member_code = $this->generateMemberCode();
+
+        $sql = "INSERT INTO users (member_code, email, phone_number, full_name, user_name, address, password_hash, role)
+                VALUES (:member_code, :email, :phone, :full_name, :user_name, :address, :password, 'Member')";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':member_code', $member_code);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':phone', $data['phone_number']);
+        $stmt->bindParam(':full_name', $data['full_name']);
+        $stmt->bindParam(':user_name', $data['user_name']);
+        $stmt->bindParam(':address', $data['address']);
+        $stmt->bindParam(':password', $data['password']);
+
+        return $stmt->execute();
+    }
+
+    // =========================================================================
+    // 3. PUBLIC READ & PROFILE (THÔNG TIN NGƯỜI DÙNG)
+    // =========================================================================
+
     public function getUserById($id)
     {
         $sql = "SELECT user_id, member_code, full_name, user_name, email, password_hash, phone_number, address, created_at
-                FROM users 
+                FROM users
                 WHERE user_id = :user_id";
         try {
             $stmt = $this->db->prepare($sql);
@@ -66,71 +105,36 @@ class User
             return $stmt->fetch(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
             return false;
-    }
-        return $stmt->fetch();
-    }
-
-    // Tự động sinh mã Member Code ---
-    // Logic: Lấy mã cuối cùng (ví dụ MEM0005) -> tách số 5 -> cộng 1 thành 6 -> tạo mã MEM0006
-    private function generateMemberCode() {
-        $sql = "SELECT member_code FROM users ORDER BY user_id DESC LIMIT 1";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $lastUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($lastUser && !empty($lastUser['member_code'])) {
-            // Lấy phần số: substr('MEM0005', 3) sẽ lấy từ ký tự thứ 3 trở đi -> được chuỗi "0005"
-            $lastNumber = (int)substr($lastUser['member_code'], 3);
-            $newNumber = $lastNumber + 1;
-        } else {
-            // Nếu chưa có user nào, bắt đầu từ 1 (MEM0001) hoặc 0 tùy bạn chọn
-            $newNumber = 1;
         }
-
-        // Tạo chuỗi mới: 'MEM' + số đã được đệm số 0 cho đủ 4 chữ số
-        return 'MEM' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 
-    // --- 3. Thêm user mới (ĐÃ SỬA: Dùng cột password_hash và tự sinh code) ---
-    public function addUser($data) {
-        // 1. Tự sinh mã code
-        $newMemberCode = $this->generateMemberCode();
-
-        // 2. Câu lệnh SQL đã sửa: đổi 'password' thành 'password_hash'
-        $sql = "INSERT INTO users (member_code, full_name, email, address, phone_number, password_hash, created_at) 
-                VALUES (:member_code, :full_name, :email, :address, :phone_number, :password, NOW())";
-        
+    // Lấy thông tin user trả về mảng (dùng cho một số trường hợp legacy)
+    public function getUsersById($id)
+    {
+        $sql = "SELECT * FROM users WHERE user_id = :id";
         $stmt = $this->db->prepare($sql);
-        
-        // Bind các giá trị
-        $stmt->bindValue(':member_code', $newMemberCode); // Dùng mã vừa sinh
-        $stmt->bindValue(':full_name', $data['full_name']);
-        $stmt->bindValue(':email', $data['email']);
-        $stmt->bindValue(':address', $data['address']);
-        $stmt->bindValue(':phone_number', $data['phone_number']);
-        $stmt->bindValue(':password', $data['password']); // Giá trị mật khẩu đã hash
-
-        return $stmt->execute();
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // --- 4. Admin cập nhật user (ĐÃ SỬA: Dùng cột password_hash) ---
-    public function updateUser($data) {
+    // Cập nhật user (Admin & Profile Edit)
+    public function updateUser($data)
+    {
         if (!empty($data['password'])) {
-            // SQL cập nhật có mật khẩu -> dùng cột password_hash
-            $sql = "UPDATE users 
-                    SET full_name = :full_name, 
-                        email = :email, 
-                        phone_number = :phone_number, 
-                        address = :address, 
-                        password_hash = :password 
+            $sql = "UPDATE users
+                    SET full_name = :full_name,
+                        email = :email,
+                        phone_number = :phone_number,
+                        address = :address,
+                        password_hash = :password
                     WHERE user_id = :id";
         } else {
-            // SQL cập nhật không đổi mật khẩu
-            $sql = "UPDATE users 
-                    SET full_name = :full_name, 
-                        email = :email, 
-                        phone_number = :phone_number, 
-                        address = :address 
+            $sql = "UPDATE users
+                    SET full_name = :full_name,
+                        email = :email,
+                        phone_number = :phone_number,
+                        address = :address
                     WHERE user_id = :id";
         }
 
@@ -149,41 +153,54 @@ class User
         return $stmt->execute();
     }
 
-    // --- CÁC HÀM KHÁC GIỮ NGUYÊN ---
-    public function getAllUsers() {
+    // =========================================================================
+    // 4. ADMIN USER MANAGEMENT (QUẢN LÝ USER - CRUD)
+    // =========================================================================
+
+    public function getAllUsers()
+    {
         $sql = "SELECT * FROM users ORDER BY created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getUsersById($id) {
-        $sql = "SELECT * FROM users WHERE user_id = :id";
+    // Thêm user mới (Admin)
+    public function addUser($data)
+    {
+        $newMemberCode = $this->generateMemberCode();
+
+        $sql = "INSERT INTO users (member_code, full_name, email, address, phone_number, password_hash, created_at)
+                VALUES (:member_code, :full_name, :email, :address, :phone_number, :password, NOW())";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt->bindValue(':member_code', $newMemberCode);
+        $stmt->bindValue(':full_name', $data['full_name']);
+        $stmt->bindValue(':email', $data['email']);
+        $stmt->bindValue(':address', $data['address']);
+        $stmt->bindValue(':phone_number', $data['phone_number']);
+        $stmt->bindValue(':password', $data['password']);
+
+        return $stmt->execute();
     }
 
-    public function deleteUser($id) {
+    public function deleteUser($id)
+    {
         $sql = "DELETE FROM users WHERE user_id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
-    public function findUserByEmail($email) {
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':email', $email);
-        $stmt->execute();
-        return $stmt->rowCount() > 0;
-    }
+    // =========================================================================
+    // 5. STATS & LOANS (THỐNG KÊ & MƯỢN TRẢ)
+    // =========================================================================
 
     // 1. Đếm số sách ĐANG mượn (Reading) - Chưa trả
     public function countReading($userId) {
         $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id AND status = 'Active'";
-        $stmt = $this->db->prepare($sql);   
+        $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_OBJ);
@@ -191,7 +208,8 @@ class User
     }
 
     // 2. Đếm tổng số sách ĐÃ mượn trong quá khứ (Borrowed) - Tính cả đang mượn và đã trả
-    public function countTotalBorrowed($userId) {
+    public function countTotalBorrowed($userId)
+    {
         $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId);
@@ -200,17 +218,16 @@ class User
         return $result ? $result->count : 0;
     }
 
-    // 3. Cập nhật hàm getBorrowHistory (Lấy thêm book_id để hiển thị)
-public function getBorrowHistory($userId)
+    // 3. Lấy lịch sử mượn trả
+    public function getBorrowHistory($userId)
     {
-        // Thêm DISTINCT để tránh trùng lặp dòng nếu dữ liệu JOIN bị nhân đôi
-        $sql = "SELECT DISTINCT b.book_id, b.title, l.loan_id, l.borrow_date, l.due_date, l.return_date, l.status 
+        $sql = "SELECT DISTINCT b.book_id, b.title, l.loan_id, l.borrow_date, l.due_date, l.return_date, l.status
                 FROM Loans l
                 JOIN BookCopies bc ON l.copy_id = bc.copy_id
                 JOIN Books b ON bc.book_id = b.book_id
                 WHERE l.user_id = :user_id
                 ORDER BY l.borrow_date DESC";
-        
+
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_id', $userId);
@@ -221,23 +238,18 @@ public function getBorrowHistory($userId)
         }
     }
 
-    // --- 4. HÀM MỚI: Thêm lượt mượn (Xử lý logic 14 ngày) ---
-    // Bạn cần gọi hàm này trong Controller khi Admin thực hiện mượn sách
-    public function createLoan($data) {
-        
-        // Logic xử lý ngày trả (Due Date)
+    // 4. Thêm lượt mượn (Xử lý logic 14 ngày)
+    public function createLoan($data)
+    {
         if (empty($data['due_date'])) {
-            // Nếu người dùng không yêu cầu (để trống), tự động cộng 14 ngày
             $dueDate = date('Y-m-d', strtotime('+14 days'));
         } else {
-            // Nếu có yêu cầu, dùng ngày người dùng nhập
             $dueDate = $data['due_date'];
         }
 
-        // Ngày mượn mặc định là hôm nay
         $borrowDate = date('Y-m-d');
 
-        $sql = "INSERT INTO Loans (user_id, copy_id, borrow_date, due_date, status) 
+        $sql = "INSERT INTO Loans (user_id, copy_id, borrow_date, due_date, status)
                 VALUES (:user_id, :copy_id, :borrow_date, :due_date, 'Active')";
 
         try {
@@ -246,11 +258,10 @@ public function getBorrowHistory($userId)
             $stmt->bindValue(':copy_id', $data['copy_id']);
             $stmt->bindValue(':borrow_date', $borrowDate);
             $stmt->bindValue(':due_date', $dueDate);
-            
+
             return $stmt->execute();
         } catch (PDOException $e) {
             return false;
         }
-    
     }
 }
