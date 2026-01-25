@@ -46,8 +46,8 @@
                 <div class="form-group">
                     <label>NEW PASSWORD (LEAVE BLANK TO KEEP CURRENT)</label>
                     <div style="position:relative;">
-                        <input type="password" name="password" class="form-control" placeholder="••••••••••••••">
-                        <i class="fas fa-eye-slash" style="position:absolute; right:10px; top:12px; color:#333;"></i>
+                        <input type="password" name="password" class="form-control" placeholder="Enter new password...">
+                        <i class="toggle-password" style="position:absolute; right:10px; top:12px; color:#333; cursor: pointer;"></i>
                     </div>
                 </div>
                 </div>

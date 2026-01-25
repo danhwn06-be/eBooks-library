@@ -1,6 +1,6 @@
 -- Active: 1768276078050@@localhost@3306@library_db
 -- Xóa database cũ nếu tồn tại
-DROP DATABASE IF EXISTS library_db;
+-- DROP DATABASE IF EXISTS library_db;
 CREATE DATABASE IF NOT EXISTS library_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE library_db;
@@ -31,6 +31,7 @@ CREATE TABLE Users (
     member_code VARCHAR(20) UNIQUE, 
     
     full_name VARCHAR(100) NOT NULL,            -- [cite: 19]
+    user_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,         -- [cite: 19]
     password_hash VARCHAR(255) NOT NULL,        -- [cite: 78]
     phone_number VARCHAR(20) NOT NULL,          -- [cite: 19]
