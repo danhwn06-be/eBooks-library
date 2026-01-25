@@ -8,7 +8,9 @@ $dotenv->load();
 
 // Nạp file cấu hình (chứa thông tin DB, hằng số...)
 require_once '../config/config.php';
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Nạp các lớp Core (Database, Controller cơ sở, Router)
 require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';

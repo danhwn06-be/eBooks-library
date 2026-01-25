@@ -114,3 +114,5 @@
 </main>
 
 <?php require APP_ROOT . "/app/views/inc/footer.php"; ?>
+
+<?php echo password_hash("123123", PASSWORD_DEFAULT); ?>

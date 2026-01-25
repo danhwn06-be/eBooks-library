@@ -80,7 +80,7 @@ class BookController extends Controller
             $pageTitle = 'Tất cả sách';
         } else {
             //tìm kiếm bằng tên của sách
-            $books = $bookModel->searchByTitle($keyword);
+            $books = $bookModel->searchBooks($keyword);
             $pageTitle = 'Kết quả tìm kiếm cho: ' . htmlspecialchars($keyword);
         }
 
