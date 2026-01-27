@@ -25,32 +25,6 @@ class AdminController extends Controller
         $this->view('admin/books/index', $data);
     }
 
-    // Trang BookCopies của từng quyển sách
-    public function copies($id = null)
-    {
-        if ($id == null) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $book = $this->bookModel->getBookById($id);
-        $copies = $this->bookModel->getCopiesByBookId($id);
-
-        // Nếu sách không tồn tại
-        if (!$book) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $data = [
-            'book' => $book,
-            'copies' => $copies
-        ];
-
-        // Gọi view
-        $this->view('admin/books/copies', $data);
-    }
-
     public function add()
     {
         // Cần lấy danh mục để hiện trong thẻ <select>
@@ -172,6 +146,32 @@ class AdminController extends Controller
     }
 
     // COPIES
+    // Trang BookCopies của từng quyển sách
+    public function copies($id = null)
+    {
+        if ($id == null) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $book = $this->bookModel->getBookById($id);
+        $copies = $this->bookModel->getCopiesByBookId($id);
+
+        // Nếu sách không tồn tại
+        if (!$book) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $data = [
+            'book' => $book,
+            'copies' => $copies
+        ];
+
+        // Gọi view
+        $this->view('admin/books/copies', $data);
+    }
+
     // 1. Giao diện Thêm Copy (GET)
     public function add_copy($book_id = null) {
         if (!$book_id) header('Location: ' . URL_ROOT . '/admin/books');
@@ -374,5 +374,33 @@ public function addUser() {
         }
     }
 
-    
+    // Chức năng export CSV (Excel)
+    public function export() {
+        $books = $this->bookModel->getBooksForAdmin();
+
+        // Thiết lập tên file khi tải về
+        $filename = "book_inventory_" . date('Y-m-d_H-i') . ".csv";
+
+        // Thiết lập thông báo cho trình duyệt biết đây là file tải về
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename .'"');
+
+        // Mở luồng output PHP
+        $output = fopen('php://output', 'w');
+
+        // Thêm BOM để Excel đọc được tiếng Việt không bị lỗi font (quan trọng)
+        fputs($output, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+
+        // Tiêu đề
+        fputcsv($output, ['ISBN', 'Title', 'Author', 'Category', 'Image', 'Publisher', 'Publication year', 'Content description']);
+
+        // Dữ liệu
+        foreach ($books as $book) {
+            fputcsv($output, [$book['isbn'], $book['title'], $book['author'], $book['category_name'], $book['publisher'], $book['publication_year'], $book['description']]);
+        }
+
+        // Đóng file và dừng chương trình
+        fclose($output);
+        exit();
+    }
 }

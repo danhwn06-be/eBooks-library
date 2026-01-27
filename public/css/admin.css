@@ -138,6 +138,10 @@ body {
     color: #000;
 }
 
+.page-header.right {
+    gap: 8px;
+}
+
 .btn-add {
     background-color: #22c55e;
     color: white;
@@ -153,8 +157,23 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.btn-export {
+    background-color: #c52222;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .btn-add:hover {
-    background-color: #16a34a;
+    background-color: #a31616;
 }
 
 .table-wrapper {

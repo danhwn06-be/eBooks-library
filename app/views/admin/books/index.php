@@ -3,12 +3,21 @@
 <main class="container">
     <div class="page-header">
         <h1>Book management</h1>
-        <a href="<?php echo URL_ROOT; ?>/admin/add" style="text-decoration: none;">
-            <button class="btn-add">
-                <i class="fa-solid fa-plus"></i>
-                Add new book
-            </button>
-        </a>
+        <div class="page-header right">
+            <!-- <a href="<?php //echo URL_ROOT; ?>/admin/export" target="_blank" style="text-decoration: none"> -->
+            <!-- <a> 
+                <button class="btn-export" id="open-btn">
+                    <i class="fa-solid fa-file-csv"></i>
+                    Export table
+                </button>
+            </a> -->
+            <a href="<?php echo URL_ROOT; ?>/admin/add" style="text-decoration: none;">
+                <button class="btn-add">
+                    <i class="fa-solid fa-plus"></i>
+                    Add new book
+                </button>
+            </a>
+        </div>
     </div>
 
     <div class="table-wrapper">
@@ -82,6 +91,31 @@
         </table>
     </div>
 </main>
+
+<!-- <div id="exportModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="btn-close-modal">&times;</button>
+        </div>
+    </div>
+</div> -->
+
+<!-- <script>
+    const exportModal = document.getElementById('exportModal');
+    const openBtn = document.getElementById('open-btn');
+    const closeBtn = document.getElementById('close-btn');
+
+    // Xử lý nút thoát
+    openBtn.onclick = () => exportModal.style.display = 'flex';
+    closeBtn.onclick = () => exportModal.style.display = 'none';
+    
+    // Thoát ra nếu click ngoài form
+    window.onclick = (e) => {
+        if (e.target == exportModal) exportModal.style.display = 'none';
+    }
+
+    
+</script> -->
 </body>
 
 </html>
