@@ -1777,8 +1777,8 @@ body {
 
 .cf-book-reservation-section .cf-label {
     width: 140px;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: #000;
     flex-shrink: 0;
 }
@@ -1789,12 +1789,13 @@ body {
     border: 1.5px solid #999;
     border-radius: 15px;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 22px;
     text-align: center;
-    color: #333;
+    color: #000000;
     height: 45px;
     display: flex;
     align-items: center;
+    text-shadow: #676565;
     justify-content: center;
 }
 
@@ -1813,11 +1814,10 @@ body {
     margin-bottom: 15px;
     gap: 20px;
 }
-
 .cf-label,
 .cf-form-group label {
     width: 140px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #000;
     flex-shrink: 0;
@@ -1857,12 +1857,12 @@ body {
 }
 
 .cf-confirm-btn {
-    background-color: #4a69bd;
+    background-color: #4A5BDE;
     color: #fff;
-    border: none;
+    border: 1px solid #000;
     padding: 12px 60px;
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 600;
     border-radius: 12px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(74, 105, 189, 0.3);
@@ -1870,7 +1870,7 @@ body {
 }
 
 .cf-confirm-btn:hover {
-    background-color: #3c55a5;
+    background-color: #a0071b;
     transform: scale(1.03);
 }
 
