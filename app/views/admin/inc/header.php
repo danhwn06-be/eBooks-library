@@ -24,6 +24,7 @@
                 $is_user_page = (strpos($current_url, 'admin/users') !== false || strpos($current_url, 'editUser') !== false || strpos($current_url, 'addUser') !== false);
                 // Kiểm tra xem có phải trang Book không (loại trừ trường hợp có chữ User)
                 $is_book_page = (strpos($current_url, 'admin/books') !== false || (strpos($current_url, 'admin/edit') !== false && strpos($current_url, 'editUser') === false) || strpos($current_url, 'admin/add') !== false);
+                $is_loan_page = (strpos($current_url, 'admin/loans') !== false);
             ?>
 
             <nav class="nav-links">
@@ -37,7 +38,7 @@
                     <span>Books</span>
                 </a>
 
-                <a href="#" class="nav-item <?php echo (strpos($current_url, 'loans') !== false) ? 'active' : ''; ?>">
+                <a href="<?php echo URL_ROOT; ?>/admin/loans" class="nav-item <?php echo $is_loan_page ? 'active' : ''; ?>">
                     <i class="fa-solid fa-handshake icon-red"></i>
                     <span>Loans</span>
                 </a>
