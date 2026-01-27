@@ -1832,10 +1832,12 @@ body {
     border-radius: 15px;
     padding: 10px 20px;
     font-size: 17px;
-    text-align: center;
     color: #333;
     outline: none;
     height: 45px;
+}
+.cf-input-center {
+    text-align: center;
 }
 
 .cf-row-flex {

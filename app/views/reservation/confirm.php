@@ -62,7 +62,7 @@
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Member Code:</label>
-                    <input type="text" value="<?php echo htmlspecialchars($member_code); ?>" readonly>
+                    <input type="text" class="cf-input-center" value="<?php echo htmlspecialchars($member_code); ?>" readonly>
                     <input type="hidden" name="member_code" value="<?php echo htmlspecialchars($member_code); ?>">
                 </div>
                 
@@ -82,7 +82,6 @@
                             <option value="1_week">1 week</option>
                             <option value="2_weeks">2 weeks</option>
                             <option value="3_weeks">3 weeks</option>
-                            <option value="1_month">1 month</option>
                         </select>
                     </div>
                 </div>
