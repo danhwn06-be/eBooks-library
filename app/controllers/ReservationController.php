@@ -43,26 +43,18 @@ class ReservationController extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            $data = [
-                'user_id'     => $_SESSION['user_id'],
-                'book_id'     => $_POST['book_id'],
-                'member_code' => $_POST['member_code'],
-                'email'       => $_POST['email'],
-                'phone'       => $_POST['phone'],
-                'address'     => $_POST['address'],
-                'borrow_date' => $_POST['borrow_date'],
-                'loan_term'   => $_POST['loan_term'],
-            ];
+            $userId = $_SESSION['user_id'];
+            $bookId = $_POST['book_id'];
 
-            if (empty($data['book_id']) || empty($data['member_code'])) {
+            if (empty($bookId)) {
                 echo "<script>
-                    alert('Missing reservation information');
+                    alert('Missing book information');
                     window.history.back();
                 </script>";
                 exit;
             }
 
-            if ($this->reservationModel->createReservation($data)) {
+            if ($this->reservationModel->createReservation($userId, $bookId)) {
                 echo "<script>
                     alert('Reservation created successfully!');
                     window.location.href = '" . URL_ROOT . "/users/profile';
