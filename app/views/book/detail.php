@@ -49,8 +49,8 @@
         </div>
 
         <?php if ($data['book']['available_copies'] > 0): ?>
-          <a href="<?php echo URL_ROOT; ?>/book/reserve/<?php echo $data['book']['book_id']; ?>"
-             class="bd-btn-reserve">Reservations</a>
+        <a href="<?php echo URL_ROOT; ?>/reservation/create/<?php echo $data['book']['book_id']; ?>"
+          class="bd-btn-reserve">Reservations</a>
         <?php else: ?>
            <a href="#" class="bd-btn-reserve disabled" onclick="return false;">Reservations</a>
         <?php endif; ?>

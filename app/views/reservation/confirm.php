@@ -35,16 +35,14 @@
             // Kiểm tra xem user đã đăng nhập chưa
             $isLoggedIn = isset($_SESSION['user_id']) || isset($_SESSION['user_name']);
             
-            // Giả sử nếu đã đăng nhập thì có member_code
-            // Trong thực tế, Cần lấy member_code từ database dựa trên user_id
             if (!$isLoggedIn): ?>
                 <div class="error-message cf-error-message">
                     <p>You need to be logged in with a member account to make a reservation.</p>
                     <a href="<?php echo URL_ROOT; ?>/users/login" class="btn-login cf-btn-login">Please login first</a>
                 </div>
             <?php else: 
-                // Giả sử member_code được lưu trong session hoặc lấy từ controller
-                $member_code = $_SESSION['user_member_code'] ?? ($data['user']['member_code'] ?? 'MEM2025');
+                // USER LÀ OBJECT
+                $member_code = $data['user']->member_code;
             ?>
             
             <form action="<?php echo URL_ROOT; ?>/reservation/store" method="post">
@@ -52,29 +50,35 @@
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Email:</label>
-                    <input type="email" name="email" value="<?php echo $_SESSION['user_email'] ?? ''; ?>" required>
+                    <input type="email" name="email"
+                           value="<?php echo htmlspecialchars($data['user']->email); ?>" readonly>
                 </div>
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Address:</label>
-                    <input type="text" name="address" value="<?php echo $_SESSION['user_address'] ?? ''; ?>" required>
+                    <input type="text" name="address"
+                           value="<?php echo htmlspecialchars($data['user']->address); ?>" readonly>
                 </div>
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Member Code:</label>
-                    <input type="text" class="cf-input-center" value="<?php echo htmlspecialchars($member_code); ?>" readonly>
-                    <input type="hidden" name="member_code" value="<?php echo htmlspecialchars($member_code); ?>">
+                    <input type="text" class="cf-input-center"
+                           value="<?php echo htmlspecialchars($member_code); ?>" readonly>
+                    <input type="hidden" name="member_code"
+                           value="<?php echo htmlspecialchars($member_code); ?>">
                 </div>
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Phone number:</label>
-                    <input type="tel" name="phone" value="<?php echo $_SESSION['user_phone'] ?? ''; ?>" required>
+                    <input type="tel" name="phone"
+                           value="<?php echo htmlspecialchars($data['user']->phone_number); ?>" readonly>
                 </div>
                 
                 <div class="row-flex cf-row-flex">
                     <div class="form-group flex-1 cf-form-group">
                         <label class="cf-label">Borrow Date:</label>
-                        <input type="date" name="borrow_date" value="<?php echo date('Y-m-d'); ?>" required>
+                        <input type="date" name="borrow_date"
+                               value="<?php echo date('Y-m-d'); ?>" required>
                     </div>
                     <div class="form-group flex-1 cf-form-group">
                         <label class="cf-label">Loan term:</label>
