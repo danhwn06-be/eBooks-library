@@ -1,58 +1,18 @@
 <?php
 
-use PgSql\Lob;
-
-class BookModel
+class Book
 {
     private $db;
+    private $cache;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
+        // Khởi tạo Cache helper
+        require_once APP_ROOT . '/app/core/Cache.php';
+        $this->cache = new Cache();
     }
 
-    // =========================================================================
-    // 1. COMMON & UTILITIES (CÁC HÀM DÙNG CHUNG)
-    // =========================================================================
-
-    // Method để lấy database instance (cần cho CategoryController)
-    public function getDb()
-    {
-        return $this->db;
-    }
-
-    // Lấy danh sách tất cả danh mục
-    public function getAllCategories()
-    {
-        $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
-        try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-
-    // Hàm hỗ trợ lấy danh sách Categories để đổ vào Select Option trong Modal
-    public function getCategories()
-    {
-        $stmt = $this->db->getConnection()->query("SELECT * FROM Categories");
-        return $stmt->fetchAll();
-    }
-
-    // Lấy tên Category theo ID
-    public function getCategoryNameById($cat_id)
-    {
-        $sql = "SELECT category_name FROM Categories WHERE category_id = :cat_id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        return $row ? $row['category_name'] : '';
-    }
-
-    // =========================================================================
     // 2. PUBLIC READ & DETAILS (HIỂN THỊ SÁCH CHO NGƯỜI DÙNG)
     // =========================================================================
 
@@ -103,6 +63,13 @@ class BookModel
     // Lấy chi tiết 1 cuốn sách theo ID
     public function getBookById($id)
     {
+        // KEY CACHE: book_detail_1, book_detail_2...
+        $cacheKey = 'book_detail_' . $id;
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) {
+            return $cachedData;
+        }
+
         $sql = "SELECT 
                 b.*,
                 c.category_name,
@@ -118,10 +85,47 @@ class BookModel
             $stmt = $this->db->getConnection()->prepare($sql);
             $stmt->bindValue(':id', $id);
             $stmt->execute();
-            return $stmt->fetch();
+            $result = $stmt->fetch();
+
+            // Cache thông tin sách này trong 24 giờ (vì ít thay đổi)
+            if ($result) $this->cache->set($cacheKey, $result, 86400);
+            return $result;
         } catch (PDOException) {
             return false;
         };
+    }
+
+    // Lấy tất cả danh mục sách (Bổ sung để hỗ trợ Controller và Cache)
+    public function getAllCategories()
+    {
+        $cacheKey = 'all_categories';
+
+        // 1. Thử lấy dữ liệu từ cache trước
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) {
+            return $cachedData;
+        }
+
+        // 2. Nếu không có trong cache, truy vấn database
+        $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
+        $stmt = $this->db->getConnection()->query($sql);
+        $categories = $stmt->fetchAll();
+
+        // 3. Lưu kết quả vào cache trong 24 giờ
+        $this->cache->set($cacheKey, $categories, 86400);
+
+        return $categories;
+    }
+
+    // Lấy tên danh mục theo ID (Bổ sung)
+    public function getCategoryNameById($id)
+    {
+        $sql = "SELECT category_name FROM Categories WHERE category_id = :id";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result ? $result['category_name'] : 'Unknown Category';
     }
 
     // =========================================================================
@@ -193,6 +197,11 @@ class BookModel
     // Lấy sách để hiển thị cho dashboard
     public function getBooksForAdmin()
     {
+        // Cache toàn bộ danh sách admin
+        $cacheKey = 'admin_books_list';
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) return $cachedData;
+
         $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
                 FROM Books b
                 LEFT JOIN Categories c ON b.category_id = c.category_id
@@ -201,7 +210,11 @@ class BookModel
                 ORDER BY b.book_id DESC";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+
+        // Cache trong 1 giờ
+        $this->cache->set($cacheKey, $result, 3600);
+        return $result;
     }
 
     // Thêm sách mới
@@ -220,7 +233,12 @@ class BookModel
         $stmt->bindValue(':desc', $data['description']);
         $stmt->bindValue(':image', $data['image_url']); // Lưu tên file ảnh
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            // Xóa cache danh sách admin để cập nhật sách mới
+            $this->cache->delete('admin_books_list');
+            return true;
+        }
+        return false;
     }
 
     // Cập nhật sách
@@ -257,87 +275,33 @@ class BookModel
             $stmt->bindValue(':image', $data['image_url']);
         }
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            // Xóa cache của cuốn sách này và danh sách tổng
+            $this->cache->delete('book_detail_' . $data['book_id']);
+            $this->cache->delete('admin_books_list');
+            return true;
+        }
+        return false;
     }
 
     // Xóa sách
     public function deleteBook($id)
     {
-        // Kiểm tra xem sách có bản sao (copies) nào không
-        $checkSql = "SELECT COUNT(*) as count FROM BookCopies WHERE book_id = :id";
-        $checkStmt = $this->db->getConnection()->prepare($checkSql);
-        $checkStmt->bindValue(':id', $id);
-        $checkStmt->execute();
-        $result = $checkStmt->fetch();
-
-        if ($result && $result['count'] > 0) {
-            return false;
-        }
-
         $sql = "DELETE FROM Books WHERE book_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':id', $id);
-        return $stmt->execute();
-    }
-
-    // =========================================================================
-    // 5. COPY MANAGEMENT (QUẢN LÝ BẢN SAO - INVENTORY)
-    // =========================================================================
-
-    // Lấy danh sách các bản sao của sách đó
-    public function getCopiesByBookId($bookId)
-    {
-        $sql = "SELECT *
-            FROM BookCopies
-            WHERE book_id = :book_id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':book_id', $bookId);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    // Thêm bản sao mới
-    public function addCopy($data)
-    {
-        $sql = "INSERT INTO BookCopies (book_id, copy_code, status, condition_note) 
-                VALUES (:book_id, :copy_code, :status, :quality)";
-
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':book_id', $data['book_id']);
-        $stmt->bindValue(':copy_code', $data['copy_code']);
-        $stmt->bindValue(':status', $data['status']);
-        $stmt->bindValue(':quality', $data['condition_note']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
-
-        return $stmt->execute();
-    }
-
-    // Lấy thông tin 1 bản sao cụ thể (để sửa)
-    public function getCopyById($id)
-    {
-        $sql = "SELECT * FROM BookCopies WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->execute();
-        return $stmt->fetch();
-    }
-
-    // Cập nhật bản sao
-    public function updateCopy($data)
-    {
-        $sql = "UPDATE BookCopies SET status = :status, condition_note = :quality WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':status', $data['status']);
-        $stmt->bindValue(':quality', $data['quality']);
-        $stmt->bindValue(':id', $data['copy_id']);
-        return $stmt->execute();
-    }
-
-    // Xóa bản sao
-    public function deleteCopy($id)
-    {
-        $sql = "DELETE FROM BookCopies WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        return $stmt->execute();
+        
+        if ($stmt->execute()) {
+            // Xóa cache
+            $this->cache->delete('book_detail_' . $id);
+            $this->cache->delete('admin_books_list');
+            return true;
+        }
+        return false;
     }
 }
+
+
+
+
+   

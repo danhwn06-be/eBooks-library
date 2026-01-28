@@ -3,7 +3,8 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $bookModel = $this->model('BookModel');
+        $bookModel = $this->model('Book');
+        $categoryModel = $this->model('Categories');
 
         // Giới hạn số sách trong 1 trang
         $limit = 6;
@@ -14,7 +15,7 @@ class HomeController extends Controller
         $books = $bookModel->getBooksWithPagination($limit, $offset);
         $totalBooks = $bookModel->getTotalBookCount();
         $totalPages = ceil($totalBooks / $limit);
-        $categories = $bookModel->getAllCategories();
+        $categories = $categoryModel->getAllCategories();
 
         $data = [
             'title' => 'Home Page',

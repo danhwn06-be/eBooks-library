@@ -5,7 +5,7 @@ class BookController extends Controller
 
     public function __construct()
     {
-        $this->bookModel = $this->model('BookModel');
+        $this->bookModel = $this->model('Book');
     }
 
     // Hàm mặc định (nếu gõ /books sau URL)
@@ -71,23 +71,22 @@ class BookController extends Controller
 
     public function search()
     {
-        $bookModel = $this->model('BookModel');
         //kiểm tra từ khóa mà người dùng nhập vào
         $keyword = isset($_GET['keyword']) ? trim ($_GET['keyword']) : "";
         //xử lý nếu từ khóa trống sẽ trả về tất cả sách
         if ($keyword === " ") {
-            $books = $bookModel->getAllBooks();
+            $books = $this->bookModel->getAllBooks();
             $pageTitle = 'Tất cả sách';
         } else {
             //tìm kiếm bằng tên của sách
-            $books = $bookModel->searchBooks($keyword);
+            $books = $this->bookModel->searchBooks($keyword);
             $pageTitle = 'Kết quả tìm kiếm cho: ' . htmlspecialchars($keyword);
         }
 
         //xử lý khi người dùng tìm kiếm mà không có 
         $noResult = empty($books);
 
-        $categories = $bookModel->getAllCategories();
+        $categories = $this->bookModel->getAllCategories();
 
         $data = [
             'title' => 'Search Result',

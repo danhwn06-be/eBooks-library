@@ -3,7 +3,7 @@ class CategoryController extends Controller {
     private $bookModel;
 
     public function __construct() {
-        $this->bookModel = $this->model('BookModel');
+        $this->bookModel = $this->model('Book');
     }
 
     public function index($cat_id = null) {

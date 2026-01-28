@@ -3,11 +3,15 @@ class AdminController extends Controller
 {
     private $bookModel;
     private $userModel;
+    private $categoryModel;
+    private $copyModel;
 
     public function __construct()
     {
-        $this->bookModel = $this->model('BookModel');
-        $this->userModel = $this->model('User');
+        $this->bookModel = $this->model('Book');
+        $this->userModel = $this->model('Users');
+        $this->categoryModel = $this->model('Categories');
+        $this->copyModel = $this->model('BookCopies');
     }
 
     // Trang Dashboard quản lý sách
@@ -28,7 +32,7 @@ class AdminController extends Controller
     public function add()
     {
         // Cần lấy danh mục để hiện trong thẻ <select>
-        $categories = $this->bookModel->getAllCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         $data = [
             'categories' => $categories
@@ -71,7 +75,7 @@ class AdminController extends Controller
     public function edit($id)
     {
         $book = $this->bookModel->getBookById($id);
-        $categories = $this->bookModel->getCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         if (!$book) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -115,6 +119,13 @@ class AdminController extends Controller
     // URL: /admin/delete/5
     public function delete($id)
     {
+        // Kiểm tra xem sách có bản sao không (Sử dụng CopyModel)
+        $copies = $this->copyModel->getCopiesByBookId($id);
+        if (count($copies) > 0) {
+            echo "<script>alert('Cannot delete book. It has copies in the system.'); window.location.href='" . URL_ROOT . "/admin/books';</script>";
+            return;
+        }
+
         if ($this->bookModel->deleteBook($id)) {
             header('Location: ' . URL_ROOT . '/admin/books');
         } else {
@@ -155,7 +166,7 @@ class AdminController extends Controller
         }
 
         $book = $this->bookModel->getBookById($id);
-        $copies = $this->bookModel->getCopiesByBookId($id);
+        $copies = $this->copyModel->getCopiesByBookId($id);
 
         // Nếu sách không tồn tại
         if (!$book) {
@@ -196,7 +207,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            if ($this->bookModel->addCopy($data)) {
+            if ($this->copyModel->addCopy($data)) {
                 // Quay lại trang danh sách copy của cuốn sách đó
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $data['book_id']);
             } else {
@@ -207,7 +218,7 @@ class AdminController extends Controller
 
     // 3. Giao diện Sửa Copy (GET)
     public function edit_copy($copy_id) {
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         
         if (!$copy) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -236,8 +247,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            // Lưu ý: UpdateCopy đã có sẵn trong BookModel cũ của bạn, nếu chưa thì thêm vào
-            if ($this->bookModel->updateCopy($data)) {
+            if ($this->copyModel->updateCopy($data)) {
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
             } else {
                 die('Error updating copy');
@@ -248,10 +258,10 @@ class AdminController extends Controller
     // 5. Xóa Copy
     public function delete_copy($copy_id) {
         // Lấy thông tin copy trước để biết book_id mà quay về
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         $book_id = $copy['book_id'];
 
-        if ($this->bookModel->deleteCopy($copy_id)) {
+        if ($this->copyModel->deleteCopy($copy_id)) {
             header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
         } else {
             die('Cannot delete this copy (Maybe borrowed?)');
@@ -288,7 +298,7 @@ public function addUser() {
             // Validation (Giữ nguyên)
             if (empty($data['email'])) { $data['email_err'] = 'Please enter email'; }
             else {
-                if ($this->userModel->findUserByEmail($data['email'])) {
+                if ($this->userModel->findUserByField('email', $data['email'])) {
                     $data['email_err'] = 'Email is already taken';
                 }
             }
