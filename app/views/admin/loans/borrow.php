@@ -74,49 +74,50 @@
         </form>
     </div>
     <div id="reservation-content" style="display: none;">
-    <div class="form-card">
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr style="text-align: left; background-color: #f8faff; border-bottom: 2px solid #eef2f7;">
-                        <th style="padding: 15px; color: #5a6a85;">Reservation ID</th>
-                        <th style="padding: 15px; color: #5a6a85;">User ID</th>
-                        <th style="padding: 15px; color: #5a6a85;">Book ID</th>
-                        <th style="padding: 15px; color: #5a6a85;"> Reservations Date</th>
-                        <th style="padding: 15px; color: #5a6a85;">Status</th>
-                        <th style="padding: 15px; color: #5a6a85;">Note</th>
-                    </tr>
-                </thead>
-            <tbody>
-                <?php if(!empty($data['reservations'])): ?>
-                    <?php foreach($data['reservations'] as $res): ?>
-                    <tr style="border-bottom: 1px solid #f1f1f1;">
-                        <td style="padding: 15px;"><?php echo $res->reservation_id; ?></td>
-                        <td style="padding: 15px;"><?php echo $res->member_code; ?></td>
-                        <td style="padding: 15px;"><?php echo $res->title; ?></td> 
-                        <td style="padding: 15px;"><?php echo date('d/m/Y', strtotime($res->reservation_date)); ?></td>
-                        <td style="padding: 15px;">
-                            <?php 
-                                $bg = '#ffb822'; // Waiting
-                                if($res->status == 'Cancelled') $bg = '#f4516c';
-                                if($res->status == 'Fulfilled') $bg = '#34bfa3';
-                            ?>
-                            <span style="background: <?php echo $bg; ?>; color: white; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                                <?php echo $res->status; ?>
-                            </span>
-                        </td>
-                        <td style="padding: 15px; color: #666;">---</td> </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="6" style="padding: 20px; text-align: center;">No reservations found.</td></tr>
-                <?php endif; ?>
-            </tbody>
-            </table>
+            <div class="form-card" style="padding: 0; overflow: hidden; border: 1px solid #dce4ff;">
+                <div class="reservation-wrapper">
+                    <table class="table-reservation">
+                        <thead>
+                            <tr>
+                                <th>Reservation ID</th>
+                                <th>User ID</th>
+                                <th>Book ID</th>
+                                <th>Reservation Date</th>
+                                <th>Status</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(!empty($data['reservations'])): ?>
+                                <?php foreach($data['reservations'] as $res): ?>
+                                <tr>
+                                    <td>#<?php echo $res->reservation_id; ?></td>
+                                    <td class="font-bold"><?php echo $res->member_code; ?></td>
+                                    <td><?php echo $res->title; ?></td> 
+                                    <td><?php echo date('d/m/Y', strtotime($res->reservation_date)); ?></td>
+                                    <td>
+                                        <?php 
+                                            $c = 'res-waiting';
+                                            if($res->status == 'Cancelled') $c = 'res-cancelled';
+                                            if($res->status == 'Fulfilled') $c = 'res-fulfilled';
+                                        ?>
+                                        <span class="res-badge <?php echo $c; ?>">
+                                            <?php echo $res->status; ?>
+                                        </span>
+                                    </td>
+                                    <td class="url-text">Null</td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="6" class="res-empty">No reservations found</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-</div>
-
 <script>
     const tabs = document.querySelectorAll('.tab-link');
     const borrowContent = document.getElementById('borrow-content');
