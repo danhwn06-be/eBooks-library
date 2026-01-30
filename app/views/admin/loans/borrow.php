@@ -11,7 +11,7 @@
 
     <div class="tab-container">
         <a href="<?php echo URL_ROOT; ?>/admin/loans" class="tab-link active">Borrow</a>
-        <a href="#" class="tab-link">Return</a>
+        <a href="<?php echo URL_ROOT; ?>/admin/returns" class="tab-link">Return</a>
         <a href="#" class="tab-link">Loan Tracking</a>
         <a href="#" class="tab-link">Reservations</a>
     </div>
