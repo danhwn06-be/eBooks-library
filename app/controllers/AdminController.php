@@ -424,8 +424,10 @@ public function addUser() {
         } else {
             // Logic cho phương thức GET (giữ nguyên của bạn)
             $availableBooks = $this->loanModel->getAvailableCopies();
+            $reservations = $this->loanModel->getReservations();
             $data = [
                 'books' => $availableBooks,
+                'reservations' => $reservations,
                 'current_date' => date('Y-m-d'),
                 'default_due_date' => date('Y-m-d', strtotime('+14 days')),
                 'max_due_date' => date('Y-m-d', strtotime('+30 days')),

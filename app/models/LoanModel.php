@@ -149,4 +149,19 @@ class LoanModel
             return false;
         }
     }
+public function getReservations() {
+    $sql = "SELECT r.*, u.member_code, b.title 
+            FROM Reservations r
+            JOIN Users u ON r.user_id = u.user_id
+            JOIN Books b ON r.book_id = b.book_id
+            ORDER BY r.reservation_date DESC";
+    
+    try {
+        $stmt = $this->conn()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
 }
