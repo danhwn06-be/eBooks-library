@@ -380,7 +380,7 @@ public function addUser() {
         $this->books(); // Mặc định vào trang books nếu không có tham số
     }
 
-public function loans() {
+    public function loans() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $data = [
                 'member_code' => trim($_POST['member_code']),
@@ -437,5 +437,34 @@ public function loans() {
             ];
             $this->view('admin/loans/borrow', $data);
         }
+    }
+
+    public function returns() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Xử lý lưu dữ liệu trả sách
+            $loan_id = $_POST['loan_id'];
+            $copy_id = $_POST['copy_id'];
+            $return_date = $_POST['return_date'];
+
+            if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date)) {
+                header('Location: ' . URL_ROOT . '/admin/loans?return_success=true');
+                exit();
+            } else {
+                die("Something went wrong during the return process.");
+            }
+        } else {
+            // Load giao diện trả sách (GET)
+            $data = [
+                'current_date' => date('Y-m-d'),
+                'error' => ''
+            ];
+            $this->view('admin/loans/return', $data);
+        }
+    }
+
+    public function getMemberLoans($code) {
+        $loans = $this->loanModel->getActiveLoansByMember($code);
+        header('Content-Type: application/json');
+        echo json_encode($loans);
     }
 }

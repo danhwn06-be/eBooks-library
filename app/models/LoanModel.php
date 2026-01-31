@@ -49,7 +49,7 @@ class LoanModel
         }
     }
 
-public function getAvailableCopies() {
+    public function getAvailableCopies() {
         $sql = "SELECT bc.copy_id, b.title, b.book_id 
                 FROM BookCopies bc 
                 JOIN Books b ON bc.book_id = b.book_id 
@@ -105,6 +105,7 @@ public function getAvailableCopies() {
         }
     }
 
+<<<<<<< HEAD
 public function getReservations() {
     $sql = "SELECT r.*, u.member_code, b.title 
             FROM Reservations r
@@ -120,4 +121,50 @@ public function getReservations() {
         return [];
     }
 }
+=======
+    public function getActiveLoansByMember($member_code) {
+        $sql = "SELECT l.loan_id, bc.copy_id, b.title, l.borrow_date, l.due_date
+                FROM Loans l
+                JOIN BookCopies bc ON l.copy_id = bc.copy_id
+                JOIN Books b ON bc.book_id = b.book_id
+                JOIN Users u ON l.user_id = u.user_id
+                WHERE u.member_code = :member_code
+                  AND l.return_date IS NULL";
+        try {
+            $stmt = $this->conn()->prepare($sql);
+            $stmt->bindValue(':member_code', $member_code);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    public function updateReturnDate($loan_id, $return_date, $copy_id) {
+        try {
+            $this->conn()->beginTransaction();
+
+            // Cập nhật ngày trả sách trong bảng Loans
+            $sql1 = "UPDATE Loans SET return_date = :return_date, status = 'Returned' WHERE loan_id = :loan_id";
+            $stmt1 = $this->conn()->prepare($sql1);
+            $stmt1->bindValue(':return_date', $return_date);
+            $stmt1->bindValue(':loan_id', $loan_id);
+            $stmt1->execute();
+
+            // Cập nhật trạng thái bản sao sách thành 'Available'
+            $sql2 = "UPDATE BookCopies SET status = 'Available' WHERE copy_id = :copy_id";
+            $stmt2 = $this->conn()->prepare($sql2);
+            $stmt2->bindValue(':copy_id', $copy_id);
+            $stmt2->execute();
+
+            $this->conn()->commit();
+            return true;
+        } catch (PDOException $e) {
+            if ($this->conn()->inTransaction()) {
+                $this->conn()->rollBack();
+            }
+            return false;
+        }
+    }
+>>>>>>> 209b380bbbb0a55a3b4d922bc14e1bbfeebb0966
 }
