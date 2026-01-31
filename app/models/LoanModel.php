@@ -105,23 +105,21 @@ class LoanModel
         }
     }
 
-<<<<<<< HEAD
-public function getReservations() {
-    $sql = "SELECT r.*, u.member_code, b.title 
-            FROM Reservations r
-            JOIN Users u ON r.user_id = u.user_id
-            JOIN Books b ON r.book_id = b.book_id
-            ORDER BY r.reservation_date DESC";
-    
-    try {
-        $stmt = $this->conn()->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
-    } catch (PDOException $e) {
-        return [];
+    public function getReservations() {
+        $sql = "SELECT r.*, u.member_code, b.title 
+                FROM Reservations r
+                JOIN Users u ON r.user_id = u.user_id
+                JOIN Books b ON r.book_id = b.book_id
+                ORDER BY r.reservation_date DESC";
+        
+        try {
+            $stmt = $this->conn()->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
     }
-}
-=======
     public function getActiveLoansByMember($member_code) {
         $sql = "SELECT l.loan_id, bc.copy_id, b.title, l.borrow_date, l.due_date
                 FROM Loans l
@@ -166,5 +164,4 @@ public function getReservations() {
             return false;
         }
     }
->>>>>>> 209b380bbbb0a55a3b4d922bc14e1bbfeebb0966
 }
