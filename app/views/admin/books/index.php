@@ -4,15 +4,16 @@
     <div class="page-header">
         <h1>Book management</h1>
         <div class="page-header right">
-            <!-- <a href="<?php //echo URL_ROOT; ?>/admin/export" target="_blank" style="text-decoration: none"> -->
-                <button type="button" class="btn-export" id="btnOpenImportModal">
-                    <i class="fa-solid fa-file-excel"></i> Import book
-                </button>
+            <!-- <a href="<?php //echo URL_ROOT; 
+                            ?>/admin/export" target="_blank" style="text-decoration: none"> -->
+            <button type="button" class="btn-export" id="btnOpenImportModal">
+                <i class="fa-solid fa-file-excel"></i> Import book
+            </button>
             <!-- </a>  -->
             <a href="<?php echo URL_ROOT; ?>/admin/add" style="text-decoration: none;">
                 <button class="btn-add">
                     <i class="fa-solid fa-plus"></i>
-                        Add new book
+                    Add new book
                 </button>
             </a>
         </div>
@@ -88,20 +89,52 @@
             </tbody>
         </table>
     </div>
+
+    <?php if (isset($data['pagination']) && $data['pagination']['total_pages'] > 1): ?>
+        <div class="pagination-container" style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+            <?php
+            $current = $data['pagination']['current_page'];
+            $total = $data['pagination']['total_pages'];
+            ?>
+
+            <!-- Nút Previous -->
+            <?php if ($current > 1): ?>
+                <a href="<?php echo URL_ROOT; ?>/admin/books?page=<?php echo $current - 1; ?>" class="page-btn nav-btn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            <?php endif; ?>
+
+            <!-- Các số trang -->
+            <?php for ($i = 1; $i <= $total; $i++): ?>
+                <a href="<?php echo URL_ROOT; ?>/admin/books?page=<?php echo $i; ?>"
+                    class="page-btn <?php echo ($i == $current) ? 'active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+
+            <!-- Nút Next -->
+            <?php if ($current < $total): ?>
+                <a href="<?php echo URL_ROOT; ?>/admin/books?page=<?php echo $current + 1; ?>" class="page-btn nav-btn">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 </main>
 
 <div id="importModal" class="modal-overlay">
     <div class="modal-box">
-        <div class="modal-header">
+        <div class="modal-he
+        ader">
             <h2>Import Books from Excel</h2>
             <button class="btn-close-modal">&times;</button>
         </div>
-        
+
         <div class="modal-body">
             <form action="<?php echo URL_ROOT; ?>/admin/import_books" method="POST" enctype="multipart/form-data">
                 <div style="padding: 25px;">
                     <p class="input-hint">Select an Excel file (.xlsx) to update inventory:</p>
-                    
+
                     <div class="file-upload-wrapper">
                         <input type="file" name="import_file" accept=".xlsx, .xls" required class="file-input">
                         <p class="file-hint">Supported formats: .xlsx, .xls</p>

@@ -26,12 +26,25 @@ class AdminController extends Controller
     // Trang Dashboard quản lý sách
     public function books()
     {
-        // Lấy tất cả sách
-        $books = $this->bookModel->getbooksForAdmin();
+        // Cấu hình phân trang
+        $limit = 10; // Số sách mỗi trang
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $offset = ($page - 1) * $limit;
+
+        // Lấy tổng số sách và tính tổng số trang
+        $totalBooks = $this->bookModel->getTotalBookCount();
+        $totalPages = ceil($totalBooks / $limit);
+
+        // Lấy danh sách sách theo trang
+        $books = $this->bookModel->getBooksForAdminPaginated($limit, $offset);
 
         $data = [
             'books' => $books,
-            'page_title' => 'Book Inventory Management'
+            'page_title' => 'Book Inventory Management',
+            'pagination' => [
+                'current_page' => $page,
+                'total_pages' => $totalPages
+            ]
         ];
 
         // Gọi view

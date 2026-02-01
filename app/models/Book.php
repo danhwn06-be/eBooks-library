@@ -240,6 +240,24 @@ class Book
         return $result;
     }
 
+    // Lấy sách cho admin có phân trang (Không cache để đảm bảo dữ liệu realtime)
+    public function getBooksForAdminPaginated($limit, $offset)
+    {
+        $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
+                FROM Books b
+                LEFT JOIN Categories c ON b.category_id = c.category_id
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
+                GROUP BY b.book_id
+                ORDER BY b.book_id DESC
+                LIMIT :limit OFFSET :offset";
+        
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     // Thêm sách mới
     public function addBook($data)
     {
