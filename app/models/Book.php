@@ -3,18 +3,11 @@
 class Book
 {
     private $db;
-    private $cache;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
-        // Khởi tạo Cache helper
-        require_once APP_ROOT . '/app/core/Cache.php';
-        $this->cache = new Cache();
     }
-
-    // 2. PUBLIC READ & DETAILS (HIỂN THỊ SÁCH CHO NGƯỜI DÙNG)
-    // =========================================================================
 
     // Đếm tổng số sách (để tính số trang)
     public function getTotalBookCount()
@@ -25,7 +18,8 @@ class Book
             $stmt = $this->db->getConnection()->prepare($sql);
             $stmt->execute();
             $row = $stmt->fetch();
-            return $row['total'];
+            $total = $row['total'];
+            return $total;
         } catch (PDOException $e) {
             return [];
         }
@@ -63,12 +57,6 @@ class Book
     // Lấy chi tiết 1 cuốn sách theo ID
     public function getBookById($id)
     {
-        // KEY CACHE: book_detail_1, book_detail_2...
-        $cacheKey = 'book_detail_' . $id;
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) {
-            return $cachedData;
-        }
 
         $sql = "SELECT 
                 b.*,
@@ -86,33 +74,18 @@ class Book
             $stmt->bindValue(':id', $id);
             $stmt->execute();
             $result = $stmt->fetch();
-
-            // Cache thông tin sách này trong 24 giờ (vì ít thay đổi)
-            if ($result) $this->cache->set($cacheKey, $result, 86400);
             return $result;
         } catch (PDOException) {
             return false;
         };
     }
 
-    // Lấy tất cả danh mục sách (Bổ sung để hỗ trợ Controller và Cache)
+    // Lấy tất cả danh mục sách (Bổ sung để hỗ trợ Controller và Cache) -- test
     public function getAllCategories()
     {
-        $cacheKey = 'all_categories';
-
-        // 1. Thử lấy dữ liệu từ cache trước
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) {
-            return $cachedData;
-        }
-
-        // 2. Nếu không có trong cache, truy vấn database
         $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
         $stmt = $this->db->getConnection()->query($sql);
         $categories = $stmt->fetchAll();
-
-        // 3. Lưu kết quả vào cache trong 24 giờ
-        $this->cache->set($cacheKey, $categories, 86400);
 
         return $categories;
     }
@@ -127,10 +100,6 @@ class Book
         $result = $stmt->fetch();
         return $result ? $result['category_name'] : 'Unknown Category';
     }
-
-    // =========================================================================
-    // 3. SEARCH & FILTER (TÌM KIẾM VÀ LỌC)
-    // =========================================================================
 
     //Tìm kiếm sách (Title, Author, ISBN)
     public function searchBooks($keyword)
@@ -190,18 +159,51 @@ class Book
         return $stmt->fetchAll();
     }
 
-    // =========================================================================
-    // 4. ADMIN BOOK MANAGEMENT (QUẢN LÝ SÁCH - CRUD)
-    // =========================================================================
+
+    // Đếm số sách trong 1 danh mục
+    public function getBookCountByCategoryId($cat_id)
+    {
+        $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch();
+            $total = $row['total'];
+            return $total;
+        } catch (PDOException $e) {
+            return 0;
+        }
+    }
+
+    // Lấy sách theo danh mục có phân trang
+    public function getBooksByCategoryIdPaginated($cat_id, $limit, $offset)
+    {
+        $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
+                COUNT(bc.copy_id) AS total_copies, 
+                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
+                FROM Books b 
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
+                WHERE b.category_id = :cat_id
+                GROUP BY b.book_id
+                ORDER BY b.created_at DESC
+                LIMIT :limit OFFSET :offset";
+        
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 
     // Lấy sách để hiển thị cho dashboard
     public function getBooksForAdmin()
     {
-        // Cache toàn bộ danh sách admin
-        $cacheKey = 'admin_books_list';
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) return $cachedData;
-
         $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
                 FROM Books b
                 LEFT JOIN Categories c ON b.category_id = c.category_id
@@ -211,9 +213,6 @@ class Book
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-
-        // Cache trong 1 giờ
-        $this->cache->set($cacheKey, $result, 3600);
         return $result;
     }
 
@@ -234,9 +233,7 @@ class Book
         $stmt->bindValue(':image', $data['image_url']); // Lưu tên file ảnh
 
         if ($stmt->execute()) {
-            // Xóa cache danh sách admin để cập nhật sách mới
-            $this->cache->delete('admin_books_list');
-            return true;
+            return $this->db->getConnection()->lastInsertId();
         }
         return false;
     }
@@ -276,9 +273,6 @@ class Book
         }
 
         if ($stmt->execute()) {
-            // Xóa cache của cuốn sách này và danh sách tổng
-            $this->cache->delete('book_detail_' . $data['book_id']);
-            $this->cache->delete('admin_books_list');
             return true;
         }
         return false;
@@ -292,9 +286,6 @@ class Book
         $stmt->bindValue(':id', $id);
         
         if ($stmt->execute()) {
-            // Xóa cache
-            $this->cache->delete('book_detail_' . $id);
-            $this->cache->delete('admin_books_list');
             return true;
         }
         return false;

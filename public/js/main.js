@@ -130,4 +130,30 @@ document.querySelector(".login-form").addEventListener("submit", function (e) {
     alert("Confirm password does not match.");
     e.preventDefault();
   }
-});
+})
+
+// document.addEventListener('DOMContentLoaded', function() {
+//     const modal = document.getElementById('importModal');
+//     const openBtn = document.getElementById('btnOpenImportModal');
+//     const closeBtn = document.querySelector('.btn-close-modal');
+
+//     // Logic Đóng/Mở Modal Import
+//     if (openBtn && modal) {
+//         openBtn.addEventListener('click', function(e) {
+//             e.preventDefault();
+//             modal.classList.add('show');
+//         });
+
+//         if (closeBtn) {
+//             closeBtn.addEventListener('click', function() {
+//                 modal.classList.remove('show');
+//             });
+//         }
+
+//         window.addEventListener('click', function(e) {
+//             if (e.target === modal) {
+//                 modal.classList.remove('show');
+//             }
+//         });
+//     }
+// });

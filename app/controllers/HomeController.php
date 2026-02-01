@@ -4,7 +4,7 @@ class HomeController extends Controller
     public function index()
     {
         $bookModel = $this->model('Book');
-        $categoryModel = $this->model('Categories');
+        $categoryModel = $this->model('Category');
 
         // Giới hạn số sách trong 1 trang
         $limit = 6;

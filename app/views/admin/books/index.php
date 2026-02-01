@@ -5,16 +5,14 @@
         <h1>Book management</h1>
         <div class="page-header right">
             <!-- <a href="<?php //echo URL_ROOT; ?>/admin/export" target="_blank" style="text-decoration: none"> -->
-            <!-- <a> 
-                <button class="btn-export" id="open-btn">
-                    <i class="fa-solid fa-file-csv"></i>
-                    Export table
+                <button type="button" class="btn-export" id="btnOpenImportModal">
+                    <i class="fa-solid fa-file-excel"></i> Import book
                 </button>
-            </a> -->
+            <!-- </a>  -->
             <a href="<?php echo URL_ROOT; ?>/admin/add" style="text-decoration: none;">
                 <button class="btn-add">
                     <i class="fa-solid fa-plus"></i>
-                    Add new book
+                        Add new book
                 </button>
             </a>
         </div>
@@ -92,30 +90,72 @@
     </div>
 </main>
 
-<!-- <div id="exportModal" class="modal-overlay">
-    <div class="modal-content">
+<div id="importModal" class="modal-overlay">
+    <div class="modal-box">
         <div class="modal-header">
+            <h2>Import Books from Excel</h2>
             <button class="btn-close-modal">&times;</button>
         </div>
+        
+        <div class="modal-body">
+            <form action="<?php echo URL_ROOT; ?>/admin/import_books" method="POST" enctype="multipart/form-data">
+                <div style="padding: 25px;">
+                    <p class="input-hint">Select an Excel file (.xlsx) to update inventory:</p>
+                    
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="import_file" accept=".xlsx, .xls" required class="file-input">
+                        <p class="file-hint">Supported formats: .xlsx, .xls</p>
+                    </div>
+
+                    <div class="link-wrapper right-align">
+                        <a href="<?php echo URL_ROOT; ?>/admin/download_template" class="link-primary">
+                            <i class="fa-solid fa-download"></i> Download Template File
+                        </a>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn-success full-width">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Import Data
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div> -->
+</div>
 
-<!-- <script>
-    const exportModal = document.getElementById('exportModal');
-    const openBtn = document.getElementById('open-btn');
-    const closeBtn = document.getElementById('close-btn');
+<script src="<?php echo URL_ROOT; ?>/js/admin.js"></script>
+<script>
+    // Script xử lý Modal Import (Thêm trực tiếp để đảm bảo hoạt động)
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('importModal');
+        const btnOpen = document.getElementById('btnOpenImportModal');
+        const btnClose = document.querySelector('.btn-close-modal');
 
-    // Xử lý nút thoát
-    openBtn.onclick = () => exportModal.style.display = 'flex';
-    closeBtn.onclick = () => exportModal.style.display = 'none';
-    
-    // Thoát ra nếu click ngoài form
-    window.onclick = (e) => {
-        if (e.target == exportModal) exportModal.style.display = 'none';
-    }
+        if (btnOpen && modal) {
+            btnOpen.addEventListener('click', function(e) {
+                e.preventDefault();
+                modal.classList.add('active');
+                modal.style.display = 'flex'; // Đảm bảo hiển thị đè lên CSS mặc định
+            });
+        }
 
-    
-</script> -->
+        if (btnClose && modal) {
+            btnClose.addEventListener('click', function() {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            });
+        }
+
+        // Đóng khi click ra ngoài vùng modal
+        window.addEventListener('click', function(e) {
+            if (e.target == modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
 </body>
 
 </html>

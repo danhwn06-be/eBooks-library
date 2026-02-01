@@ -12,10 +12,6 @@ class User
         $this->cache = new Cache();
     }
 
-    // =========================================================================
-    // 1. COMMON & UTILITIES (CÁC HÀM DÙNG CHUNG)
-    // =========================================================================
-
     // Kiểm tra trùng lặp (Email hoặc Phone)
     public function findUserByField($field, $value)
     {
@@ -43,10 +39,6 @@ class User
 
         return 'MEM' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
-
-    // =========================================================================
-    // 2. AUTHENTICATION (ĐĂNG KÝ & ĐĂNG NHẬP)
-    // =========================================================================
 
     // Đăng nhập bằng email, phone, hoặc username
     public function login($account, $password)
@@ -87,10 +79,6 @@ class User
         }
         return false;
     }
-
-    // =========================================================================
-    // 3. PUBLIC READ & PROFILE (THÔNG TIN NGƯỜI DÙNG)
-    // =========================================================================
 
     public function getUserById($id)
     {
@@ -164,10 +152,6 @@ class User
         }
         return false;
     }
-
-    // =========================================================================
-    // 4. ADMIN USER MANAGEMENT (QUẢN LÝ USER - CRUD)
-    // =========================================================================
 
     public function getAllUsers()
     {

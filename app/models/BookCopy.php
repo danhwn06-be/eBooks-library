@@ -31,7 +31,10 @@ class BookCopy {
         $stmt->bindValue(':status', $data['status']);
         $stmt->bindValue(':quality', $data['condition_note']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
     }
 
     // Lấy thông tin 1 bản sao cụ thể (để sửa)
@@ -52,7 +55,11 @@ class BookCopy {
         $stmt->bindValue(':status', $data['status']);
         $stmt->bindValue(':quality', $data['quality']);
         $stmt->bindValue(':id', $data['copy_id']);
-        return $stmt->execute();
+        
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
     }
 
     // Xóa bản sao
@@ -61,6 +68,10 @@ class BookCopy {
         $sql = "DELETE FROM BookCopies WHERE copy_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':id', $id);
-        return $stmt->execute();
+        
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
     }
 }

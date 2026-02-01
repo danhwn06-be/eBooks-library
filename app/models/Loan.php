@@ -9,10 +9,6 @@ class Loan
         $this->db = Database::getInstance();
     }
 
-    // =========================================================================
-    // CÁC HÀM CHUYỂN TỪ USERS SANG
-    // =========================================================================
-
     // 1. Đếm số sách ĐANG mượn (Reading) - Chưa trả
     public function countReading($userId) {
         $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id AND status = 'Active'";

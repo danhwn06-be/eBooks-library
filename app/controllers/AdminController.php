@@ -1,4 +1,11 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+// use PhpOffice\PhpSpreadsheet\Style\Alignment;
+// use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class AdminController extends Controller
 {
     private $bookModel;
@@ -9,9 +16,9 @@ class AdminController extends Controller
     public function __construct()
     {
         $this->bookModel = $this->model('Book');
-        $this->userModel = $this->model('Users');
-        $this->categoryModel = $this->model('Categories');
-        $this->copyModel = $this->model('BookCopies');
+        $this->userModel = $this->model('User');
+        $this->categoryModel = $this->model('Category');
+        $this->copyModel = $this->model('BookCopy');
     }
 
     // Trang Dashboard quản lý sách
@@ -384,33 +391,114 @@ public function addUser() {
         }
     }
 
-    // Chức năng export CSV (Excel)
-    public function export() {
-        $books = $this->bookModel->getBooksForAdmin();
+    // Tạo và tải xuống file mẫu Excel
+    public function download_template() {
+        // Tạo spreadsheet mới
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        // Thiết lập tên file khi tải về
-        $filename = "book_inventory_" . date('Y-m-d_H-i') . ".csv";
+        // Đặt tiêu đề cột (Khớp với logic import)
+        // Thứ tự: ISBN, Title, Author, Category, Image, Publisher, Publication year, Created at, Content description
+        $headers = ['ISBN', 'Title', 'Author', 'Category ID', 'Image URL', 'Publisher', 'Publication Year', 'Created At', 'Content Description'];
+        $sheet->fromArray($headers, NULL, 'A1');
 
-        // Thiết lập thông báo cho trình duyệt biết đây là file tải về
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename .'"');
+        // Thêm một dòng dữ liệu mẫu để người dùng dễ hiểu
+        $sample = ['9780132350884', 'Clean Code', 'Robert C. Martin', '1', 'https://example.com/cover.jpg', 'Prentice Hall', '2008', date('Y-m-d'), 'A Handbook of Agile Software Craftsmanship'];
+        $sheet->fromArray($sample, NULL, 'A2');
 
-        // Mở luồng output PHP
-        $output = fopen('php://output', 'w');
-
-        // Thêm BOM để Excel đọc được tiếng Việt không bị lỗi font (quan trọng)
-        fputs($output, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
-
-        // Tiêu đề
-        fputcsv($output, ['ISBN', 'Title', 'Author', 'Category', 'Image', 'Publisher', 'Publication year', 'Content description']);
-
-        // Dữ liệu
-        foreach ($books as $book) {
-            fputcsv($output, [$book['isbn'], $book['title'], $book['author'], $book['category_name'], $book['publisher'], $book['publication_year'], $book['description']]);
+        // Tự động điều chỉnh độ rộng cột
+        foreach (range('A', 'I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
-        // Đóng file và dừng chương trình
-        fclose($output);
-        exit();
+        // Thiết lập header để trình duyệt hiểu đây là file Excel tải về
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="template_books.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+public function import_books() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['import_file'])) {
+            $file = $_FILES['import_file']['tmp_name'];
+
+            // Kiểm tra có file tải lên không
+            if (!file_exists($file)) {
+                die("No file uploaded");
+            }
+
+            try {
+                // 1. Load file Excel bằng thư viện
+                $spreadsheet = IOFactory::load($file);
+                $sheet = $spreadsheet->getActiveSheet();
+                $rows = $sheet->toArray(); // Chuyển toàn bộ sheet thành mảng
+
+                // 2. Duyệt qua từng dòng (Bỏ qua dòng đầu tiên là Header)
+                foreach ($rows as $index => $row) {
+                    if ($index === 0) continue; // Bỏ qua header
+
+                    // Cấu trúc file mẫu: 
+                    // [0]ISBN | [1]Title | [2]Author | [3]Category ID | [4]Image URL | [5]Publisher | [6]Year | [7]Created At | [8]Desc
+                    
+                    // Kiểm tra dữ liệu bắt buộc (Title, ISBN)
+                    if (empty($row[0]) || empty($row[1])) continue;
+
+                    // Xử lý ảnh (Cột 4)
+                    $imageName = null;
+                    if (!empty($row[4])) {
+                        $imgInput = trim($row[4]);
+                        // Trường hợp 1: Là đường dẫn URL (http/https) -> Tải về server
+                        if (filter_var($imgInput, FILTER_VALIDATE_URL)) {
+                            $ext = pathinfo(parse_url($imgInput, PHP_URL_PATH), PATHINFO_EXTENSION);
+                            // Chỉ chấp nhận đuôi ảnh hợp lệ
+                            if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
+                                $newFilename = time() . '_' . uniqid() . '.' . $ext;
+                                $savePath = APP_ROOT . '/public/images/books/' . $newFilename;
+                                $fileContent = @file_get_contents($imgInput);
+                                if ($fileContent) {
+                                    file_put_contents($savePath, $fileContent);
+                                    $imageName = $newFilename;
+                                }
+                            }
+                        } else {
+                            // Trường hợp 2: Là tên file (đã upload thủ công vào thư mục images/books/)
+                            $imageName = $imgInput;
+                        }
+                    }
+
+                    $bookData = [
+                        'isbn'             => $row[0],
+                        'title'            => $row[1],
+                        'author'           => $row[2],
+                        'category_id'      => (int)$row[3] ?: 1, // Mặc định là 1 nếu trống
+                        'image_url'        => $imageName,
+                        'publisher'        => $row[5],
+                        'publication_year' => (int)$row[6],
+                        // row[7] Created At (Bỏ qua vì hệ thống tự sinh)
+                        'description'      => $row[8]
+                    ];
+
+                    // 3. Gọi Model để lưu
+                    // Sử dụng try-catch để nếu trùng ISBN thì không chết chương trình
+                    try {
+                        $this->bookModel->addBook($bookData);
+                    } catch (Exception $e) {
+                        // Có thể ghi log lỗi ở đây: "Lỗi dòng $index: " . $e->getMessage();
+                        continue; 
+                    }
+                }
+
+                // Import xong -> Quay về trang danh sách
+                header('Location: ' . URL_ROOT . '/admin/books?status=import_success');
+
+            } catch (Exception $e) {
+                die('Error loading file: ' . $e->getMessage());
+            }
+        } else {
+            header('Location: ' . URL_ROOT . '/admin/books');
+        }
     }
 }

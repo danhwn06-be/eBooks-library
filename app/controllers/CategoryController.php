@@ -18,9 +18,9 @@ class CategoryController extends Controller {
         if ($cat_id) {
             $title = $this->bookModel->getCategoryNameById($cat_id);
             // Lấy tổng số sách trong category
-            $totalBooks = $this->getBookCountByCategory($cat_id);
+            $totalBooks = $this->bookModel->getBookCountByCategoryId($cat_id);
             // Lấy sách phân trang
-            $books = $this->getBooksByCategoryPaginated($cat_id, $limit, $offset);
+            $books = $this->bookModel->getBooksByCategoryIdPaginated($cat_id, $limit, $offset);
         } else {
             // Không có ID: lấy tất cả sách
             $title = "All Categories";
@@ -43,46 +43,4 @@ class CategoryController extends Controller {
         $this->view('category/index', $data);
     }
 
-    // Helper method: đếm sách theo category
-    private function getBookCountByCategory($cat_id) {
-        $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
-        try {
-            $stmt = $this->bookModel->getDb()->getConnection()->prepare($sql);
-            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
-            $stmt->execute();
-            $row = $stmt->fetch();
-            return $row['total'];
-        } catch (PDOException $e) {
-            return 0;
-        }
-    }
-
-    // Helper method: lấy sách theo category có phân trang
-    private function getBooksByCategoryPaginated($cat_id, $limit, $offset) {
-        $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
-                COUNT(bc.copy_id) AS total_copies, 
-                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
-                FROM Books b 
-                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
-                WHERE b.category_id = :cat_id
-                GROUP BY b.book_id
-                ORDER BY b.created_at DESC
-                LIMIT :limit OFFSET :offset";
-        
-        try {
-            $stmt = $this->bookModel->getDb()->getConnection()->prepare($sql);
-            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-
-    // Method để truy cập BookModel nếu cần
-    public function getBookModel() {
-        return $this->bookModel;
-    }
 }
