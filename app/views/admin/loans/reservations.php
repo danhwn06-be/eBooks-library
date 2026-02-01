@@ -1,5 +1,8 @@
 <?php require APP_ROOT . '/app/views/admin/inc/header.php'; ?>
-
+<?php 
+    $activeTab = 'tracking'; 
+    require APP_ROOT . '/app/views/admin/inc/loan_header.php'; 
+?>
 <div class="main-content">
 
     <div class="tab-container">

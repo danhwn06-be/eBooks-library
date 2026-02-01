@@ -552,6 +552,7 @@ public function import_books() {
             $availableBooks = $this->loanModel->getAvailableCopies();
 
             $data = [
+                'stats' => $this->buildLoanStats(),
                 'books' => $availableBooks,
                 'current_date' => date('Y-m-d'),
                 'default_due_date' => date('Y-m-d', strtotime('+14 days')),
@@ -581,6 +582,7 @@ public function import_books() {
         } else {
             // Load giao diện trả sách (GET)
             $data = [
+                'stats' => $this->buildLoanStats(),
                 'current_date' => date('Y-m-d'),
                 'error' => ''
             ];
@@ -617,9 +619,15 @@ public function import_books() {
         $reservationModel = $this->model('Reservation');
 
         $data = [
+            'stats' => $this->buildLoanStats(),
             'reservations' => $reservationModel->getAllReservations()
         ];
 
         $this->view('admin/loans/reservations', $data);
     }
+    private function buildLoanStats()
+    {
+        return $this->loanModel->getLoanStats();
+    }
+
 }
