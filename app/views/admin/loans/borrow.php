@@ -13,7 +13,7 @@
         <a href="<?php echo URL_ROOT; ?>/admin/loans" class="tab-link active">Borrow</a>
         <a href="<?php echo URL_ROOT; ?>/admin/returns" class="tab-link ">Return</a>
         <a href="<?php echo URL_ROOT; ?>/admin/loan_tracking" class="tab-link ">Loan Tracking</a>
-        <a href="#" class="tab-link">Reservations</a>
+        <a href="<?php echo URL_ROOT; ?>/admin/reservations" class="tab-link">Reservations</a>
     </div>
     <div class="tab-line"></div>
 
@@ -73,84 +73,13 @@
             </div>
         </form>
     </div>
-    <div id="reservation-content" style="display: none;">
-            <div class="form-card" style="padding: 0; overflow: hidden; border: 1px solid #dce4ff;">
-                <div class="reservation-wrapper">
-                    <table class="table-reservation">
-                        <thead>
-                            <tr>
-                                <th>Reservation ID</th>
-                                <th>User ID</th>
-                                <th>Book ID</th>
-                                <th>Reservation Date</th>
-                                <th>Status</th>
-                                <th>Note</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if(!empty($data['reservations'])): ?>
-                                <?php foreach($data['reservations'] as $res): ?>
-                                <tr>
-                                    <td>#<?php echo $res->reservation_id; ?></td>
-                                    <td class="font-bold"><?php echo $res->member_code; ?></td>
-                                    <td><?php echo $res->title; ?></td> 
-                                    <td><?php echo date('d/m/Y', strtotime($res->reservation_date)); ?></td>
-                                    <td>
-                                        <?php 
-                                            $c = 'res-waiting';
-                                            if($res->status == 'Cancelled') $c = 'res-cancelled';
-                                            if($res->status == 'Fulfilled') $c = 'res-fulfilled';
-                                        ?>
-                                        <span class="res-badge <?php echo $c; ?>">
-                                            <?php echo $res->status; ?>
-                                        </span>
-                                    </td>
-                                    <td class="url-text">Null</td>
-                                </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr><td colspan="6" class="res-empty">No reservations found</td></tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 <script>
-    const tabs = document.querySelectorAll('.tab-link');
-    const borrowContent = document.getElementById('borrow-content');
-    const reservationContent = document.getElementById('reservation-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
-            // Nếu nhấn vào tab Reservations
-            if (this.textContent.trim() === 'Reservations') {
-                e.preventDefault();
-                
-                // Đổi class active
-                tabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-
-                // Ẩn Form mượn, hiện Bảng đặt chỗ
-                borrowContent.style.display = 'none';
-                reservationContent.style.display = 'block';
-            } 
-            // Nếu nhấn vào tab Borrow
-            else if (this.textContent.trim() === 'Borrow') {
-                // Giữ nguyên link gốc để reset lại trạng thái chuẩn
-                return; 
-            }
-        });
-    });
-
     // Nút Refresh giữ nguyên logic cũ
     document.querySelector('.btn-refresh').addEventListener('click', function(e) {
         e.preventDefault();
         window.location.href = "<?php echo URL_ROOT; ?>/admin/loans";
     });
 </script>
-
 </body>
 </html>
