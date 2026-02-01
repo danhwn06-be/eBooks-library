@@ -108,36 +108,42 @@ class Loan
 
     public function createLoan($data) {
         try {
-            // Bước 1: Lấy thông tin user từ member_code
-            $user = $this->checkMemberExist($data['member_code']);
-            if (!$user) return false; // Không thấy user thì thoát luôn
-
+            // Bắt đầu Transaction để đảm bảo dữ liệu đồng nhất
             $this->conn()->beginTransaction();
 
-            // Bước 2: Insert vào bảng Loans (Sử dụng user_id vừa lấy được)
-            $sql1 = "INSERT INTO Loans (user_id, copy_id, borrow_date, due_date, note, status) 
-                     VALUES (:user_id, :copy_id, :borrow_date, :due_date, :note, 'Active')";
-            
-            $stmt1 = $this->conn()->prepare($sql1);
-            $stmt1->bindValue(':user_id', $user->user_id); // Bây giờ $user đã là object, lấy được ID
-            $stmt1->bindValue(':copy_id', $data['copy_id']);
-            $stmt1->bindValue(':borrow_date', $data['borrow_date']);
-            $stmt1->bindValue(':due_date', $data['due_date']);
-            $stmt1->bindValue(':note', $data['note']);
-            $stmt1->execute();
+            // 1. Tìm user_id dựa trên member_code
+            $sqlUser = "SELECT user_id FROM Users WHERE member_code = :member_code";
+            $stmtUser = $this->conn()->prepare($sqlUser);
+            $stmtUser->bindValue(':member_code', $data['member_code']);
+            $stmtUser->execute();
+            $user = $stmtUser->fetch(PDO::FETCH_OBJ);
 
-            // Bước 3: Cập nhật trạng thái bản sao sách thành 'Borrowed'
-            $sql2 = "UPDATE BookCopies SET status = 'Borrowed' WHERE copy_id = :copy_id";
-            $stmt2 = $this->conn()->prepare($sql2);
-            $stmt2->bindValue(':copy_id', $data['copy_id']);
-            $stmt2->execute();
+            if (!$user) {
+                return "User not found"; // Trả về lỗi nếu member code sai
+            }
 
+            // 2. Chèn dữ liệu vào bảng Loans
+            $sqlLoan = "INSERT INTO Loans (user_id, copy_id, borrow_date, due_date, status, note) 
+                        VALUES (:user_id, :copy_id, :borrow_date, :due_date, 'Active', :note)";
+            $stmtLoan = $this->conn()->prepare($sqlLoan);
+            $stmtLoan->bindValue(':user_id', $user->user_id);
+            $stmtLoan->bindValue(':copy_id', $data['copy_id']);
+            $stmtLoan->bindValue(':borrow_date', $data['borrow_date']);
+            $stmtLoan->bindValue(':due_date', $data['due_date']);
+            $stmtLoan->bindValue(':note', $data['note']);
+            $stmtLoan->execute();
+
+            // 3. Cập nhật trạng thái bản sao sách (BookCopies) thành 'Borrowed'
+            $sqlUpdateCopy = "UPDATE BookCopies SET status = 'Borrowed' WHERE copy_id = :copy_id";
+            $stmtUpdate = $this->conn()->prepare($sqlUpdateCopy);
+            $stmtUpdate->bindValue(':copy_id', $data['copy_id']);
+            $stmtUpdate->execute();
+
+            // Hoàn tất lưu dữ liệu
             $this->conn()->commit();
             return true;
         } catch (PDOException $e) {
-            if ($this->conn()->inTransaction()) {
-                $this->conn()->rollBack();
-            }
+            $this->conn()->rollBack();
             return false;
         }
     }
@@ -182,12 +188,10 @@ class Loan
         }
     }
 
-    public function updateReturn($loan_id, $copy_id, $return_date) {
-        // Lấy kết nối PDO trực tiếp
-        $conn = $this->db->getConnection();
-    
-        try {
-            $conn->beginTransaction();
+
+public function updateReturn($loan_id, $copy_id, $return_date, $note) {
+    try {
+        $this->conn()->beginTransaction();
 
             // Bước 1: Cập nhật phiếu mượn
             $sql1 = "UPDATE Loans SET return_date = :return_date, status = 'Returned' WHERE loan_id = :loan_id";
@@ -195,20 +199,69 @@ class Loan
             $stmt1->bindValue(':return_date', $return_date);
             $stmt1->bindValue(':loan_id', $loan_id);
             $stmt1->execute();
+        // 1. Cập nhật ngày trả, trạng thái và ghi chú (Good/Bad...)
+        $sql1 = "UPDATE Loans 
+                 SET return_date = :return_date, 
+                     status = 'Returned',
+                     note = :note 
+                 WHERE loan_id = :loan_id";
+        $stmt1 = $this->conn()->prepare($sql1);
+        $stmt1->bindValue(':return_date', $return_date);
+        $stmt1->bindValue(':note', $note);
+        $stmt1->bindValue(':loan_id', $loan_id);
+        $stmt1->execute();
 
             // Bước 2: Cập nhật trạng thái sách trong kho
             $sql2 = "UPDATE BookCopies SET status = 'Available' WHERE copy_id = :copy_id";
             $stmt2 = $conn->prepare($sql2);
             $stmt2->bindValue(':copy_id', $copy_id);
             $stmt2->execute();
+        // 2. Cập nhật sách về trạng thái có sẵn
+        $sql2 = "UPDATE BookCopies SET status = 'Available' WHERE copy_id = :copy_id";
+        $stmt2 = $this->conn()->prepare($sql2);
+        $stmt2->bindValue(':copy_id', $copy_id);
+        $stmt2->execute();
 
-            $conn->commit();
-            return true;
-        } catch (Exception $e) {
-            if ($conn->inTransaction()) {
-                $conn->rollBack();
-            }
-            return false;
-        }
+        return $this->conn()->commit();
+    } catch (PDOException $e) {
+        $this->conn()->rollBack();
+        return false;
+    }
+}
+
+    public function getAllLoans() {
+        $sql = "SELECT l.*, u.member_code, b.title, l.copy_id 
+                FROM Loans l
+                JOIN Users u ON l.user_id = u.user_id
+                JOIN BookCopies bc ON l.copy_id = bc.copy_id
+                JOIN Books b ON bc.book_id = b.book_id
+                ORDER BY l.borrow_date DESC";
+        $stmt = $this->conn()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public function getLoanStats() {
+        $stats = ['total' => 0, 'overdue' => 0, 'reservations' => 0];
+        
+        // Tổng số lượt mượn đang Active
+        $sqlTotal = "SELECT COUNT(*) as count FROM Loans WHERE status = 'Active'";
+        $stmt1 = $this->conn()->prepare($sqlTotal);
+        $stmt1->execute();
+        $stats['total'] = $stmt1->fetch(PDO::FETCH_OBJ)->count;
+
+        // Số lượng quá hạn (Due date < Today và chưa trả)
+        $sqlOverdue = "SELECT COUNT(*) as count FROM Loans WHERE status = 'Active' AND due_date < CURDATE()";
+        $stmt2 = $this->conn()->prepare($sqlOverdue);
+        $stmt2->execute();
+        $stats['overdue'] = $stmt2->fetch(PDO::FETCH_OBJ)->count;
+
+        // Số lượng đặt trước
+        $sqlRes = "SELECT COUNT(*) as count FROM Reservations";
+        $stmt3 = $this->conn()->prepare($sqlRes);
+        $stmt3->execute();
+        $stats['reservations'] = $stmt3->fetch(PDO::FETCH_OBJ)->count;
+
+        return $stats;
     }
 }
