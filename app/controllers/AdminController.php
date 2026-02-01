@@ -21,7 +21,6 @@ class AdminController extends Controller
         $this->categoryModel = $this->model('Category');
         $this->copyModel = $this->model('BookCopy');
         $this->loanModel = $this->model('Loan');
-        $this->loanModel = $this->model('Loan');
     }
 
     // Trang Dashboard quản lý sách
