@@ -8,7 +8,7 @@
     <div class="tab-container">
         <a href="<?php echo URL_ROOT; ?>/admin/loans" class="tab-link">Borrow</a>
         <a href="<?php echo URL_ROOT; ?>/admin/returns" class="tab-link active">Return</a>
-        <a href="#" class="tab-link">Loan Tracking</a>
+        <a href="<?php echo URL_ROOT; ?>/admin/loan_tracking" class="tab-link">Loan Tracking</a>
         <a href="#" class="tab-link">Reservations</a>
     </div>
     <div class="tab-line"></div>

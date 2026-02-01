@@ -467,4 +467,22 @@ public function addUser() {
         header('Content-Type: application/json');
         echo json_encode($loans);
     }
+
+    // Trong file AdminController.php
+
+    public function loan_tracking() {
+        // 1. Lấy dữ liệu từ Model
+        $loans = $this->loanModel->getAllLoans();
+        $stats = $this->loanModel->getLoanStats();
+
+        // 2. Chuẩn bị dữ liệu gửi sang View
+        $data = [
+            'loans' => $loans,
+            'stats' => $stats,
+            'page_title' => 'Loan Tracking System'
+        ];
+
+        // 3. Gọi View
+        $this->view('admin/loans/loan_tracking', $data);
+    }
 }
