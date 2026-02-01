@@ -12,6 +12,7 @@ class AdminController extends Controller
     private $userModel;
     private $categoryModel;
     private $copyModel;
+    private $loanModel;
 
     public function __construct()
     {
@@ -19,6 +20,7 @@ class AdminController extends Controller
         $this->userModel = $this->model('User');
         $this->categoryModel = $this->model('Category');
         $this->copyModel = $this->model('BookCopy');
+        $this->loanModel = $this->model('Loan');
     }
 
     // Trang Dashboard quản lý sách
@@ -500,5 +502,93 @@ public function import_books() {
         } else {
             header('Location: ' . URL_ROOT . '/admin/books');
         }
+    }
+
+    public function loans() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'member_code' => trim($_POST['member_code']),
+                'copy_id'     => trim($_POST['copy_id']),
+                'borrow_date' => $_POST['borrow_date'],
+                'due_date'    => $_POST['due_date'],
+                'note'        => trim($_POST['note']),
+                'error'       => ''
+            ];
+
+            // Luôn lấy lại danh sách sách để hiển thị lại form nếu có lỗi
+            $data['books'] = $this->loanModel->getAvailableCopies();
+
+            // 1. Validate Member Code (Chỉnh lại kiểm tra object)
+            $user = $this->loanModel->checkMemberExist($data['member_code']);
+            if (!$user) {
+                $data['error'] = 'Member code does not exist!';
+                $this->view('admin/loans/borrow', $data);
+                return;
+            }
+
+            // 2. Validate Date (Max 30 days)
+            $diff = (strtotime($data['due_date']) - strtotime($data['borrow_date'])) / (60 * 60 * 24);
+            if ($diff > 30 || $diff < 1) {
+                $data['error'] = 'Invalid loan period (1-30 days only)!';
+                $this->view('admin/loans/borrow', $data);
+                return;
+            }
+
+            // 3. Thực hiện lưu
+            if ($this->loanModel->createLoan($data)) {
+                // Thành công -> Chuyển hướng
+                header('Location: ' . URL_ROOT . '/admin/loans?success=true');
+                exit();
+            } else {
+                // Thay vì die, hãy hiện lỗi lên giao diện để admin biết
+                $data['error'] = 'System error: Could not process the loan. Please try again.';
+                $this->view('admin/loans/borrow', $data);
+            }
+
+        } else {
+            // Logic cho phương thức GET (giữ nguyên của bạn)
+            $availableBooks = $this->loanModel->getAvailableCopies();
+            $reservations = $this->loanModel->getReservations();
+            $data = [
+                'books' => $availableBooks,
+                'reservations' => $reservations,
+                'current_date' => date('Y-m-d'),
+                'default_due_date' => date('Y-m-d', strtotime('+14 days')),
+                'max_due_date' => date('Y-m-d', strtotime('+30 days')),
+                'member_code' => '',
+                'note' => '',
+                'error' => ''
+            ];
+            $this->view('admin/loans/borrow', $data);
+        }
+    }
+
+    public function returns() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Xử lý lưu dữ liệu trả sách
+            $loan_id = $_POST['loan_id'];
+            $copy_id = $_POST['copy_id'];
+            $return_date = $_POST['return_date'];
+
+            if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date)) {
+                header('Location: ' . URL_ROOT . '/admin/loans?return_success=true');
+                exit();
+            } else {
+                die("Something went wrong during the return process.");
+            }
+        } else {
+            // Load giao diện trả sách (GET)
+            $data = [
+                'current_date' => date('Y-m-d'),
+                'error' => ''
+            ];
+            $this->view('admin/loans/return', $data);
+        }
+    }
+
+    public function getMemberLoans($code) {
+        $loans = $this->loanModel->getActiveLoansByMember($code);
+        header('Content-Type: application/json');
+        echo json_encode($loans);
     }
 }

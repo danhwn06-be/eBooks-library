@@ -105,4 +105,24 @@ class BookController extends Controller
     public function filter() {
         
     }
+    public function reserve($bookId)
+{
+    // Chưa login → login trước
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: " . URL_ROOT . "/auth/login");
+        exit;
+    }
+
+    $bookModel = $this->model("BookModel");
+    $book = $bookModel->getBookById($bookId);
+
+    if (!$book) {
+        header("Location: " . URL_ROOT . "/book");
+        exit;
+    }
+
+    $this->view("reservation/confirm", [
+        "book" => $book
+    ]);
+}
 }
