@@ -1,6 +1,6 @@
 <?php
 
-class ReservationModel
+class Reservation
 {
     private $db;
 
