@@ -148,21 +148,6 @@ class Loan
         }
     }
 
-    public function getReservations() {
-        $sql = "SELECT r.*, u.member_code, b.title 
-                FROM Reservations r
-                JOIN Users u ON r.user_id = u.user_id
-                JOIN Books b ON r.book_id = b.book_id
-                ORDER BY r.reservation_date DESC";
-        
-        try {
-            $stmt = $this->conn()->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
     public function getActiveLoansByMember($member_code) {
         // Lấy kết nối PDO trực tiếp từ Singleton Database
         $conn = $this->db->getConnection();
@@ -203,12 +188,7 @@ class Loan
         }
     }
 
-    public function updateReturn($loan_id, $copy_id, $return_date) {
-        // Lấy kết nối PDO trực tiếp
-        $conn = $this->db->getConnection();
-    
-        try {
-            $conn->beginTransaction();
+
 public function updateReturn($loan_id, $copy_id, $return_date, $note) {
     try {
         $this->conn()->beginTransaction();
@@ -242,15 +222,6 @@ public function updateReturn($loan_id, $copy_id, $return_date, $note) {
         $stmt2->bindValue(':copy_id', $copy_id);
         $stmt2->execute();
 
-            $conn->commit();
-            return true;
-        } catch (Exception $e) {
-            if ($conn->inTransaction()) {
-                $conn->rollBack();
-            }
-            return false;
-        }
-    }
         return $this->conn()->commit();
     } catch (PDOException $e) {
         $this->conn()->rollBack();
