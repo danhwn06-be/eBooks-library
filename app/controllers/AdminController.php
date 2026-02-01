@@ -1,15 +1,24 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+// use PhpOffice\PhpSpreadsheet\Style\Alignment;
+// use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class AdminController extends Controller
 {
     private $bookModel;
     private $userModel;
-    private $loanModel;
+    private $categoryModel;
+    private $copyModel;
 
     public function __construct()
     {
-        $this->bookModel = $this->model('BookModel');
+        $this->bookModel = $this->model('Book');
         $this->userModel = $this->model('User');
-        $this->loanModel = $this->model('LoanModel');
+        $this->categoryModel = $this->model('Category');
+        $this->copyModel = $this->model('BookCopy');
     }
 
     // Trang Dashboard quản lý sách
@@ -27,36 +36,10 @@ class AdminController extends Controller
         $this->view('admin/books/index', $data);
     }
 
-    // Trang BookCopies của từng quyển sách
-    public function copies($id = null)
-    {
-        if ($id == null) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $book = $this->bookModel->getBookById($id);
-        $copies = $this->bookModel->getCopiesByBookId($id);
-
-        // Nếu sách không tồn tại
-        if (!$book) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $data = [
-            'book' => $book,
-            'copies' => $copies
-        ];
-
-        // Gọi view
-        $this->view('admin/books/copies', $data);
-    }
-
     public function add()
     {
         // Cần lấy danh mục để hiện trong thẻ <select>
-        $categories = $this->bookModel->getAllCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         $data = [
             'categories' => $categories
@@ -99,7 +82,7 @@ class AdminController extends Controller
     public function edit($id)
     {
         $book = $this->bookModel->getBookById($id);
-        $categories = $this->bookModel->getCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         if (!$book) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -143,6 +126,13 @@ class AdminController extends Controller
     // URL: /admin/delete/5
     public function delete($id)
     {
+        // Kiểm tra xem sách có bản sao không (Sử dụng CopyModel)
+        $copies = $this->copyModel->getCopiesByBookId($id);
+        if (count($copies) > 0) {
+            echo "<script>alert('Cannot delete book. It has copies in the system.'); window.location.href='" . URL_ROOT . "/admin/books';</script>";
+            return;
+        }
+
         if ($this->bookModel->deleteBook($id)) {
             header('Location: ' . URL_ROOT . '/admin/books');
         } else {
@@ -174,6 +164,32 @@ class AdminController extends Controller
     }
 
     // COPIES
+    // Trang BookCopies của từng quyển sách
+    public function copies($id = null)
+    {
+        if ($id == null) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $book = $this->bookModel->getBookById($id);
+        $copies = $this->copyModel->getCopiesByBookId($id);
+
+        // Nếu sách không tồn tại
+        if (!$book) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $data = [
+            'book' => $book,
+            'copies' => $copies
+        ];
+
+        // Gọi view
+        $this->view('admin/books/copies', $data);
+    }
+
     // 1. Giao diện Thêm Copy (GET)
     public function add_copy($book_id = null) {
         if (!$book_id) header('Location: ' . URL_ROOT . '/admin/books');
@@ -198,7 +214,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            if ($this->bookModel->addCopy($data)) {
+            if ($this->copyModel->addCopy($data)) {
                 // Quay lại trang danh sách copy của cuốn sách đó
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $data['book_id']);
             } else {
@@ -209,7 +225,7 @@ class AdminController extends Controller
 
     // 3. Giao diện Sửa Copy (GET)
     public function edit_copy($copy_id) {
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         
         if (!$copy) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -238,8 +254,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            // Lưu ý: UpdateCopy đã có sẵn trong BookModel cũ của bạn, nếu chưa thì thêm vào
-            if ($this->bookModel->updateCopy($data)) {
+            if ($this->copyModel->updateCopy($data)) {
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
             } else {
                 die('Error updating copy');
@@ -250,10 +265,10 @@ class AdminController extends Controller
     // 5. Xóa Copy
     public function delete_copy($copy_id) {
         // Lấy thông tin copy trước để biết book_id mà quay về
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         $book_id = $copy['book_id'];
 
-        if ($this->bookModel->deleteCopy($copy_id)) {
+        if ($this->copyModel->deleteCopy($copy_id)) {
             header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
         } else {
             die('Cannot delete this copy (Maybe borrowed?)');
@@ -290,7 +305,7 @@ public function addUser() {
             // Validation (Giữ nguyên)
             if (empty($data['email'])) { $data['email_err'] = 'Please enter email'; }
             else {
-                if ($this->userModel->findUserByEmail($data['email'])) {
+                if ($this->userModel->findUserByField('email', $data['email'])) {
                     $data['email_err'] = 'Email is already taken';
                 }
             }
@@ -376,66 +391,5 @@ public function addUser() {
         }
     }
 
-    public function index() {
-        $this->books(); // Mặc định vào trang books nếu không có tham số
-    }
-
-public function loans() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $data = [
-                'member_code' => trim($_POST['member_code']),
-                'copy_id'     => trim($_POST['copy_id']),
-                'borrow_date' => $_POST['borrow_date'],
-                'due_date'    => $_POST['due_date'],
-                'note'        => trim($_POST['note']),
-                'error'       => ''
-            ];
-
-            // Luôn lấy lại danh sách sách để hiển thị lại form nếu có lỗi
-            $data['books'] = $this->loanModel->getAvailableCopies();
-
-            // 1. Validate Member Code (Chỉnh lại kiểm tra object)
-            $user = $this->loanModel->checkMemberExist($data['member_code']);
-            if (!$user) {
-                $data['error'] = 'Member code does not exist!';
-                $this->view('admin/loans/borrow', $data);
-                return;
-            }
-
-            // 2. Validate Date (Max 30 days)
-            $diff = (strtotime($data['due_date']) - strtotime($data['borrow_date'])) / (60 * 60 * 24);
-            if ($diff > 30 || $diff < 1) {
-                $data['error'] = 'Invalid loan period (1-30 days only)!';
-                $this->view('admin/loans/borrow', $data);
-                return;
-            }
-
-            // 3. Thực hiện lưu
-            if ($this->loanModel->createLoan($data)) {
-                // Thành công -> Chuyển hướng
-                header('Location: ' . URL_ROOT . '/admin/loans?success=true');
-                exit();
-            } else {
-                // Thay vì die, hãy hiện lỗi lên giao diện để admin biết
-                $data['error'] = 'System error: Could not process the loan. Please try again.';
-                $this->view('admin/loans/borrow', $data);
-            }
-
-        } else {
-            // Logic cho phương thức GET (giữ nguyên của bạn)
-            $availableBooks = $this->loanModel->getAvailableCopies();
-            $reservations = $this->loanModel->getReservations();
-            $data = [
-                'books' => $availableBooks,
-                'reservations' => $reservations,
-                'current_date' => date('Y-m-d'),
-                'default_due_date' => date('Y-m-d', strtotime('+14 days')),
-                'max_due_date' => date('Y-m-d', strtotime('+30 days')),
-                'member_code' => '',
-                'note' => '',
-                'error' => ''
-            ];
-            $this->view('admin/loans/borrow', $data);
-        }
-    }
+    
 }
