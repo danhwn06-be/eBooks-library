@@ -7,7 +7,7 @@ class ReservationController extends Controller
 
     public function __construct()
     {
-        $this->reservationModel = $this->model("ReservationModel");
+        $this->reservationModel = $this->model("reservation");
         $this->userModel = $this->model("User");
     }
 
