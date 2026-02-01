@@ -49,7 +49,7 @@ class LoanModel
         }
     }
 
-public function getAvailableCopies() {
+    public function getAvailableCopies() {
         $sql = "SELECT bc.copy_id, b.title, b.book_id 
                 FROM BookCopies bc 
                 JOIN Books b ON bc.book_id = b.book_id 
@@ -59,7 +59,6 @@ public function getAvailableCopies() {
         return $stmt->fetchAll(PDO::FETCH_OBJ); 
     }
 
-    // SỬA LẠI: Trả về Object User để lấy được user_id
     public function checkMemberExist($member_code) {
         $sql = "SELECT user_id FROM Users WHERE member_code = :code";
         $stmt = $this->conn()->prepare($sql);
@@ -105,19 +104,73 @@ public function getAvailableCopies() {
         }
     }
 
-public function getReservations() {
-    $sql = "SELECT r.*, u.member_code, b.title 
-            FROM Reservations r
-            JOIN Users u ON r.user_id = u.user_id
-            JOIN Books b ON r.book_id = b.book_id
-            ORDER BY r.reservation_date DESC";
+    public function getActiveLoansByMember($member_code) {
+        // Lấy kết nối PDO trực tiếp từ Singleton Database
+        $conn = $this->db->getConnection();
     
-    try {
-        $stmt = $this->conn()->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
-    } catch (PDOException $e) {
-        return [];
+        $sql = "SELECT l.loan_id, bc.copy_id, b.title, l.borrow_date, l.due_date
+                FROM Loans l
+                JOIN BookCopies bc ON l.copy_id = bc.copy_id
+                JOIN Books b ON bc.book_id = b.book_id
+               JOIN Users u ON l.user_id = u.user_id
+               WHERE u.member_code = :member_code
+                  AND l.return_date IS NULL";
+              
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(':member_code', $member_code);
+            $stmt->execute();
+            // Trả về Fetch Object để khớp với code View hiện tại
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
     }
-}
+
+    public function getReservations() {
+        $conn = $this->db->getConnection();
+        $sql = "SELECT r.*, u.member_code, b.title 
+                FROM Reservations r
+                JOIN Users u ON r.user_id = u.user_id
+                JOIN Books b ON r.book_id = b.book_id
+                ORDER BY r.reservation_date DESC";
+        
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    public function updateReturn($loan_id, $copy_id, $return_date) {
+        // Lấy kết nối PDO trực tiếp
+        $conn = $this->db->getConnection();
+    
+        try {
+            $conn->beginTransaction();
+
+            // Bước 1: Cập nhật phiếu mượn
+            $sql1 = "UPDATE Loans SET return_date = :return_date, status = 'Returned' WHERE loan_id = :loan_id";
+            $stmt1 = $conn->prepare($sql1);
+            $stmt1->bindValue(':return_date', $return_date);
+            $stmt1->bindValue(':loan_id', $loan_id);
+            $stmt1->execute();
+
+            // Bước 2: Cập nhật trạng thái sách trong kho
+            $sql2 = "UPDATE BookCopies SET status = 'Available' WHERE copy_id = :copy_id";
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bindValue(':copy_id', $copy_id);
+            $stmt2->execute();
+
+            $conn->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
+            }
+            return false;
+        }
+    }
 }
