@@ -1,2 +1,5 @@
 /vendor
 .env
+
+# Bỏ cache
+app/cache/

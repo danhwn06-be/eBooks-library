@@ -63,7 +63,6 @@
 </div>
 
 <script>
-// Giữ nguyên logic JS của bạn vì nó đang hoạt động tốt
 document.getElementById('member_code').addEventListener('change', function() {
     const code = this.value.trim();
     const loanSelect = document.getElementById('loan_select');
@@ -78,9 +77,15 @@ document.getElementById('member_code').addEventListener('change', function() {
             
             if (data.length > 0) {
                 data.forEach(loan => {
-                    loanSelect.innerHTML += `<option value="${loan.loan_id}" data-copy="${loan.copy_id}" data-due="${loan.due_date}">
-                        ${loan.title} (ID: ${loan.copy_id})
-                    </option>`;
+                    // Cắt chuỗi ngày tháng để loại bỏ giờ (chỉ lấy 10 ký tự đầu: YYYY-MM-DD)
+                    // Ví dụ: "2026-02-11 14:00:00" -> "2026-02-11"
+                    let safeDate = loan.due_date ? loan.due_date.substring(0, 10) : '';
+
+                    loanSelect.innerHTML += `<option value="${loan.loan_id}" 
+                                                data-copy="${loan.copy_id}" 
+                                                data-due="${safeDate}">
+                                                ${loan.title} (ID: ${loan.copy_id})
+                                             </option>`;
                 });
                 loanSelect.disabled = false;
                 msg.innerText = `Found ${data.length} active loan(s).`;
@@ -89,18 +94,28 @@ document.getElementById('member_code').addEventListener('change', function() {
                 loanSelect.disabled = true;
                 msg.innerText = "No active loans found for this member!";
                 msg.style.color = "red";
+                // Reset các ô input nếu không tìm thấy
+                document.getElementById('due_date_display').value = "";
+                document.getElementById('btn_submit').disabled = true;
             }
-        });
+        })
+        .catch(err => console.error("Error fetching loans:", err));
 });
 
 document.getElementById('loan_select').addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
+    
     if (selectedOption.value !== "") {
-        document.getElementById('due_date_display').value = selectedOption.getAttribute('data-due');
+        const dueDate = selectedOption.getAttribute('data-due');
+        
+        console.log("Selected Due Date:", dueDate);
+
+        document.getElementById('due_date_display').value = dueDate;
         document.getElementById('copy_id').value = selectedOption.getAttribute('data-copy');
         document.getElementById('btn_submit').disabled = false;
     } else {
         document.getElementById('due_date_display').value = "";
+        document.getElementById('copy_id').value = "";
         document.getElementById('btn_submit').disabled = true;
     }
 });
