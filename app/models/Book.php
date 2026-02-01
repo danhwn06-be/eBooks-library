@@ -3,15 +3,22 @@
 class Book
 {
     private $db;
+    private $cache;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
+        require_once APP_ROOT . '/app/core/Cache.php';
+        $this->cache = new Cache();
     }
 
     // Đếm tổng số sách (để tính số trang)
     public function getTotalBookCount()
     {
+        $cacheKey = 'total_book_count';
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) return $cachedData;
+
         $sql = "SELECT COUNT(*) AS total
             FROM Books";
         try {
@@ -19,6 +26,8 @@ class Book
             $stmt->execute();
             $row = $stmt->fetch();
             $total = $row['total'];
+            
+            $this->cache->set($cacheKey, $total, 3600);
             return $total;
         } catch (PDOException $e) {
             return [];
@@ -57,6 +66,9 @@ class Book
     // Lấy chi tiết 1 cuốn sách theo ID
     public function getBookById($id)
     {
+        $cacheKey = 'book_detail_' . $id;
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) return $cachedData;
 
         $sql = "SELECT 
                 b.*,
@@ -74,6 +86,8 @@ class Book
             $stmt->bindValue(':id', $id);
             $stmt->execute();
             $result = $stmt->fetch();
+            
+            if ($result) $this->cache->set($cacheKey, $result, 86400);
             return $result;
         } catch (PDOException) {
             return false;
@@ -163,6 +177,10 @@ class Book
     // Đếm số sách trong 1 danh mục
     public function getBookCountByCategoryId($cat_id)
     {
+        $cacheKey = 'cat_count_' . $cat_id;
+        $cached = $this->cache->get($cacheKey);
+        if ($cached !== false) return $cached;
+
         $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
         try {
             $stmt = $this->db->getConnection()->prepare($sql);
@@ -170,6 +188,7 @@ class Book
             $stmt->execute();
             $row = $stmt->fetch();
             $total = $row['total'];
+            $this->cache->set($cacheKey, $total, 3600);
             return $total;
         } catch (PDOException $e) {
             return 0;
@@ -204,6 +223,10 @@ class Book
     // Lấy sách để hiển thị cho dashboard
     public function getBooksForAdmin()
     {
+        $cacheKey = 'admin_books_list';
+        $cachedData = $this->cache->get($cacheKey);
+        if ($cachedData !== false) return $cachedData;
+
         $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
                 FROM Books b
                 LEFT JOIN Categories c ON b.category_id = c.category_id
@@ -213,6 +236,7 @@ class Book
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
+        $this->cache->set($cacheKey, $result, 3600);
         return $result;
     }
 
@@ -233,6 +257,9 @@ class Book
         $stmt->bindValue(':image', $data['image_url']); // Lưu tên file ảnh
 
         if ($stmt->execute()) {
+            $this->cache->delete('admin_books_list');
+            $this->cache->delete('total_book_count');
+            $this->cache->delete('cat_count_' . $data['category_id']);
             return $this->db->getConnection()->lastInsertId();
         }
         return false;
@@ -241,6 +268,10 @@ class Book
     // Cập nhật sách
     public function updateBook($data)
     {
+        // Lấy thông tin cũ để xử lý cache category nếu có thay đổi
+        $oldBook = $this->getBookById($data['book_id']); // Lưu ý: hàm này giờ đã có cache, nên rất nhanh
+        $oldCatId = $oldBook ? $oldBook['category_id'] : 0;
+
         // Nếu người dùng không upload ảnh mới ($data['image_url'] rỗng), ta không update cột image_url
         if (empty($data['image_url'])) {
             $sql = "UPDATE Books SET 
@@ -273,6 +304,13 @@ class Book
         }
 
         if ($stmt->execute()) {
+            $this->cache->delete('book_detail_' . $data['book_id']);
+            $this->cache->delete('admin_books_list');
+            
+            if ($oldCatId) $this->cache->delete('cat_count_' . $oldCatId);
+            if ($data['category_id'] && $data['category_id'] != $oldCatId) {
+                $this->cache->delete('cat_count_' . $data['category_id']);
+            }
             return true;
         }
         return false;
@@ -281,11 +319,18 @@ class Book
     // Xóa sách
     public function deleteBook($id)
     {
+        $book = $this->getBookById($id);
+        $catId = $book['category_id'] ?? 0;
+
         $sql = "DELETE FROM Books WHERE book_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':id', $id);
         
         if ($stmt->execute()) {
+            $this->cache->delete('book_detail_' . $id);
+            $this->cache->delete('admin_books_list');
+            $this->cache->delete('total_book_count');
+            if ($catId) $this->cache->delete('cat_count_' . $catId);
             return true;
         }
         return false;

@@ -1,10 +1,13 @@
 <?php
 class BookCopy {
     private $db;
+    private $cache;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
+        require_once APP_ROOT . '/app/core/Cache.php';
+        $this->cache = new Cache();
     }
 
     // Lấy danh sách các bản sao của sách đó
@@ -32,6 +35,8 @@ class BookCopy {
         $stmt->bindValue(':quality', $data['condition_note']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
 
         if ($stmt->execute()) {
+            $this->cache->delete('book_detail_' . $data['book_id']);
+            $this->cache->delete('admin_books_list');
             return true;
         }
         return false;
@@ -50,6 +55,8 @@ class BookCopy {
     // Cập nhật bản sao
     public function updateCopy($data)
     {
+        $oldCopy = $this->getCopyById($data['copy_id']);
+
         $sql = "UPDATE BookCopies SET status = :status, condition_note = :quality WHERE copy_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':status', $data['status']);
@@ -57,6 +64,8 @@ class BookCopy {
         $stmt->bindValue(':id', $data['copy_id']);
         
         if ($stmt->execute()) {
+            if ($oldCopy) $this->cache->delete('book_detail_' . $oldCopy['book_id']);
+            $this->cache->delete('admin_books_list');
             return true;
         }
         return false;
@@ -65,11 +74,15 @@ class BookCopy {
     // Xóa bản sao
     public function deleteCopy($id)
     {
+        $oldCopy = $this->getCopyById($id);
+
         $sql = "DELETE FROM BookCopies WHERE copy_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':id', $id);
         
         if ($stmt->execute()) {
+            if ($oldCopy) $this->cache->delete('book_detail_' . $oldCopy['book_id']);
+            $this->cache->delete('admin_books_list');
             return true;
         }
         return false;
