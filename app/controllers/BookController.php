@@ -109,15 +109,36 @@ class BookController extends Controller
 {
     // Chưa login → login trước
     if (!isset($_SESSION['user_id'])) {
-        header("Location: " . URL_ROOT . "/auth/login");
+        header("Location: " . URL_ROOT . "/users/login");
         exit;
     }
 
-    $bookModel = $this->model("BookModel");
-    $book = $bookModel->getBookById($bookId);
+    // Sử dụng model đã load sẵn trong __construct
+    $book = $this->bookModel->getBookById($bookId);
 
     if (!$book) {
         header("Location: " . URL_ROOT . "/book");
+        exit;
+    }
+
+    // Fix lỗi Deprecated: htmlspecialchars(): Passing null
+    // Chuyển đổi các giá trị null thành chuỗi rỗng để tránh lỗi khi hiển thị
+    if (is_array($book)) {
+        foreach ($book as $key => $value) {
+            if ($value === null) {
+                $book[$key] = '';
+            }
+        }
+    }
+
+    // Xử lý khi người dùng xác nhận đặt sách (POST)
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $reservationModel = $this->model('Reservation');
+        if ($reservationModel->createReservation($_SESSION['user_id'], $bookId)) {
+            header("Location: " . URL_ROOT . "/users/profile?status=reserved");
+        } else {
+            header("Location: " . URL_ROOT . "/book/detail/$bookId?error=failed");
+        }
         exit;
     }
 

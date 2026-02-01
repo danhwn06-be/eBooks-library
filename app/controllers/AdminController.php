@@ -516,6 +516,9 @@ public function import_books() {
             header('Location: ' . URL_ROOT . '/admin/books');
         }
     }
+    public function index() {
+        $this->books(); // Mặc định vào trang books nếu không có tham số
+    }
 
     public function loans() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -559,19 +562,28 @@ public function import_books() {
             }
 
         } else {
-            // Logic cho phương thức GET (giữ nguyên của bạn)
             $availableBooks = $this->loanModel->getAvailableCopies();
-            $reservations = $this->loanModel->getReservations();
+
+            // Xử lý thông báo thành công từ URL (GET)
+            $successMsg = '';
+            if (isset($_GET['success'])) {
+                $successMsg = 'Loan recorded successfully!';
+            } elseif (isset($_GET['return_success'])) {
+                $successMsg = 'Book returned successfully!';
+            }
+
             $data = [
+                'stats' => $this->buildLoanStats(),
                 'books' => $availableBooks,
-                'reservations' => $reservations,
                 'current_date' => date('Y-m-d'),
                 'default_due_date' => date('Y-m-d', strtotime('+14 days')),
                 'max_due_date' => date('Y-m-d', strtotime('+30 days')),
                 'member_code' => '',
                 'note' => '',
-                'error' => ''
+                'error' => '',
+                'success' => $successMsg
             ];
+
             $this->view('admin/loans/borrow', $data);
         }
     }
@@ -582,8 +594,9 @@ public function import_books() {
             $loan_id = $_POST['loan_id'];
             $copy_id = $_POST['copy_id'];
             $return_date = $_POST['return_date'];
+            $note = trim($_POST['note'] ?? '');
 
-            if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date)) {
+            if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date, $note)) {
                 header('Location: ' . URL_ROOT . '/admin/loans?return_success=true');
                 exit();
             } else {
@@ -592,6 +605,7 @@ public function import_books() {
         } else {
             // Load giao diện trả sách (GET)
             $data = [
+                'stats' => $this->buildLoanStats(),
                 'current_date' => date('Y-m-d'),
                 'error' => ''
             ];
@@ -604,4 +618,39 @@ public function import_books() {
         header('Content-Type: application/json');
         echo json_encode($loans);
     }
+
+    // Trong file AdminController.php
+
+    public function loan_tracking() {
+        // 1. Lấy dữ liệu từ Model
+        $loans = $this->loanModel->getAllLoans();
+        $stats = $this->loanModel->getLoanStats();
+
+        // 2. Chuẩn bị dữ liệu gửi sang View
+        $data = [
+            'loans' => $loans,
+            'stats' => $stats,
+            'page_title' => 'Loan Tracking System'
+        ];
+
+        // 3. Gọi View
+        $this->view('admin/loans/loan_tracking', $data);
+    }
+    public function reservations()
+    {
+        // Load model Reservation
+        $reservationModel = $this->model('Reservation');
+
+        $data = [
+            'stats' => $this->buildLoanStats(),
+            'reservations' => $reservationModel->getAllReservations()
+        ];
+
+        $this->view('admin/loans/reservations', $data);
+    }
+    private function buildLoanStats()
+    {
+        return $this->loanModel->getLoanStats();
+    }
+
 }

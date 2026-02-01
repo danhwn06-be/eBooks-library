@@ -124,15 +124,14 @@
 
 <div id="importModal" class="modal-overlay">
     <div class="modal-box">
-        <div class="modal-he
-        ader">
+        <div class="modal-header">
             <h2>Import Books from Excel</h2>
             <button class="btn-close-modal">&times;</button>
         </div>
 
         <div class="modal-body">
             <form action="<?php echo URL_ROOT; ?>/admin/import_books" method="POST" enctype="multipart/form-data">
-                <div style="padding: 25px;">
+                <div style="padding: 15px 25px;">
                     <p class="input-hint">Select an Excel file (.xlsx) to update inventory:</p>
 
                     <div class="file-upload-wrapper">

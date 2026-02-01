@@ -381,7 +381,7 @@ td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
 }
@@ -665,13 +665,9 @@ td {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+.modal-header h2 {
+    margin: 0;
+    line-height: 1;
 }
 
 .btn-close-modal {
@@ -680,6 +676,10 @@ td {
     font-size: 28px;
     color: #aaa;
     cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
 }
 
 .btn-close-modal:hover {
@@ -702,7 +702,6 @@ td {
     background-color: #27ae60;
 }
 /* End of users/edit.php */
-
 /* Layout chung cho trang Loan */
 :root {
     --primary-blue: #4361ee;
@@ -882,4 +881,103 @@ body { background-color: white; }
     text-align: center;
     padding: 40px !important;
     color: #94a3b8;
+}
+
+/* Layout tổng cho trang Loans */
+.container-admin { padding: 20px; background: #f8f9fa; }
+
+/* Khối thống kê trên cùng */
+.stats-row { justify-content: center; gap: 15px; margin-bottom: 20px; display: flex; }
+.stat-box { 
+    flex: 1; background: white; padding: 20px; border-radius: 12px;
+    display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.stat-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; }
+.stat-icon.blue { background: #3b44cc; }
+.stat-icon.orange { background: #ff9f43; }
+.stat-icon.black { background: #2c3e50; }
+.stat-info h3 { font-size: 1.2rem; margin: 0; }
+.stat-info p { font-size: 0.75rem; margin: 0; }
+
+/* Lọc trạng thái trong bảng */
+th select#statusFilter.form-input {
+    margin: 0;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    font-weight: 500;
+}
+
+th select#statusFilter.form-input:hover {
+    border-color: #3b44cc;
+}
+
+/* Container bao quanh để bo góc chuẩn */
+.loan_tracking-section {
+    background: #fff;
+    border-radius: 15px !important; /* Bo góc lớn cho bảng */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Đổ bóng nhẹ */
+    overflow-x: auto; /* Cho phép cuộn ngang thay vì ẩn nội dung */
+    border: 1px solid #eef2f7;
+    /* Phá vỡ giới hạn chiều rộng của container cha để mở rộng ra toàn màn hình */
+    width: 98vw;
+    position: relative;
+    left: 50%;
+    margin-left: -49vw;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.loan_tracking-table {
+    width: 100%;
+    border-collapse: separate !important; /* Bắt buộc để bo góc td/th */
+    border-spacing: 0;
+    min-width: max-content; /* Bảng sẽ tự mở rộng theo nội dung, không bị ép nhỏ */
+}
+
+.loan_tracking-table thead tr {
+    background-color: #5d69f1;
+    color: white;
+}
+
+.loan_tracking-table th {
+    padding: 15px;
+    font-weight: 600;
+    text-align: left;
+    border: none;
+}
+
+.loan_tracking-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f4f8;
+    white-space: nowrap; /* Giữ nội dung thẳng hàng, không xuống dòng */
+}
+
+/* Bo góc cho dòng cuối cùng */
+.loan_tracking-table tr:last-child td:first-child {
+    border-bottom-left-radius: 15px;
+}
+.loan_tracking-table tr:last-child td:last-child {
+    border-bottom-right-radius: 15px;
+}
+
+/* Badge trạng thái bo tròn (Pill style) */
+.res-badge {
+    padding: 4px 12px;
+    border-radius: 20px !important; /* Bo tròn hoàn toàn */
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-block;
+    min-width: 85px;
+    text-align: center;
+}
+/* Triệt tiêu các khoảng trống thừa của select để nó đạt kích thước nhỏ nhất */
+#statusFilter {
+    appearance: none; /* Bỏ giao diện mặc định của hệ điều hành */
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px top 50%;
+    background-size: 8px auto;
+    padding-right: 15px !important; /* Chừa chỗ cho mũi tên nhỏ */
 }

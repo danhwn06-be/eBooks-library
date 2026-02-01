@@ -1,5 +1,8 @@
 <?php require APP_ROOT . '/app/views/admin/inc/header.php'; ?>
-
+<?php 
+    $activeTab = 'tracking'; 
+    require APP_ROOT . '/app/views/admin/inc/loan_header.php'; 
+?>
 <div class="main-content">
     <?php if(isset($_GET['return_success'])): ?>
         <div class="alert alert-success">Book returned successfully!</div>
@@ -8,8 +11,8 @@
     <div class="tab-container">
         <a href="<?php echo URL_ROOT; ?>/admin/loans" class="tab-link">Borrow</a>
         <a href="<?php echo URL_ROOT; ?>/admin/returns" class="tab-link active">Return</a>
-        <a href="#" class="tab-link">Loan Tracking</a>
-        <a href="#" class="tab-link">Reservations</a>
+        <a href="<?php echo URL_ROOT; ?>/admin/loan_tracking" class="tab-link">Loan Tracking</a>
+        <a href="<?php echo URL_ROOT; ?>/admin/reservations" class="tab-link">Reservations</a>
     </div>
     <div class="tab-line"></div>
 

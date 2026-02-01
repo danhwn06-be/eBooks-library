@@ -7,7 +7,7 @@ class ReservationController extends Controller
 
     public function __construct()
     {
-        $this->reservationModel = $this->model("ReservationModel");
+        $this->reservationModel = $this->model("reservation");
         $this->userModel = $this->model("User");
     }
 
@@ -23,7 +23,7 @@ class ReservationController extends Controller
         $user = $this->userModel->getUserById($_SESSION['user_id']);
 
         // book đã có sẵn theo logic route
-        $book = $this->model("BookModel")->getBookById($bookId);
+        $book = $this->model("Book")->getBookById($bookId);
 
         $data = [
             'user' => $user,
