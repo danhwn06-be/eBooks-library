@@ -12,6 +12,7 @@ class AdminController extends Controller
     private $userModel;
     private $categoryModel;
     private $copyModel;
+    private $loanModel;
 
     public function __construct()
     {
@@ -19,6 +20,7 @@ class AdminController extends Controller
         $this->userModel = $this->model('User');
         $this->categoryModel = $this->model('Category');
         $this->copyModel = $this->model('BookCopy');
+        $this->loanModel = $this->model('Loan');
     }
 
     // Trang Dashboard quản lý sách
