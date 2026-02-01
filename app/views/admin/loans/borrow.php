@@ -32,8 +32,8 @@
 
                     <div class="form-group">
                         <label class="form-label">Borrow Date</label>
-                        <input type="date" name="borrow_date" class="form-input" 
-                               value="<?php echo $data['current_date']; ?>" readonly>
+                        <input type="date" name="borrow_date" class="form-input"
+                               value="<?php echo isset($data['borrow_date']) ? $data['borrow_date'] : ($data['current_date'] ?? date('Y-m-d')); ?>" readonly>
                     </div>
                 </div>
 
@@ -53,10 +53,15 @@
 
                     <div class="form-group">
                         <label class="form-label">Due Date</label>
+                        <?php
+                            $borrowDate = isset($data['borrow_date']) ? $data['borrow_date'] : ($data['current_date'] ?? date('Y-m-d'));
+                            $computedMax = date('Y-m-d', strtotime($borrowDate . ' +14 days'));
+                            $dueValue = isset($data['due_date']) ? $data['due_date'] : ($data['default_due_date'] ?? $computedMax);
+                        ?>
                         <input type="date" name="due_date" class="form-input"
-                               value="<?php echo $data['default_due_date']; ?>"
-                               min="<?php echo $data['current_date']; ?>"
-                               max="<?php echo $data['default_due_date']; ?>" required>
+                               value="<?php echo $dueValue; ?>"
+                               min="<?php echo $borrowDate; ?>"
+                               max="<?php echo $computedMax; ?>" required>
                         <small class="form-note">* Default is 14 days (maximum 14 days).</small>
                     </div>
                 </div>
