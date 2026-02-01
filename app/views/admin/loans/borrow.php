@@ -52,12 +52,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Due Date (Max 30 Days)</label>
-                        <input type="date" name="due_date" class="form-input" 
+                        <label class="form-label">Due Date</label>
+                        <input type="date" name="due_date" class="form-input"
                                value="<?php echo $data['default_due_date']; ?>"
-                               min="<?php echo $data['current_date']; ?>" 
-                               max="<?php echo $data['max_due_date']; ?>" required>
-                        <small class="form-note">* Default is 14 days. Max limit is 30 days.</small>
+                               min="<?php echo $data['current_date']; ?>"
+                               max="<?php echo $data['default_due_date']; ?>" required>
+                        <small class="form-note">* Default is 14 days (maximum 14 days).</small>
                     </div>
                 </div>
             </div>

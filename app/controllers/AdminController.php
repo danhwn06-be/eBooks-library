@@ -402,10 +402,10 @@ public function addUser() {
                 return;
             }
 
-            // 2. Validate Date (Max 30 days)
+            // 2. Validate Date (Max 14 days)
             $diff = (strtotime($data['due_date']) - strtotime($data['borrow_date'])) / (60 * 60 * 24);
-            if ($diff > 30 || $diff < 1) {
-                $data['error'] = 'Invalid loan period (1-30 days only)!';
+            if ($diff > 14 || $diff < 1) {
+                $data['error'] = 'Invalid loan period (1-14 days only)!';
                 $this->view('admin/loans/borrow', $data);
                 return;
             }
@@ -430,7 +430,6 @@ public function addUser() {
                 'reservations' => $reservations,
                 'current_date' => date('Y-m-d'),
                 'default_due_date' => date('Y-m-d', strtotime('+14 days')),
-                'max_due_date' => date('Y-m-d', strtotime('+30 days')),
                 'member_code' => '',
                 'note' => '',
                 'error' => ''

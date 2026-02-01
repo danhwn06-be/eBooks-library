@@ -26,7 +26,7 @@ class LoanModel
             $stmt = $this->conn()->prepare($sql);
             $stmt->bindValue(':userId', $userId);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ); // Tương đương resultSet()
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
             return [];
         }   
@@ -81,7 +81,7 @@ class LoanModel
                      VALUES (:user_id, :copy_id, :borrow_date, :due_date, :note, 'Active')";
             
             $stmt1 = $this->conn()->prepare($sql1);
-            $stmt1->bindValue(':user_id', $user->user_id); // Bây giờ $user đã là object, lấy được ID
+            $stmt1->bindValue(':user_id', $user->user_id);
             $stmt1->bindValue(':copy_id', $data['copy_id']);
             $stmt1->bindValue(':borrow_date', $data['borrow_date']);
             $stmt1->bindValue(':due_date', $data['due_date']);
