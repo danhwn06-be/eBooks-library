@@ -3,10 +3,12 @@
 class UsersController extends Controller
 {
         private $userModel;
+        private $loanModel;
 
     public function __construct()
     {
         $this->userModel = $this->model('User');
+        $this->loanModel = $this->model('Loan');
     }
 
         public function index() 
@@ -83,9 +85,9 @@ public function profile()
         $user = $this->userModel->getUserById($userId);
         
         // 3. Lấy dữ liệu thống kê & Lịch sử
-        $borrowHistory = $this->userModel->getBorrowHistory($userId);
-        $countReading = $this->userModel->countReading($userId);       // Số sách đang đọc
-        $countBorrowed = $this->userModel->countTotalBorrowed($userId); // Tổng số sách đã mượn
+        $borrowHistory = $this->loanModel->getBorrowHistory($userId);
+        $countReading = $this->loanModel->countReading($userId);       // Số sách đang đọc
+        $countBorrowed = $this->loanModel->countTotalBorrowed($userId); // Tổng số sách đã mượn
 
         $data = [
             'title' => 'Hồ sơ cá nhân',

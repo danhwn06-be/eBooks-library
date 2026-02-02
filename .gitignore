@@ -1,2 +1,5 @@
-/vendor
+# Bảo mật
 .env
+
+# Bỏ cache
+app/cache/

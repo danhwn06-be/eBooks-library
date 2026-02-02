@@ -1,60 +1,60 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+// use PhpOffice\PhpSpreadsheet\Style\Alignment;
+// use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class AdminController extends Controller
 {
     private $bookModel;
     private $userModel;
+    private $categoryModel;
+    private $copyModel;
+    private $loanModel;
 
     public function __construct()
     {
-        $this->bookModel = $this->model('BookModel');
+        $this->bookModel = $this->model('Book');
         $this->userModel = $this->model('User');
+        $this->categoryModel = $this->model('Category');
+        $this->copyModel = $this->model('BookCopy');
+        $this->loanModel = $this->model('Loan');
     }
 
     // Trang Dashboard quản lý sách
     public function books()
     {
-        // Lấy tất cả sách
-        $books = $this->bookModel->getbooksForAdmin();
+        // Cấu hình phân trang
+        $limit = 10; // Số sách mỗi trang
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $offset = ($page - 1) * $limit;
+
+        // Lấy tổng số sách và tính tổng số trang
+        $totalBooks = $this->bookModel->getTotalBookCount();
+        $totalPages = ceil($totalBooks / $limit);
+
+        // Lấy danh sách sách theo trang
+        $books = $this->bookModel->getBooksForAdminPaginated($limit, $offset);
 
         $data = [
             'books' => $books,
-            'page_title' => 'Book Inventory Management'
+            'page_title' => 'Book Inventory Management',
+            'pagination' => [
+                'current_page' => $page,
+                'total_pages' => $totalPages
+            ]
         ];
 
         // Gọi view
         $this->view('admin/books/index', $data);
     }
 
-    // Trang BookCopies của từng quyển sách
-    public function copies($id = null)
-    {
-        if ($id == null) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $book = $this->bookModel->getBookById($id);
-        $copies = $this->bookModel->getCopiesByBookId($id);
-
-        // Nếu sách không tồn tại
-        if (!$book) {
-            header('Location: ' . URL_ROOT . '/admin');
-            return;
-        }
-
-        $data = [
-            'book' => $book,
-            'copies' => $copies
-        ];
-
-        // Gọi view
-        $this->view('admin/books/copies', $data);
-    }
-
     public function add()
     {
         // Cần lấy danh mục để hiện trong thẻ <select>
-        $categories = $this->bookModel->getAllCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         $data = [
             'categories' => $categories
@@ -97,7 +97,7 @@ class AdminController extends Controller
     public function edit($id)
     {
         $book = $this->bookModel->getBookById($id);
-        $categories = $this->bookModel->getCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         if (!$book) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -141,6 +141,13 @@ class AdminController extends Controller
     // URL: /admin/delete/5
     public function delete($id)
     {
+        // Kiểm tra xem sách có bản sao không (Sử dụng CopyModel)
+        $copies = $this->copyModel->getCopiesByBookId($id);
+        if (count($copies) > 0) {
+            echo "<script>alert('Cannot delete book. It has copies in the system.'); window.location.href='" . URL_ROOT . "/admin/books';</script>";
+            return;
+        }
+
         if ($this->bookModel->deleteBook($id)) {
             header('Location: ' . URL_ROOT . '/admin/books');
         } else {
@@ -172,6 +179,32 @@ class AdminController extends Controller
     }
 
     // COPIES
+    // Trang BookCopies của từng quyển sách
+    public function copies($id = null)
+    {
+        if ($id == null) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $book = $this->bookModel->getBookById($id);
+        $copies = $this->copyModel->getCopiesByBookId($id);
+
+        // Nếu sách không tồn tại
+        if (!$book) {
+            header('Location: ' . URL_ROOT . '/admin');
+            return;
+        }
+
+        $data = [
+            'book' => $book,
+            'copies' => $copies
+        ];
+
+        // Gọi view
+        $this->view('admin/books/copies', $data);
+    }
+
     // 1. Giao diện Thêm Copy (GET)
     public function add_copy($book_id = null) {
         if (!$book_id) header('Location: ' . URL_ROOT . '/admin/books');
@@ -196,7 +229,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            if ($this->bookModel->addCopy($data)) {
+            if ($this->copyModel->addCopy($data)) {
                 // Quay lại trang danh sách copy của cuốn sách đó
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $data['book_id']);
             } else {
@@ -207,7 +240,7 @@ class AdminController extends Controller
 
     // 3. Giao diện Sửa Copy (GET)
     public function edit_copy($copy_id) {
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         
         if (!$copy) {
             header('Location: ' . URL_ROOT . '/admin/books');
@@ -236,8 +269,7 @@ class AdminController extends Controller
                 'quality' => trim($_POST['quality'])
             ];
 
-            // Lưu ý: UpdateCopy đã có sẵn trong BookModel cũ của bạn, nếu chưa thì thêm vào
-            if ($this->bookModel->updateCopy($data)) {
+            if ($this->copyModel->updateCopy($data)) {
                 header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
             } else {
                 die('Error updating copy');
@@ -248,10 +280,10 @@ class AdminController extends Controller
     // 5. Xóa Copy
     public function delete_copy($copy_id) {
         // Lấy thông tin copy trước để biết book_id mà quay về
-        $copy = $this->bookModel->getCopyById($copy_id);
+        $copy = $this->copyModel->getCopyById($copy_id);
         $book_id = $copy['book_id'];
 
-        if ($this->bookModel->deleteCopy($copy_id)) {
+        if ($this->copyModel->deleteCopy($copy_id)) {
             header('Location: ' . URL_ROOT . '/admin/copies/' . $book_id);
         } else {
             die('Cannot delete this copy (Maybe borrowed?)');
@@ -288,7 +320,7 @@ public function addUser() {
             // Validation (Giữ nguyên)
             if (empty($data['email'])) { $data['email_err'] = 'Please enter email'; }
             else {
-                if ($this->userModel->findUserByEmail($data['email'])) {
+                if ($this->userModel->findUserByField('email', $data['email'])) {
                     $data['email_err'] = 'Email is already taken';
                 }
             }
@@ -374,5 +406,251 @@ public function addUser() {
         }
     }
 
-    
+    // Tạo và tải xuống file mẫu Excel
+    public function download_template() {
+        // Tạo spreadsheet mới
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Đặt tiêu đề cột (Khớp với logic import)
+        // Thứ tự: ISBN, Title, Author, Category, Image, Publisher, Publication year, Created at, Content description
+        $headers = ['ISBN', 'Title', 'Author', 'Category ID', 'Image URL', 'Publisher', 'Publication Year', 'Created At', 'Content Description'];
+        $sheet->fromArray($headers, NULL, 'A1');
+
+        // Thêm một dòng dữ liệu mẫu để người dùng dễ hiểu
+        $sample = ['9780132350884', 'Clean Code', 'Robert C. Martin', '1', 'https://example.com/cover.jpg', 'Prentice Hall', '2008', date('Y-m-d'), 'A Handbook of Agile Software Craftsmanship'];
+        $sheet->fromArray($sample, NULL, 'A2');
+
+        // Tự động điều chỉnh độ rộng cột
+        foreach (range('A', 'I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Thiết lập header để trình duyệt hiểu đây là file Excel tải về
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="template_books.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+public function import_books() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['import_file'])) {
+            $file = $_FILES['import_file']['tmp_name'];
+
+            // Kiểm tra có file tải lên không
+            if (!file_exists($file)) {
+                die("No file uploaded");
+            }
+
+            try {
+                // 1. Load file Excel bằng thư viện
+                $spreadsheet = IOFactory::load($file);
+                $sheet = $spreadsheet->getActiveSheet();
+                $rows = $sheet->toArray(); // Chuyển toàn bộ sheet thành mảng
+
+                // 2. Duyệt qua từng dòng (Bỏ qua dòng đầu tiên là Header)
+                foreach ($rows as $index => $row) {
+                    if ($index === 0) continue; // Bỏ qua header
+
+                    // Cấu trúc file mẫu: 
+                    // [0]ISBN | [1]Title | [2]Author | [3]Category ID | [4]Image URL | [5]Publisher | [6]Year | [7]Created At | [8]Desc
+                    
+                    // Kiểm tra dữ liệu bắt buộc (Title, ISBN)
+                    if (empty($row[0]) || empty($row[1])) continue;
+
+                    // Xử lý ảnh (Cột 4)
+                    $imageName = null;
+                    if (!empty($row[4])) {
+                        $imgInput = trim($row[4]);
+                        // Trường hợp 1: Là đường dẫn URL (http/https) -> Tải về server
+                        if (filter_var($imgInput, FILTER_VALIDATE_URL)) {
+                            $ext = pathinfo(parse_url($imgInput, PHP_URL_PATH), PATHINFO_EXTENSION);
+                            // Chỉ chấp nhận đuôi ảnh hợp lệ
+                            if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
+                                $newFilename = time() . '_' . uniqid() . '.' . $ext;
+                                $savePath = APP_ROOT . '/public/images/books/' . $newFilename;
+                                $fileContent = @file_get_contents($imgInput);
+                                if ($fileContent) {
+                                    file_put_contents($savePath, $fileContent);
+                                    $imageName = $newFilename;
+                                }
+                            }
+                        } else {
+                            // Trường hợp 2: Là tên file (đã upload thủ công vào thư mục images/books/)
+                            $imageName = $imgInput;
+                        }
+                    }
+
+                    $bookData = [
+                        'isbn'             => $row[0],
+                        'title'            => $row[1],
+                        'author'           => $row[2],
+                        'category_id'      => (int)$row[3] ?: 1, // Mặc định là 1 nếu trống
+                        'image_url'        => $imageName,
+                        'publisher'        => $row[5],
+                        'publication_year' => (int)$row[6],
+                        // row[7] Created At (Bỏ qua vì hệ thống tự sinh)
+                        'description'      => $row[8]
+                    ];
+
+                    // 3. Gọi Model để lưu
+                    // Sử dụng try-catch để nếu trùng ISBN thì không chết chương trình
+                    try {
+                        $this->bookModel->addBook($bookData);
+                    } catch (Exception $e) {
+                        // Có thể ghi log lỗi ở đây: "Lỗi dòng $index: " . $e->getMessage();
+                        continue; 
+                    }
+                }
+
+                // Import xong -> Quay về trang danh sách
+                header('Location: ' . URL_ROOT . '/admin/books?status=import_success');
+
+            } catch (Exception $e) {
+                die('Error loading file: ' . $e->getMessage());
+            }
+        } else {
+            header('Location: ' . URL_ROOT . '/admin/books');
+        }
+    }
+    public function index() {
+        $this->books(); // Mặc định vào trang books nếu không có tham số
+    }
+
+    public function loans() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'member_code' => trim($_POST['member_code']),
+                'copy_id'     => trim($_POST['copy_id']),
+                'borrow_date' => $_POST['borrow_date'],
+                'due_date'    => $_POST['due_date'],
+                'note'        => trim($_POST['note']),
+                'error'       => ''
+            ];
+
+            // Luôn lấy lại danh sách sách để hiển thị lại form nếu có lỗi
+            $data['books'] = $this->loanModel->getAvailableCopies();
+
+            // 1. Validate Member Code (Chỉnh lại kiểm tra object)
+            $user = $this->loanModel->checkMemberExist($data['member_code']);
+            if (!$user) {
+                $data['error'] = 'Member code does not exist!';
+                $this->view('admin/loans/borrow', $data);
+                return;
+            }
+
+            // 2. Validate Date (Max 30 days)
+            $diff = (strtotime($data['due_date']) - strtotime($data['borrow_date'])) / (60 * 60 * 24);
+            if ($diff > 30 || $diff < 1) {
+                $data['error'] = 'Invalid loan period (1-30 days only)!';
+                $this->view('admin/loans/borrow', $data);
+                return;
+            }
+
+            // 3. Thực hiện lưu
+            if ($this->loanModel->createLoan($data)) {
+                // Thành công -> Chuyển hướng
+                header('Location: ' . URL_ROOT . '/admin/loans?success=true');
+                exit();
+            } else {
+                // Thay vì die, hãy hiện lỗi lên giao diện để admin biết
+                $data['error'] = 'System error: Could not process the loan. Please try again.';
+                $this->view('admin/loans/borrow', $data);
+            }
+
+        } else {
+            $availableBooks = $this->loanModel->getAvailableCopies();
+
+            // Xử lý thông báo thành công từ URL (GET)
+            $successMsg = '';
+            if (isset($_GET['success'])) {
+                $successMsg = 'Loan recorded successfully!';
+            } elseif (isset($_GET['return_success'])) {
+                $successMsg = 'Book returned successfully!';
+            }
+
+            $data = [
+                'stats' => $this->buildLoanStats(),
+                'books' => $availableBooks,
+                'current_date' => date('Y-m-d'),
+                'default_due_date' => date('Y-m-d', strtotime('+14 days')),
+                'max_due_date' => date('Y-m-d', strtotime('+30 days')),
+                'member_code' => '',
+                'note' => '',
+                'error' => '',
+                'success' => $successMsg
+            ];
+
+            $this->view('admin/loans/borrow', $data);
+        }
+    }
+
+    public function returns() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Xử lý lưu dữ liệu trả sách
+            $loan_id = $_POST['loan_id'];
+            $copy_id = $_POST['copy_id'];
+            $return_date = $_POST['return_date'];
+            $note = trim($_POST['note'] ?? '');
+
+            if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date, $note)) {
+                header('Location: ' . URL_ROOT . '/admin/loans?return_success=true');
+                exit();
+            } else {
+                die("Something went wrong during the return process.");
+            }
+        } else {
+            // Load giao diện trả sách (GET)
+            $data = [
+                'stats' => $this->buildLoanStats(),
+                'current_date' => date('Y-m-d'),
+                'error' => ''
+            ];
+            $this->view('admin/loans/return', $data);
+        }
+    }
+
+    public function getMemberLoans($code) {
+        $loans = $this->loanModel->getActiveLoansByMember($code);
+        header('Content-Type: application/json');
+        echo json_encode($loans);
+    }
+
+    // Trong file AdminController.php
+
+    public function loan_tracking() {
+        // 1. Lấy dữ liệu từ Model
+        $loans = $this->loanModel->getAllLoans();
+        $stats = $this->loanModel->getLoanStats();
+
+        // 2. Chuẩn bị dữ liệu gửi sang View
+        $data = [
+            'loans' => $loans,
+            'stats' => $stats,
+            'page_title' => 'Loan Tracking System'
+        ];
+
+        // 3. Gọi View
+        $this->view('admin/loans/loan_tracking', $data);
+    }
+    public function reservations()
+    {
+        // Load model Reservation
+        $reservationModel = $this->model('Reservation');
+
+        $data = [
+            'stats' => $this->buildLoanStats(),
+            'reservations' => $reservationModel->getAllReservations()
+        ];
+
+        $this->view('admin/loans/reservations', $data);
+    }
+    private function buildLoanStats()
+    {
+        return $this->loanModel->getLoanStats();
+    }
+
 }

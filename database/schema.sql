@@ -89,7 +89,7 @@ CREATE TABLE BookCopies (
 -- Borrowed: Đang được mượn
 -- Lost/Maintenance: Không thể mượn
 
-    status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance') DEFAULT 'Available',
+    status ENUM('Available', 'Borrowed', 'Lost', 'Maintenance', 'Reserved') DEFAULT 'Available',
     
     condition_note TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -182,6 +182,7 @@ INSERT INTO
     Users (
         member_code,
         full_name,
+        user_name,
         email,
         password_hash,
         phone_number,
@@ -190,14 +191,16 @@ INSERT INTO
 VALUES (
         'ADMIN01',
         'Quản Trị Viên',
+        'admin',
         'admin@library.com',
-        'hash_pass',
+        '$2y$10$FYm.0r6OV9uXCxY3zJs1neWk/EjLsXHMZDxhs2OVsEorNMqX8dXci',
         '0909000111',
         'Admin'
     ),
     (
         'MEM0001',
         'Nguyễn Văn A',
+        'member1',
         'member1@email.com',
         'hash_pass',
         '0909000222',
@@ -206,6 +209,7 @@ VALUES (
     (
         'MEM0002',
         'Trần Thị B',
+        'member2',
         'member2@email.com',
         'hash_pass',
         '0909000333',
