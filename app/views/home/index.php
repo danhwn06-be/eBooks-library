@@ -74,7 +74,7 @@
                             <a href="<?php echo URL_ROOT; ?>/book/detail/<?php echo $book['book_id']; ?>" class="btn-details">See details</a>
 
                             <?php if ($book['available_copies'] > 0): ?>
-                                <a href="<?php echo URL_ROOT; ?>/book/reserve/<?php echo $book['book_id']; ?>" class="btn-reservation">Reservations</a>
+                                <a href="<?php echo URL_ROOT; ?>/reservation/create/<?php echo $book['book_id']; ?> " class="btn-reservation">Reservations</a>
                             <?php else: ?>
                                 <button class="btn-reservation" disabled style="opacity: 0.5; cursor: not-allowed;">Unavailable</button>
                             <?php endif; ?>

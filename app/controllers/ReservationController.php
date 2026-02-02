@@ -12,22 +12,37 @@ class ReservationController extends Controller
     }
 
     // HIỂN THỊ FORM
-    public function create($bookId)
+        public function create($bookId = null)
     {
+        // 1. Kiểm tra đăng nhập
         if (!isset($_SESSION['user_id'])) {
             header('Location: ' . URL_ROOT . '/users/login');
             exit;
         }
 
-        //LẤY USER ĐỂ ĐỔ DATA VÀO FORM
-        $user = $this->userModel->getUserById($_SESSION['user_id']);
+        // Nếu không có bookId, quay về trang chủ
+        if ($bookId === null) {
+            header('Location: ' . URL_ROOT . '/home');
+            exit;
+        }
 
-        // book đã có sẵn theo logic route
+        $userId = $_SESSION['user_id'];
+
+        // 2. Lấy thông tin chi tiết
+        $userDetails = $this->reservationModel->getReservationDetails($userId, $bookId);
         $book = $this->model("Book")->getBookById($bookId);
 
+        // KIỂM TRA: Nếu không tìm thấy user hoặc book trong DB, không cho load view
+        if (!$userDetails || !$book) {
+            echo "<script>alert('Data not found!'); window.location.href='".URL_ROOT."/home';</script>";
+            exit;
+        }
+
+        // 4. Truyền dữ liệu sang View
         $data = [
-            'user' => $user,
-            'book' => $book
+            'user' => $userDetails,
+            'book' => $book,
+            'book_id' => $bookId
         ];
 
         $this->view('reservation/confirm', $data);
@@ -54,6 +69,7 @@ class ReservationController extends Controller
                 exit;
             }
 
+            // Thực hiện giao dịch mượn sách trong Model
             if ($this->reservationModel->createReservation($userId, $bookId)) {
                 echo "<script>
                     alert('Reservation created successfully!');
@@ -61,7 +77,7 @@ class ReservationController extends Controller
                 </script>";
             } else {
                 echo "<script>
-                    alert('Reservation failed. Please try again.');
+                    alert('Reservation failed. No copies available or system error.');
                     window.history.back();
                 </script>";
             }
