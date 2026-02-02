@@ -3,34 +3,41 @@
 <div class="container main-container cf-container">
     <div class="book-reservation-section cf-book-reservation-section">
         <div class="book-cover cf-book-cover">
-            <img src="<?php echo URL_ROOT . '/images/books/' . (!empty($data['book']->image_url) ? $data['book']->image_url : 'default-book.jpg'); ?>" 
-                 alt="<?php echo htmlspecialchars($data['book']->title ?? 'Book Title'); ?>">
+            <?php 
+                $book = $data['book'] ?? null;
+                $imgName = is_object($book) ? ($book->image_url ?? '') : ($book['image_url'] ?? '');
+                $title = is_object($book) ? ($book->title ?? 'Book Title') : ($book['title'] ?? 'Book Title');
+                $finalImgPath = URL_ROOT . '/images/books/' . (!empty($imgName) ? $imgName : 'default-book.jpg');
+            ?>
+            <img src="<?php echo $finalImgPath; ?>" 
+                 alt="<?php echo htmlspecialchars($title); ?>">
         </div>
+        
         <div class="book-display-section cf-book-display-section">   
             <h2>Register Loan</h2>             
             <div class="book-info-box cf-book-info-box">
                 <div class="info-row cf-info-row">
                     <span class="label cf-label">Title book:</span>
                     <div class="value-box cf-value-box">
-                        <?php echo htmlspecialchars($data['book']->title ?? $data['user']->title ?? 'N/A'); ?>
+                        <?php echo htmlspecialchars($title); ?>
                     </div>
                 </div>
                 <div class="info-row cf-info-row">
                     <span class="label cf-label">Author:</span>
                     <div class="value-box cf-value-box">
-                        <?php echo htmlspecialchars($data['book']->author ?? 'Unknown Author'); ?>
+                        <?php echo htmlspecialchars(is_object($book) ? ($book->author ?? 'Unknown') : ($book['author'] ?? 'Unknown')); ?>
                     </div>
                 </div>
                 <div class="info-row cf-info-row">
                     <span class="label cf-label">Publisher:</span>
                     <div class="value-box cf-value-box">
-                        <?php echo htmlspecialchars($data['book']->publisher ?? 'Paragon'); ?>
+                        <?php echo htmlspecialchars(is_object($book) ? ($book->publisher ?? 'Paragon') : ($book['publisher'] ?? 'Paragon')); ?>
                     </div>
                 </div>
                 <div class="info-row cf-info-row">
                     <span class="label cf-label">Category:</span>
                     <div class="value-box cf-value-box">
-                        <?php echo htmlspecialchars($data['book']->category_name ?? 'General'); ?>
+                        <?php echo htmlspecialchars(is_object($book) ? ($book->category_name ?? 'General') : ($book['category_name'] ?? 'General')); ?>
                     </div>
                 </div>
             </div>
