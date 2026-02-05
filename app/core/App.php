@@ -46,6 +46,9 @@ class App
         if (isset($url[0]) && file_exists(APP_ROOT . '/app/controllers/' . ucfirst($url[0]) . 'Controller.php')) {
             $this->controller = ucfirst($url[0]) . 'Controller';
             unset($url[0]);
+        } elseif (isset($url[0]) && !empty($url[0])) {
+            // Nếu có URL nhưng không tìm thấy Controller -> Báo lỗi 404 hoặc xử lý
+            die("Error 404: Controller '" . ucfirst($url[0]) . "Controller' not found. Check your filename and URL.");
         }
 
         // Require file controller và khởi tạo đối tượng
