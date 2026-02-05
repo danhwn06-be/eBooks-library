@@ -1,13 +1,23 @@
 <?php
-// Lớp xử lý kết nối CSDL sử dụng Singleton Pattern
+/**
+ * Lớp xử lý kết nối CSDL sử dụng Singleton Pattern
+ * Đảm bảo chỉ có duy nhất một kết nối Database trong suốt vòng đời ứng dụng
+ */
 class Database
 {
-    // Biến tĩnh giữ thể hiện duy nhất của lớp
+    /**
+     * @var Database|null Biến tĩnh giữ thể hiện duy nhất của lớp
+     */
     private static $instance = null;
-    // Biến giữ kết nối PDO
+
+    /**
+     * @var PDO Biến giữ kết nối PDO
+     */
     private $connection;
 
-    // Constructor private để ngăn chặn khởi tạo trực tiếp từ bên ngoài (new Database)
+    /**
+     * Constructor private để ngăn chặn khởi tạo trực tiếp từ bên ngoài (new Database)
+     */
     private function __construct()
     {
         try {
@@ -50,10 +60,14 @@ class Database
         return $this->connection;
     }
 
-    // Ngăn chặn việc clone đối tượng (bảo đảm tính duy nhất)
+    /**
+     * Ngăn chặn việc clone đối tượng (bảo đảm tính duy nhất)
+     */
     private function __clone() {}
 
-    // Ngăn chặn việc unserialize đối tượng
+    /**
+     * Ngăn chặn việc unserialize đối tượng
+     */
     public function __wakeup()
     {
         throw new Exception("Cannot unserialize singleton");

@@ -1,11 +1,23 @@
 <?php
+/**
+ * Lớp App (Router)
+ * Chịu trách nhiệm phân tích URL và gọi Controller/Method tương ứng
+ */
 class App
 {
-    // Controller mặc định
+    /**
+     * @var string Controller mặc định
+     */
     protected $controller = 'HomeController';
-    // Method mặc định
+
+    /**
+     * @var string Method mặc định
+     */
     protected $method = 'index';
-    // Mảng tham số
+
+    /**
+     * @var array Mảng tham số truyền vào method
+     */
     protected $params = [];
 
     /**
@@ -23,6 +35,9 @@ class App
         return [];
     }
 
+    /**
+     * Khởi tạo ứng dụng, xử lý Routing
+     */
     public function __construct()
     {
         $url = $this->getUrl();

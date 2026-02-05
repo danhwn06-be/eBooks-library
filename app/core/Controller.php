@@ -1,6 +1,8 @@
 <?php
-// Lớp Controller cơ sở (Base Controller)
-// Các Controller khác sẽ kế thừa lớp này để gọi Model và View
+/**
+ * Lớp Controller cơ sở (Base Controller)
+ * Các Controller khác sẽ kế thừa lớp này để gọi Model và View
+ */
 class Controller
 {
     /**
