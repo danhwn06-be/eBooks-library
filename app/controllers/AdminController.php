@@ -200,6 +200,8 @@ class AdminController extends Controller
                 $sheet = $spreadsheet->getActiveSheet();
                 $rows = $sheet->toArray(); // Chuyển toàn bộ sheet thành mảng
 
+                $duplicateCount = 0;
+
                 // 2. Duyệt qua từng dòng (Bỏ qua dòng đầu tiên là Header)
                 foreach ($rows as $index => $row) {
                     if ($index === 0) continue; // Sửa lỗi cú pháp ở code cũ
@@ -216,13 +218,25 @@ class AdminController extends Controller
                         $imgInput = trim($row[4]);
                         // Trường hợp 1: Là đường dẫn URL (http/https) -> Tải về server
                         if (filter_var($imgInput, FILTER_VALIDATE_URL)) {
-                            $ext = pathinfo(parse_url($imgInput, PHP_URL_PATH), PATHINFO_EXTENSION);
-                            // Chỉ chấp nhận đuôi ảnh hợp lệ
-                            if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
-                                $newFilename = time() . '_' . uniqid() . '.' . $ext;
-                                $savePath = APP_ROOT . '/public/images/books/' . $newFilename;
-                                $fileContent = @file_get_contents($imgInput);
-                                if ($fileContent) {
+                            $fileContent = @file_get_contents($imgInput);
+                            if ($fileContent) {
+                                $ext = strtolower(pathinfo(parse_url($imgInput, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                
+                                // Nếu URL không có đuôi file rõ ràng, kiểm tra MIME type từ nội dung
+                                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) && class_exists('finfo')) {
+                                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                                    $mime = $finfo->buffer($fileContent);
+                                    $extensions = [
+                                        'image/jpeg' => 'jpg',
+                                        'image/png'  => 'png',
+                                        'image/webp' => 'webp',
+                                    ];
+                                    $ext = $extensions[$mime] ?? '';
+                                }
+
+                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                                    $newFilename = time() . '_' . uniqid() . '.' . $ext;
+                                    $savePath = APP_ROOT . '/public/images/books/' . $newFilename;
                                     file_put_contents($savePath, $fileContent);
                                     $imageName = $newFilename;
                                 }
@@ -234,7 +248,7 @@ class AdminController extends Controller
                     }
 
                     $bookData = [
-                        'isbn'             => $row[0],
+                        'isbn'             => trim((string)$row[0]),
                         'title'            => $row[1],
                         'author'           => $row[2],
                         'category_id'      => (int)$row[3] ?: 1, // Mặc định là 1 nếu trống
@@ -244,8 +258,13 @@ class AdminController extends Controller
                         'description'      => $row[8]
                     ];
 
-                    // 3. Gọi Model để lưu
-                    // Sử dụng try-catch để nếu trùng ISBN
+                    // 3. Kiểm tra trùng ISBN (Logic nghiệp vụ chủ động)
+                    if ($this->bookModel->checkIsbnExists($bookData['isbn'])) {
+                        $duplicateCount++;
+                        continue; // Bỏ qua sách này nếu ISBN đã tồn tại
+                    }
+
+                    // 4. Gọi Model để lưu
                     try {
                         $this->bookModel->addBook($bookData);
                     } catch (Exception $e) {
@@ -254,7 +273,11 @@ class AdminController extends Controller
                 }
 
                 // Import xong -> Quay về trang danh sách
-                header('Location: ' . URL_ROOT . '/admin/books?status=import_success');
+                if ($duplicateCount > 0) {
+                    echo "<script>alert('Import completed! Skipped " . $duplicateCount . " books due to duplicate ISBN.'); window.location.href='" . URL_ROOT . "/admin/books?status=import_success';</script>";
+                } else {
+                    header('Location: ' . URL_ROOT . '/admin/books?status=import_success');
+                }
 
             } catch (Exception $e) {
                 die('Error loading file: ' . $e->getMessage());
@@ -436,7 +459,8 @@ class AdminController extends Controller
     public function users() {
         $users = $this->userModel->getAllUsers();
         $data = [
-            'users' => $users
+            'users' => $users,
+            'page_title' => 'User Management' // Tiêu đề code cứng
         ];
         $this->view('admin/users/index', $data);
     }
@@ -614,9 +638,22 @@ class AdminController extends Controller
             }
 
             // 2. Validate Date (Max 30 days)
-            $diff = (strtotime($data['due_date']) - strtotime($data['borrow_date'])) / (60 * 60 * 24);
-            if ($diff > 30 || $diff < 1) {
-                $data['error'] = 'Invalid loan period (1-30 days only)!';
+            try {
+                $bDate = new DateTime($data['borrow_date']);
+                $dDate = new DateTime($data['due_date']);
+
+                // Kiểm tra ngày trả phải sau ngày mượn (tính cả giờ phút)
+                if ($dDate <= $bDate) {
+                    throw new Exception('Due date must be after borrow date!');
+                }
+
+                // Kiểm tra không quá 30 ngày
+                $interval = $bDate->diff($dDate);
+                if ($interval->days > 30) {
+                    throw new Exception('Loan period cannot exceed 30 days!');
+                }
+            } catch (Exception $e) {
+                $data['error'] = $e->getMessage();
                 $this->view('admin/loans/borrow', $data);
                 return;
             }
@@ -671,17 +708,23 @@ class AdminController extends Controller
             $note = trim($_POST['note'] ?? '');
 
             if ($this->loanModel->updateReturn($loan_id, $copy_id, $return_date, $note)) {
-                header('Location: ' . URL_ROOT . '/admin/loans?return_success=true');
+                header('Location: ' . URL_ROOT . '/admin/returns?success=true');
                 exit();
             } else {
                 die("Something went wrong during the return process.");
             }
         } else {
             // Load giao diện trả sách (GET)
+            $successMsg = '';
+            if (isset($_GET['success'])) {
+                $successMsg = 'Book returned successfully!';
+            }
+
             $data = [
                 'stats' => $this->buildLoanStats(),
                 'current_date' => date('Y-m-d'),
-                'error' => ''
+                'error' => '',
+                'success' => $successMsg
             ];
             $this->view('admin/loans/return', $data);
         }

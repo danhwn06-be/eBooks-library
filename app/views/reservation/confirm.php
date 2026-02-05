@@ -52,7 +52,7 @@
             if (!$isLoggedIn): ?>
                 <div class="error-message cf-error-message">
                     <p>You need to be logged in with a member account to make a reservation.</p>
-                    <a href="<?php echo URL_ROOT; ?>/users/login" class="btn-login cf-btn-login">Please login first</a>
+                    <a href="<?php echo URL_ROOT; ?>/user/login" class="btn-login cf-btn-login">Please login first</a>
                 </div>
             <?php else: ?>
             
@@ -73,7 +73,7 @@
                 
                 <div class="form-group cf-form-group">
                     <label class="cf-label">Member Code:</label>
-                    <input type="text" class="cf-input-center"
+                    <input type="text"
                            value="<?php echo htmlspecialchars($data['user']->member_code ?? ''); ?>" readonly>
                     <input type="hidden" name="member_code"
                            value="<?php echo htmlspecialchars($data['user']->member_code ?? ''); ?>">

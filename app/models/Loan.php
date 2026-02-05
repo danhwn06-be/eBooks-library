@@ -168,8 +168,14 @@ class Loan
             $stmtLoan = $this->conn()->prepare($sqlLoan);
             $stmtLoan->bindValue(':user_id', $user->user_id);
             $stmtLoan->bindValue(':copy_id', $data['copy_id']);
-            // Nối thêm giờ hiện tại để không bị 00:00:00
-            $stmtLoan->bindValue(':borrow_date', $data['borrow_date'] . ' ' . date('H:i:s'));
+            
+            // Đơn giản hóa: Nếu chuỗi chỉ có ngày (độ dài <= 10), nối thêm giờ hiện tại
+            $borrowDate = $data['borrow_date'];
+            if (strlen($borrowDate) <= 10) {
+                $borrowDate .= ' ' . date('H:i:s');
+            }
+            $stmtLoan->bindValue(':borrow_date', $borrowDate);
+
             $stmtLoan->bindValue(':due_date', $data['due_date']);
             $stmtLoan->bindValue(':note', $data['note']);
             $stmtLoan->execute();
@@ -255,8 +261,14 @@ class Loan
                          note = :note 
                      WHERE loan_id = :loan_id";
             $stmt1 = $this->conn()->prepare($sql1);
-            // Nối thêm giờ hiện tại khi trả sách
-            $stmt1->bindValue(':return_date', $return_date . ' ' . date('H:i:s'));
+            
+            // Xử lý ngày trả tương tự
+            $returnDate = $return_date;
+            if (strlen($returnDate) <= 10) {
+                $returnDate .= ' ' . date('H:i:s');
+            }
+            $stmt1->bindValue(':return_date', $returnDate);
+
             $stmt1->bindValue(':note', $note);
             $stmt1->bindValue(':loan_id', $loan_id);
             $stmt1->execute();

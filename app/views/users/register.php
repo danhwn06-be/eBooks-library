@@ -23,7 +23,7 @@
                 </div>
             <?php endif; ?>
             
-            <form action="<?php echo URL_ROOT; ?>/users/register" method="POST" class="login-form">
+            <form action="<?php echo URL_ROOT; ?>/user/register" method="POST" class="login-form">
                 <div class="form-group">
                     <input type="text" name="email" placeholder="Email..." class="input-blue">
                 </div>
@@ -53,7 +53,7 @@
 
             <div class="login-footer">
                 <p>Do you already have an account?</p>
-                <a href="<?php echo URL_ROOT; ?>/users/login" class="login-link">Login here</a>
+                <a href="<?php echo URL_ROOT; ?>/user/login" class="login-link">Login here</a>
             </div>
         </div>
     </div>

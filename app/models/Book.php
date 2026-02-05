@@ -89,6 +89,21 @@ class Book
     }
 
     /**
+     * Kiểm tra ISBN đã tồn tại chưa
+     * @param string $isbn
+     * @return bool True nếu đã tồn tại
+     */
+    public function checkIsbnExists($isbn)
+    {
+        $sql = "SELECT COUNT(*) as count FROM Books WHERE isbn = :isbn";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':isbn', $isbn);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return $row['count'] > 0;
+    }
+
+    /**
      * Lọc sách theo nhiều tiêu chí (Category, Year, Author)
      * @param array $f Mảng chứa các bộ lọc
      * @return array Danh sách sách đã lọc

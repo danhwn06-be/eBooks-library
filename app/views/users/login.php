@@ -32,7 +32,7 @@
                 </div>
             <?php endif; ?>
 
-            <form action="<?php echo URL_ROOT; ?>/users/login" method="POST" class="login-form">
+            <form action="<?php echo URL_ROOT; ?>/user/login" method="POST" class="login-form">
                 <div class="form-group">
                     <input
                         type="text"
@@ -63,7 +63,7 @@
                 <p>
                     Don't have an account yet?
                 </p>
-                <a href="<?php echo URL_ROOT; ?>/users/register">Register here</a>
+                <a href="<?php echo URL_ROOT; ?>/user/register">Register here</a>
             </div>
         </div>
 

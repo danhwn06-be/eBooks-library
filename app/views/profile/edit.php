@@ -6,7 +6,7 @@
             <i class="fas fa-user"></i> Account Details
         </div>
 
-        <form action="<?php echo URL_ROOT; ?>/users/edit" method="POST">
+        <form action="<?php echo URL_ROOT; ?>/user/edit" method="POST">
             <div class="avatar-edit-section">
                 <img src="<?php echo URL_ROOT; ?>/public/img/default-avatar.png" alt="User Avatar" class="profile-img">
                 <div class="name-input-wrapper">
@@ -61,7 +61,7 @@
             </div>
 
             <div class="edit-actions">
-                <a href="<?php echo URL_ROOT; ?>/users/profile" class="btn-cancle">Cancle</a>
+                <a href="<?php echo URL_ROOT; ?>/user/profile" class="btn-cancle">Cancle</a>
                 <button type="submit" class="btn-save-green">Save</button>
             </div>
         </form>

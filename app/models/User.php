@@ -148,7 +148,7 @@ class User
      */
     public function getAllUsers()
     {
-        $sql = "SELECT * FROM users ORDER BY created_at DESC";
+        $sql = "SELECT user_id, member_code, full_name, user_name, email, password_hash, phone_number, address, role, created_at, updated_at FROM users ORDER BY created_at DESC";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

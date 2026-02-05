@@ -55,7 +55,7 @@
                 <i class="fa-solid fa-circle-user user-avatar"></i>
                 <span class="greeting">👋 Hi, <span class="admin-name">Admin Library!</span></span>
             </div>
-            <a href="<?php echo URL_ROOT; ?>/users/logout" class="btn-logout" style="text-decoration: none; color: inherit;">
+            <a href="<?php echo URL_ROOT; ?>/user/logout" class="btn-logout" style="text-decoration: none; color: inherit;">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 Log out
             </a>
