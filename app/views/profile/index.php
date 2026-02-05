@@ -26,7 +26,7 @@
                 <div class="header-title">
                     <i class="fas fa-user-alt"></i> Account Details
                 </div>
-                <a href="<?php echo URL_ROOT; ?>/users/edit" class="btn-edit-profile">
+                <a href="<?php echo URL_ROOT; ?>/user/edit" class="btn-edit-profile">
                     <i class="fas fa-pencil-alt"></i> Edit profile
                 </a>
             </div>

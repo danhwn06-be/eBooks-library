@@ -1,5 +1,6 @@
 # Bảo mật
 .env
 
-# Bỏ cache
-app/cache/
+# Bỏ thư viện vendor và images books sau khi update
+vendor/
+images/books/

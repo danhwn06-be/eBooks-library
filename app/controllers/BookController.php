@@ -3,13 +3,20 @@ class BookController extends Controller
 {
     private $bookModel;
 
+    /**
+     * Khởi tạo Controller và load Model
+     */
     public function __construct()
     {
         $this->bookModel = $this->model('Book');
     }
 
-    // Hàm mặc định (nếu gõ /books sau URL)
-   public function index()
+    // 1. PUBLIC VIEWS (CATALOG & SEARCH)
+
+    /**
+     * Trang chủ / Danh sách sách (Hỗ trợ Phân trang & Lọc)
+     */
+    public function index()
     {
         $filters = [
             'category' => $_GET['category'] ?? '',
@@ -42,7 +49,47 @@ class BookController extends Controller
         $this->view('home/index', $data);
     }
 
-    // Hàm xem chi tiết: /books/detail/{id}
+    /**
+     * Tìm kiếm sách theo từ khóa
+     */
+    public function search()
+    {
+        // Kiểm tra từ khóa mà người dùng nhập vào
+        $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : "";
+        
+        // Xử lý nếu từ khóa trống sẽ trả về tất cả sách
+        if (empty($keyword)) {
+            $books = $this->bookModel->getAllBooks();
+            $pageTitle = 'Tất cả sách';
+        } else {
+            // Tìm kiếm bằng tên của sách
+            $books = $this->bookModel->searchBooks($keyword);
+            $pageTitle = 'Kết quả tìm kiếm cho: ' . htmlspecialchars($keyword);
+        }
+
+        // Xử lý khi người dùng tìm kiếm mà không có kết quả
+        $noResult = empty($books);
+
+        $categories = $this->bookModel->getAllCategories();
+
+        $data = [
+            'title' => 'Search Result',
+            'books' => $books,
+            'categories' => $categories,
+            'current_page' => 'home',
+            'keyword' => htmlspecialchars($keyword),
+            'noResult' => $noResult,
+            'pagination' => null,
+            'show-filter' => false
+        ];
+
+        $this->view('book/index', $data);
+    }
+
+    /**
+     * Xem chi tiết một cuốn sách
+     * @param int|null $id ID sách
+     */
     public function detail($id = null)
     {
         if ($id == null) {
@@ -69,47 +116,17 @@ class BookController extends Controller
         $this->view('book/detail', $data);
     }
 
-    public function search()
-    {
-        //kiểm tra từ khóa mà người dùng nhập vào
-        $keyword = isset($_GET['keyword']) ? trim ($_GET['keyword']) : "";
-        //xử lý nếu từ khóa trống sẽ trả về tất cả sách
-        if ($keyword === " ") {
-            $books = $this->bookModel->getAllBooks();
-            $pageTitle = 'Tất cả sách';
-        } else {
-            //tìm kiếm bằng tên của sách
-            $books = $this->bookModel->searchBooks($keyword);
-            $pageTitle = 'Kết quả tìm kiếm cho: ' . htmlspecialchars($keyword);
-        }
+    // 2. USER ACTIONS
 
-        //xử lý khi người dùng tìm kiếm mà không có 
-        $noResult = empty($books);
-
-        $categories = $this->bookModel->getAllCategories();
-
-        $data = [
-            'title' => 'Search Result',
-            'books' => $books,
-            'categories' => $categories,
-            'current_page' => 'home',
-            'keyword' => htmlspecialchars($keyword),
-            'noResult' => $noResult,
-            'pagination' => null,
-            'show-filter' => false
-        ];
-
-        $this->view('book/index', $data);
-    }
-
-    public function filter() {
-        
-    }
+    /**
+     * Đặt trước sách (Reservation)
+     * @param int $bookId ID sách cần đặt
+     */
     public function reserve($bookId)
-{
+    {
     // Chưa login → login trước
     if (!isset($_SESSION['user_id'])) {
-        header("Location: " . URL_ROOT . "/users/login");
+        header("Location: " . URL_ROOT . "/user/login");
         exit;
     }
 
@@ -135,7 +152,7 @@ class BookController extends Controller
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $reservationModel = $this->model('Reservation');
         if ($reservationModel->createReservation($_SESSION['user_id'], $bookId)) {
-            header("Location: " . URL_ROOT . "/users/profile?status=reserved");
+            header("Location: " . URL_ROOT . "/user/profile?status=reserved");
         } else {
             header("Location: " . URL_ROOT . "/book/detail/$bookId?error=failed");
         }
@@ -145,5 +162,5 @@ class BookController extends Controller
     $this->view("reservation/confirm", [
         "book" => $book
     ]);
-}
+    }
 }

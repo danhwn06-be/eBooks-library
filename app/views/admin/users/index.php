@@ -15,15 +15,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>Member_code</th>
+                    <th>Member code</th>
                     <th>Full name</th>
                     <th>Email</th>
                     <th>Address</th>
                     <th>Phone number</th>
-                    <th>Update_at</th>
-                    <th>Account_locked_until</th>
-                    <th>Created_at</th>
-                    <th>Password_hash</th>
+                    <th>Update at</th>
+                    <th>Created at</th>
                     <th>Operation</th>
                 </tr>
             </thead>
@@ -41,13 +39,7 @@
                             
                             <td><?php echo htmlspecialchars($user['phone_number'] ?? ''); ?></td>
                             <td><?php echo $user['updated_at'] ?? 'N/A'; ?></td>
-                            <td><?php echo $user['account_locked_until'] ?? 'NULL'; ?></td>
                             <td><?php echo $user['created_at']; ?></td>
-                            
-                            <td title="<?php echo $user['password_hash'] ?? ''; ?>">
-                                <?php echo substr($user['password_hash'] ?? '', 0, 8) . '...'; ?>
-                            </td>
-
                             <td>
                                 <div class="action-buttons">
                                     <a href="<?php echo URL_ROOT; ?>/admin/editUser/<?php echo $user['user_id']; ?>" class="btn-edit">

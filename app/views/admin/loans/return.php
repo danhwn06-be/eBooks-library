@@ -4,8 +4,8 @@
     require APP_ROOT . '/app/views/admin/inc/loan_header.php'; 
 ?>
 <div class="main-content">
-    <?php if(isset($_GET['return_success'])): ?>
-        <div class="alert alert-success">Book returned successfully!</div>
+    <?php if(!empty($data['success'])): ?>
+        <div class="alert alert-success"><?php echo $data['success']; ?></div>
     <?php endif; ?>
 
     <div class="tab-container">

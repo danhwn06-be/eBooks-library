@@ -202,7 +202,7 @@ VALUES (
         'Nguyễn Văn A',
         'member1',
         'member1@email.com',
-        'hash_pass',
+        '$2y$10$FYm.0r6OV9uXCxY3zJs1neWk/EjLsXHMZDxhs2OVsEorNMqX8dXci',
         '0909000222',
         'Member'
     ),
@@ -211,7 +211,7 @@ VALUES (
         'Trần Thị B',
         'member2',
         'member2@email.com',
-        'hash_pass',
+        '$2y$10$FYm.0r6OV9uXCxY3zJs1neWk/EjLsXHMZDxhs2OVsEorNMqX8dXci',
         '0909000333',
         'Member'
     );
@@ -224,8 +224,6 @@ INSERT INTO Books (isbn, title, author, publisher, publication_year, category_id
 -- ========================================================
 ('978-0441013593', 'Dune', 'Frank Herbert', 'Ace', 1965, 1, 'Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the “spice” melange, a drug capable of extending life and enhancing consciousness. Coveted across the known universe, melange is a prize worth killing for... When House Atreides is betrayed, the destruction of Paul’s family will set the boy on a journey toward a destiny greater than he could ever have imagined. And as he evolves into the mysterious man known as Muad’Dib, he will bring to fruition humankind’s most ancient and unattainable dream.', 'dune.jpg'),
 ('978-0451524935', '1984', 'George Orwell', 'Signet Classic', 1949, 1, 'A masterpiece of rebellion and imprisonment where war is peace freedom is slavery and Big Brother is watching. Thought Police, Big Brother, Orwellian - these words have entered our vocabulary because of George Orwell''s classic dystopian novel 1984. The story of one man''s Nightmare Odyssey as he pursues a forbidden love affair through a world ruled by warring states and a power structure that controls not only information but also individual thought and memory 1984 is a prophetic haunting tale More relevant than ever before 1984 exposes the worst crimes imaginable the destruction of truth freedom and individuality. With a foreword by Thomas Pynchon. This beautiful paperback edition features deckled edges and french flaps a perfect gift for any occasion', '1984.jpg'),
-('978-0553380163', 'A Brief History of Time', 'Stephen Hawking', 'Bantam', 1988, 1, 'A landmark volume in science writing by one of the great minds of our time, Stephen Hawking’s book explores such profound questions as: How did the universe begin—and what made its start possible? Does time always flow forward? Is the universe unending—or are there boundaries? Are there other dimensions in space? What will happen when it all ends? Told in language we all can understand, A Brief History of Time plunges into the exotic realms of black holes and quarks, of antimatter and “arrows of time,” of the big bang and a bigger God—where the possibilities are wondrous and unexpected. With exciting images and profound imagination, Stephen Hawking brings us closer to the ultimate secrets at the very heart of creation.', 'brief_history.jpg'),
-('978-0425211159', 'The Martian', 'Andy Weir', 'Crown', 2011, 1, 'Six days ago, astronaut Mark Watney became one of the first people to walk on Mars. Now, he’s sure he’ll be the first person to die there. After a dust storm nearly kills him and forces his crew to evacuate while thinking him dead, Mark finds himself stranded and completely alone with no way to even signal Earth that he’s alive—and even if he could get word out, his supplies would be gone long before a rescue could arrive. Chances are, though, he won’t have time to starve to death. The damaged machinery, unforgiving environment, or plain-old “human error” are much more likely to kill him first. But Mark isn’t ready to give up yet. Drawing on his ingenuity, his engineering skills — and a relentless, dogged refusal to quit — he steadfastly confronts one seemingly insurmountable obstacle after the next. Will his resourcefulness be enough to overcome the impossible odds against him?', 'the_martian.jpg'),
 ('978-0345391803', 'The Hitchhiker''s Guide to the Galaxy', 'Douglas Adams', 'Del Rey', 1979, 1, 'Seconds before the Earth is demolished to make way for a galactic freeway, Arthur Dent is plucked off the planet by his friend Ford Prefect, a researcher for the revised edition of The Hitchhiker''s Guide to the Galaxy who, for the last fifteen years, has been posing as an out-of-work actor. Together this dynamic pair begin a journey through space aided by quotes from The Hitchhiker''s Guide ("A towel is about the most massively useful thing an interstellar hitchhiker can have") and a galaxy-full of fellow travelers: Zaphod Beeblebrox--the two-headed, three-armed ex-hippie and totally out-to-lunch president of the galaxy; Trillian, Zaphod''s girlfriend (formally Tricia McMillan), whom Arthur tried to pick up at a cocktail party once upon a time zone; Marvin, a paranoid, brilliant, and chronically depressed robot; Veet Voojagig, a former graduate student who is obsessed with the disappearance of all the ballpoint pens he bought over the years. Where are these pens? Why are we born? Why do we die? Why do we spend so much time between wearing digital watches? For all the answers stick your thumb to the stars. And don''t forget to bring a towel!', 'hitchhiker.jpg'),
 
 -- ========================================================
@@ -304,9 +302,7 @@ INSERT INTO Books (isbn, title, author, publisher, publication_year, category_id
 -- ========================================================
 -- KỸ NĂNG SỐNG (Self-Help - ID: 11)
 -- ========================================================
-('978-0735211292', 'Atomic Habits', 'James Clear', 'Avery', 2018, 11, '', 'atomic_habits.jpg'),
 ('978-1577314806', 'The Power of Now', 'Eckhart Tolle', 'New World Library', 1997, 11, 'To make the journey into the Now we will need to leave our analytical mind and its false created self, the ego, behind. From the very first page of Eckhart Tolle''s extraordinary book, we move rapidly into a significantly higher altitude where we breathe a lighter air. We become connected to the indestructible essence of our Being, “The eternal, ever present One Life beyond the myriad forms of life that are subject to birth and death.” Although the journey is challenging, Eckhart Tolle uses simple language and an easy question-and-answer format to guide us. A word-of-mouth phenomenon since its first publication,  The Power of Now  is one of those rare books with the power to create an experience in readers, one that can radically change their lives for the better.', 'power_of_now.jpg'),
-('978-0062457714', 'The Subtle Art of Not Giving a F*ck', 'Mark Manson', 'Harper', 2016, 11, '', 'subtle_art.jpg'),
 ('978-0060937385', 'The Alchemist', 'Paulo Coelho', 'HarperOne', 1988, 11, 'Combining magic, mysticism, wisdom, and wonder into an inspiring tale of self-discovery,  The Alchemist  has become a modern classic, selling millions of copies around the world and transforming the lives of countless readers across generations. Paulo Coelho''s masterpiece tells the mystical story of Santiago, an Andalusian shepherd boy who yearns to travel in search of a worldly treasure. His quest will lead him to riches far different—and far more satisfying—than he ever imagined. Santiago''s journey teaches us about the essential wisdom of listening to our hearts, recognizing opportunity and learning to read the omens strewn along life''s path, and, most importantly, following our dreams.', 'alchemist.jpg'),
 
 -- ========================================================
@@ -314,7 +310,6 @@ INSERT INTO Books (isbn, title, author, publisher, publication_year, category_id
 -- ========================================================
 ('978-0399226908', 'The Very Hungry Caterpillar', 'Eric Carle', 'World of Eric Carle', 1969, 12, 'THE all-time classic story, from generation to generation, sold somewhere in the world every 30 seconds! Have you shared it with a child or grandchild in your life? One sunny Sunday, the caterpillar was hatched out of a tiny egg. He was very hungry. On Monday, he ate through one apple; on Tuesday, he ate through three plums--and still he was hungry. When full at last, he made a cocoon around himself and went to sleep, to wake up a few weeks later wonderfully transformed into a butterfly! The brilliantly innovative Eric Carle has dramatized the story of one of Nature''s commonest yet loveliest marvels, the metamorphosis of the butterfly. This audiobook will delight as well as instruct the very youngest listener.', 'hungry_caterpillar.jpg'),
 ('978-0061124952', 'Charlotte''s Web', 'E. B. White', 'HarperCollins', 1952, 12, 'This beloved book by E. B. White, author of  Stuart Little  and  The Trumpet of the Swan , is a classic of children''s literature that is "just about perfect." This high-quality paperback features vibrant illustrations colorized by Rosemary Wells! Some Pig. Humble. Radiant. These are the words in Charlotte''s Web, high up in Zuckerman''s barn. Charlotte''s spiderweb tells of her feelings for a little pig named Wilbur, who simply wants a friend. They also express the love of a girl named Fern, who saved Wilbur''s life when he was born the runt of his litter. E. B. White''s Newbery Honor Book is a tender novel of friendship, love, life, and death that will continue to be enjoyed by generations to come. This edition contains newly color illustrations by Garth Williams, the acclaimed illustrator of E. B. White''s  Stuart Little  and Laura Ingalls Wilder''s Little House series, among many other books.', 'charlottes_web.jpg'),
-('978-1423103349', 'Matilda', 'Roald Dahl', 'Puffin', 1988, 12, 'Matilda is a little girl who is far too good to be true. At age five-and-a-half she''s knocking off double-digit multiplication problems and blitz-reading Dickens. Even more remarkably, her classmates love her even though she''s a super-nerd and the teacher''s pet. But everything is not perfect in Matilda''s world...', 'matilda.jpg'),
 ('978-0156012195', 'The Little Prince', 'Antoine de Saint-Exupéry', 'Harcourt', 1943, 12, 'A pilot stranded in the desert awakes one morning to see, standing before him, the most extraordinary little fellow. "Please," asks the stranger, "draw me a sheep." And the pilot realizes that when life''s events are too difficult to understand, there is no choice but to succumb to their mysteries. He pulls out pencil and paper... And thus begins this wise and enchanting fable that, in teaching the secret of what is really important in life, has changed forever the world for its readers. Few stories are as widely read and as universally cherished by children and adults alike as The Little Prince, presented here in a stunning new translation with carefully restored artwork. The definitive edition of a worldwide classic, it will capture the hearts of readers of all ages.', 'little_prince.jpg');
 
 -- Book Copies
@@ -323,97 +318,89 @@ INSERT INTO BookCopies (book_id, copy_code, status, condition_note) VALUES
 (1, 'DN-001', 'Available', 'New'), (1, 'DN-002', 'Borrowed', 'Good'), (1, 'DN-003', 'Available', 'Worn cover'),
 -- Sách ID 2 (1984): 2 bản
 (2, '1984-001', 'Available', 'Worn'), (2, '1984-002', 'Available', 'Good'),
--- Sách ID 3 (Brief History): 2 bản
-(3, 'BHT-001', 'Available', 'New'), (3, 'BHT-002', 'Maintenance', 'Cover torn'),
--- Sách ID 4 (Martian): 3 bản
-(4, 'MAR-001', 'Borrowed', 'New'), (4, 'MAR-002', 'Available', 'New'), (4, 'MAR-003', 'Available', 'Good'),
 -- Sách ID 5 (Hitchhiker): 2 bản
-(5, 'HHG-001', 'Available', 'Good'), (5, 'HHG-002', 'Lost', 'Charge user'),
+(3, 'HHG-001', 'Available', 'Good'), (3, 'HHG-002', 'Lost', 'Charge user'),
 -- Sách ID 6 (Gone Girl): 2 bản
-(6, 'GG-001', 'Available', 'Good'), (6, 'GG-002', 'Borrowed', 'Good'),
+(4, 'GG-001', 'Available', 'Good'), (4, 'GG-002', 'Borrowed', 'Good'),
 -- Sách ID 7 (Silent Patient): 2 bản
-(7, 'TSP-001', 'Available', 'New'), (7, 'TSP-002', 'Available', 'New'),
+(5, 'TSP-001', 'Available', 'New'), (5, 'TSP-002', 'Available', 'New'),
 -- Sách ID 8 (Da Vinci): 3 bản
-(8, 'DVC-001', 'Available', 'Good'), (8, 'DVC-002', 'Lost', 'Charge user'), (8, 'DVC-003', 'Available', 'New'),
+(6, 'DVC-001', 'Available', 'Good'), (6, 'DVC-002', 'Lost', 'Charge user'), (6, 'DVC-003', 'Available', 'New'),
 -- Sách ID 9 (Dragon Tattoo): 2 bản
-(9, 'GDT-001', 'Available', 'Good'), (9, 'GDT-002', 'Available', 'Good'),
+(7, 'GDT-001', 'Available', 'Good'), (7, 'GDT-002', 'Available', 'Good'),
 -- Sách ID 10 (And Then There Were None): 2 bản
-(10, 'ATT-001', 'Borrowed', 'Old'), (10, 'ATT-002', 'Available', 'Good'),
+(8, 'ATT-001', 'Borrowed', 'Old'), (8, 'ATT-002', 'Available', 'Good'),
 -- Sách ID 11 (Harry Potter): 5 bản (Sách Hot)
-(11, 'HP1-001', 'Borrowed', 'Worn'), (11, 'HP1-002', 'Borrowed', 'Good'), (11, 'HP1-003', 'Available', 'New'), (11, 'HP1-004', 'Available', 'New'), (11, 'HP1-005', 'Maintenance', 'Page missing'),
+(9, 'HP1-001', 'Borrowed', 'Worn'), (9, 'HP1-002', 'Borrowed', 'Good'), (9, 'HP1-003', 'Available', 'New'), (9, 'HP1-004', 'Available', 'New'), (9, 'HP1-005', 'Maintenance', 'Page missing'),
 -- Sách ID 12 (Hobbit): 3 bản
-(12, 'HBT-001', 'Available', 'New'), (12, 'HBT-002', 'Borrowed', 'Good'), (12, 'HBT-003', 'Available', 'Good'),
+(10, 'HBT-001', 'Available', 'New'), (10, 'HBT-002', 'Borrowed', 'Good'), (10, 'HBT-003', 'Available', 'Good'),
 -- Sách ID 13 (Game of Thrones): 3 bản
-(13, 'GOT-001', 'Available', 'Good'), (13, 'GOT-002', 'Available', 'New'), (13, 'GOT-003', 'Borrowed', 'Good'),
+(11, 'GOT-001', 'Available', 'Good'), (11, 'GOT-002', 'Available', 'New'), (11, 'GOT-003', 'Borrowed', 'Good'),
 -- Sách ID 14 (Name of Wind): 2 bản
-(14, 'NOW-001', 'Maintenance', 'Binding loose'), (14, 'NOW-002', 'Available', 'Good'),
+(12, 'NOW-001', 'Maintenance', 'Binding loose'), (12, 'NOW-002', 'Available', 'Good'),
 -- Sách ID 15 (Pride Prejudice): 2 bản
-(15, 'PAP-001', 'Available', 'Old'), (15, 'PAP-002', 'Available', 'Good'),
+(13, 'PAP-001', 'Available', 'Old'), (13, 'PAP-002', 'Available', 'Good'),
 -- Sách ID 16 (Notebook): 2 bản
-(16, 'NB-001', 'Borrowed', 'Good'), (16, 'NB-002', 'Available', 'Good'),
+(14, 'NB-001', 'Borrowed', 'Good'), (14, 'NB-002', 'Available', 'Good'),
 -- Sách ID 17 (Fault in Our Stars): 2 bản
-(17, 'FOS-001', 'Available', 'New'), (17, 'FOS-002', 'Available', 'New'),
+(15, 'FOS-001', 'Available', 'New'), (15, 'FOS-002', 'Available', 'New'),
 -- Sách ID 18 (Outlander): 2 bản
-(18, 'OUT-001', 'Available', 'Good'), (18, 'OUT-002', 'Borrowed', 'Good'),
+(16, 'OUT-001', 'Available', 'Good'), (16, 'OUT-002', 'Borrowed', 'Good'),
 -- Sách ID 19 (Book Thief): 2 bản
-(19, 'BT-001', 'Borrowed', 'New'), (19, 'BT-002', 'Available', 'Good'),
+(17, 'BT-001', 'Borrowed', 'New'), (17, 'BT-002', 'Available', 'Good'),
 -- Sách ID 20 (All Light): 2 bản
-(20, 'ALW-001', 'Available', 'New'), (20, 'ALW-002', 'Available', 'New'),
+(18, 'ALW-001', 'Available', 'New'), (18, 'ALW-002', 'Available', 'New'),
 -- Sách ID 21 (Nightingale): 2 bản
-(21, 'NG-001', 'Available', 'Good'), (21, 'NG-002', 'Available', 'Good'),
+(19, 'NG-001', 'Available', 'Good'), (19, 'NG-002', 'Available', 'Good'),
 -- Sách ID 22 (Kite Runner): 2 bản
-(22, 'KR-001', 'Available', 'Good'), (22, 'KR-002', 'Available', 'Good'),
+(20, 'KR-001', 'Available', 'Good'), (20, 'KR-002', 'Available', 'Good'),
 -- Sách ID 23 (It): 3 bản
-(23, 'IT-001', 'Available', 'New'), (23, 'IT-002', 'Available', 'Good'), (23, 'IT-003', 'Borrowed', 'Worn'),
+(21, 'IT-001', 'Available', 'New'), (21, 'IT-002', 'Available', 'Good'), (21, 'IT-003', 'Borrowed', 'Worn'),
 -- Sách ID 24 (Dracula): 2 bản
-(24, 'DRA-001', 'Borrowed', 'Old edition'), (24, 'DRA-002', 'Available', 'New'),
+(22, 'DRA-001', 'Borrowed', 'Old edition'), (22, 'DRA-002', 'Available', 'New'),
 -- Sách ID 25 (Shining): 2 bản
-(25, 'SHI-001', 'Available', 'Good'), (25, 'SHI-002', 'Borrowed', 'Good'),
+(23, 'SHI-001', 'Available', 'Good'), (23, 'SHI-002', 'Borrowed', 'Good'),
 -- Sách ID 26 (Bird Box): 2 bản
-(26, 'BB-001', 'Available', 'New'), (26, 'BB-002', 'Available', 'New'),
+(24, 'BB-001', 'Available', 'New'), (24, 'BB-002', 'Available', 'New'),
 -- Sách ID 27 (Steve Jobs): 3 bản
-(27, 'SJ-001', 'Available', 'Good'), (27, 'SJ-002', 'Borrowed', 'Good'), (27, 'SJ-003', 'Available', 'Good'),
+(25, 'SJ-001', 'Available', 'Good'), (25, 'SJ-002', 'Borrowed', 'Good'), (25, 'SJ-003', 'Available', 'Good'),
 -- Sách ID 28 (Becoming): 2 bản
-(28, 'BEC-001', 'Borrowed', 'New'), (28, 'BEC-002', 'Available', 'New'),
+(26, 'BEC-001', 'Borrowed', 'New'), (26, 'BEC-002', 'Available', 'New'),
 -- Sách ID 29 (Educated): 2 bản
-(29, 'EDU-001', 'Available', 'New'), (29, 'EDU-002', 'Available', 'Good'),
+(27, 'EDU-001', 'Available', 'New'), (27, 'EDU-002', 'Available', 'Good'),
 -- Sách ID 30 (Anne Frank): 2 bản
-(30, 'AF-001', 'Available', 'Good'), (30, 'AF-002', 'Borrowed', 'Old'),
+(28, 'AF-001', 'Available', 'Good'), (28, 'AF-002', 'Borrowed', 'Old'),
 -- Sách ID 31 (Sapiens): 3 bản
-(31, 'SAP-001', 'Borrowed', 'New'), (31, 'SAP-002', 'Available', 'New'), (31, 'SAP-003', 'Available', 'Good'),
+(29, 'SAP-001', 'Borrowed', 'New'), (29, 'SAP-002', 'Available', 'New'), (29, 'SAP-003', 'Available', 'Good'),
 -- Sách ID 32 (Guns Germs): 2 bản
-(32, 'GGS-001', 'Available', 'Good'), (32, 'GGS-002', 'Available', 'Good'),
+(30, 'GGS-001', 'Available', 'Good'), (30, 'GGS-002', 'Available', 'Good'),
 -- Sách ID 33 (Silk Roads): 2 bản
-(33, 'SR-001', 'Available', 'New'), (33, 'SR-002', 'Available', 'New'),
+(31, 'SR-001', 'Available', 'New'), (31, 'SR-002', 'Available', 'New'),
 -- Sách ID 34 (1776): 2 bản
-(34, '1776-001', 'Available', 'Old'), (34, '1776-002', 'Available', 'Good'),
+(32, '1776-001', 'Available', 'Old'), (32, '1776-002', 'Available', 'Good'),
 -- Sách ID 35 (Pragmatic Programmer): 3 bản
-(35, 'PP-001', 'Borrowed', 'New'), (35, 'PP-002', 'Borrowed', 'Good'), (35, 'PP-003', 'Available', 'New'),
+(33, 'PP-001', 'Borrowed', 'New'), (33, 'PP-002', 'Borrowed', 'Good'), (33, 'PP-003', 'Available', 'New'),
 -- Sách ID 36 (C Lang): 2 bản
-(36, 'C-001', 'Available', 'Classic'), (36, 'C-002', 'Available', 'New'),
+(34, 'C-001', 'Available', 'Classic'), (34, 'C-002', 'Available', 'New'),
 -- Sách ID 37 (Code Complete): 2 bản
-(37, 'CC-001', 'Available', 'Good'), (37, 'CC-002', 'Available', 'Good'),
+(35, 'CC-001', 'Available', 'Good'), (35, 'CC-002', 'Available', 'Good'),
 -- Sách ID 38 (Clean Code): 3 bản
-(38, 'CLC-001', 'Borrowed', 'Highlighted'), (38, 'CLC-002', 'Available', 'New'), (38, 'CLC-003', 'Available', 'New'),
+(36, 'CLC-001', 'Borrowed', 'Highlighted'), (36, 'CLC-002', 'Available', 'New'), (36, 'CLC-003', 'Available', 'New'),
 -- Sách ID 39 (Rich Dad): 2 bản
-(39, 'RDPD-001', 'Available', 'Good'), (39, 'RDPD-002', 'Borrowed', 'Good'),
+(37, 'RDPD-001', 'Available', 'Good'), (37, 'RDPD-002', 'Borrowed', 'Good'),
 -- Sách ID 40 (Thinking Fast): 2 bản
-(40, 'TFS-001', 'Available', 'New'), (40, 'TFS-002', 'Available', 'Good'),
+(38, 'TFS-001', 'Available', 'New'), (38, 'TFS-002', 'Available', 'Good'),
 -- Sách ID 41 (Zero to One): 2 bản
-(41, 'ZTO-001', 'Borrowed', 'New'), (41, 'ZTO-002', 'Available', 'New'),
+(39, 'ZTO-001', 'Borrowed', 'New'), (39, 'ZTO-002', 'Available', 'New'),
 -- Sách ID 42 (Shoe Dog): 2 bản
-(42, 'SD-001', 'Available', 'Good'), (42, 'SD-002', 'Available', 'Good'),
--- Sách ID 43 (Atomic Habits): 4 bản (Sách Hot)
-(43, 'AH-001', 'Borrowed', 'New'), (43, 'AH-002', 'Borrowed', 'New'), (43, 'AH-003', 'Available', 'New'), (43, 'AH-004', 'Available', 'New'),
+(40, 'SD-001', 'Available', 'Good'), (40, 'SD-002', 'Available', 'Good'),
 -- Sách ID 44 (Power of Now): 2 bản
-(44, 'PON-001', 'Available', 'Good'), (44, 'PON-002', 'Available', 'Good'),
--- Sách ID 45 (Subtle Art): 2 bản
-(45, 'SA-001', 'Available', 'New'), (45, 'SA-002', 'Borrowed', 'Good'),
+(41, 'PON-001', 'Available', 'Good'), (41, 'PON-002', 'Available', 'Good'),
 -- Sách ID 46 (Alchemist): 3 bản
-(46, 'ALC-001', 'Borrowed', 'Worn'), (46, 'ALC-002', 'Available', 'Good'), (46, 'ALC-003', 'Available', 'New'),
+(42, 'ALC-001', 'Borrowed', 'Worn'), (42, 'ALC-002', 'Available', 'Good'), (42, 'ALC-003', 'Available', 'New'),
 -- Sách ID 47 (Hungry Caterpillar): 2 bản
-(47, 'HC-001', 'Available', 'New'), (47, 'HC-002', 'Available', 'Good'),
+(43, 'HC-001', 'Available', 'New'), (43, 'HC-002', 'Available', 'Good'),
 -- Sách ID 48 (Charlotte Web): 2 bản
-(48, 'CW-001', 'Available', 'Good'), (48, 'CW-002', 'Available', 'Good'),
+(44, 'CW-001', 'Available', 'Good'), (44, 'CW-002', 'Available', 'Good'),
 -- Sách ID 49 (Little Prince): 3 bản
-(49, 'LP-001', 'Borrowed', 'New'), (49, 'LP-002', 'Available', 'Good'), (49, 'LP-003', 'Available', 'New');
+(45, 'LP-001', 'Borrowed', 'New'), (45, 'LP-002', 'Available', 'Good'), (45, 'LP-003', 'Available', 'New');

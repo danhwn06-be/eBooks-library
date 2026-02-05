@@ -47,18 +47,18 @@
                     Hi, <strong><?php echo $_SESSION['user_name']; ?>!</strong>
                 </span>
                 <div class="user-actions">
-                    <a href="<?php echo URL_ROOT; ?>/users/profile" class="btn btn-profile">
+                    <a href="<?php echo URL_ROOT; ?>/user/profile" class="btn btn-profile">
                         <i class="fa-solid fa-user"></i> Profile
                     </a>
-                    <a href="<?php echo URL_ROOT; ?>/users/logout" class="btn btn-outline">
+                    <a href="<?php echo URL_ROOT; ?>/user/logout" class="btn btn-outline">
                         <i class="fa-solid fa-right-from-bracket"></i> Logout
                     </a>
                 </div>
             <?php else : ?>
-                <a href="<?php echo URL_ROOT; ?>/users/login" class="btn btn-outline">
+                <a href="<?php echo URL_ROOT; ?>/user/login" class="btn btn-outline">
                     <i class="fa-solid fa-right-to-bracket"></i> Log in
                 </a>
-                <a href="<?php echo URL_ROOT; ?>/users/register" class="btn btn-primary">
+                <a href="<?php echo URL_ROOT; ?>/user/register" class="btn btn-primary">
                     Register
                 </a>
             <?php endif; ?>
