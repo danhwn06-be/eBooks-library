@@ -43,8 +43,9 @@ class Reservation
             $stmtUpdate->bindValue(':copy_id', $copy->copy_id);
             $stmtUpdate->execute();
 
-            // 3. Tạo đơn đặt trước
-            $sql = "INSERT INTO Reservations (user_id, book_id) VALUES (:user_id, :book_id)";
+            // 3. Tạo đơn đặt trước (Mặc định status là 'Waiting' theo DB của bạn)
+            $sql = "INSERT INTO Reservations (user_id, book_id, reservation_date, status) 
+                    VALUES (:user_id, :book_id, NOW(), 'Waiting')";
             $stmt = $this->db->getConnection()->prepare($sql);
             $stmt->execute([
                 ':user_id' => $userId,
@@ -63,6 +64,28 @@ class Reservation
     /**
      * Lấy danh sách tất cả các đơn đặt trước (Admin)
      * @return array Danh sách reservations
+     */
+    /**
+     * LẤY THÔNG TIN CHI TIẾT ĐỂ HIỂN THỊ TRÊN TRANG XÁC NHẬN
+     * Đã đồng bộ cột phone_number theo Database thực tế
+     */
+    public function getReservationDetails($userId, $bookId) {
+        // Đã đổi u.phone thành u.phone_number để khớp với bảng Users của bạn
+        $sql = "SELECT u.email, u.address, u.member_code, u.phone_number, b.title 
+                FROM Users u, Books b 
+                WHERE u.user_id = :user_id AND b.book_id = :book_id";
+        
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->execute([':user_id' => $userId, ':book_id' => $bookId]);
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * ADMIN: LẤY DANH SÁCH TẤT CẢ ĐƠN ĐẶT TRƯỚC
      */
     public function getAllReservations()
     {
