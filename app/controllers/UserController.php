@@ -2,21 +2,60 @@
 
 class UserController extends Controller
 {
-        private $userModel;
-        private $loanModel;
+    private $userModel;
+    private $loanModel;
 
+    /**
+     * Khởi tạo Controller và load các Model cần thiết
+     */
     public function __construct()
     {
         $this->userModel = $this->model('User');
         $this->loanModel = $this->model('Loan');
     }
 
-        public function index() 
+    // 1. AUTHENTICATION (LOGIN, REGISTER, LOGOUT)
+
+    /**
+     * Đăng nhập tài khoản
+     */
+    public function login()
     {
-        $this->register(); 
+        if (isset($_SESSION['user_id'])) {
+            header('Location: ' . URL_ROOT);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = trim($_POST['email']);
+            $password = $_POST['password'];
+            $user = $this->userModel->login($email, $password);
+
+            if ($user) {
+                $_SESSION['user_id']   = $user->user_id;
+                $_SESSION['user_name'] = $user->full_name;
+                $_SESSION['user_role'] = $user->role;
+
+                if ($user->role === 'Admin') {
+                    header('Location: ' . URL_ROOT . '/admin/books');
+                } else {
+                    header('Location: ' . URL_ROOT);
+                }
+                exit;
+            }
+
+            $data['error'] = 'Email or password is incorrect! Please try again.';
+            $this->view('users/login', $data);
+        } else {
+            $this->view('users/login');
+        }
     }
 
-    public function register() {
+    /**
+     * Đăng ký tài khoản mới
+     */
+    public function register()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'email'        => trim($_POST['email']),
@@ -69,8 +108,30 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Đăng xuất khỏi hệ thống
+     */
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+        }
+        session_destroy();
+        header('Location: ' . URL_ROOT);
+        exit;
+    }
 
-public function profile()
+    // 2. USER PROFILE (READ)
+
+    /**
+     * Xem hồ sơ cá nhân
+     */
+    public function profile()
     {
         // 1. Kiểm tra đăng nhập
         
@@ -101,152 +162,110 @@ public function profile()
         $this->view('profile/index', $data);
     }
 
-    public function login()
+    /**
+     * Trang mặc định (Chuyển hướng sang đăng ký hoặc login tùy logic)
+     */
+    public function index() 
     {
-        if (isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT);
+        $this->register(); 
+    }
+    
+    // 3. USER ACTIONS (UPDATE)
+
+    /**
+     * Chỉnh sửa thông tin cá nhân
+     */
+    public function edit()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . URL_ROOT . '/users/login');
             exit;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email']);
-            $password = $_POST['password'];
-            $user = $this->userModel->login($email, $password);
+        $userId = $_SESSION['user_id'];
+        
+        // Lấy thông tin user hiện tại từ DB (để lấy pass cũ và hiển thị form)
+        $currentUser = $this->userModel->getUserById($userId);
 
-            if ($user) {
-                $_SESSION['user_id']   = $user->user_id;
-                $_SESSION['user_name'] = $user->full_name;
-                $_SESSION['user_role'] = $user->role;
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Sanitize POST data
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
 
-                if ($user->role === 'Admin') {
-                    header('Location: ' . URL_ROOT . '/admin/books');
-                } else {
-                    header('Location: ' . URL_ROOT);
-                }
-                exit;
-            }
+            $data = [
+                'user_id' => $userId,
+                'full_name' => trim($_POST['full_name']),
+                'email' => trim($_POST['email']),
+                'phone_number' => trim($_POST['phone_number']),
+                'address' => trim($_POST['address']),
+                
+                // Password fields
+                'current_password' => $_POST['current_password'],
+                'new_password' => $_POST['new_password'],
+                'confirm_password' => $_POST['confirm_password'],
+                
+                // Password mặc định là password cũ (nếu không đổi)
+                'password' => $currentUser->password_hash, 
+                
+                // Errors
+                'full_name_err' => '',
+                'email_err' => '',
+                'password_err' => '',
+                'user' => $currentUser // Giữ lại object user để view dùng nếu có lỗi
+            ];
 
-            $data['error'] = 'Email or password is incorrect! Please try again.';
-            $this->view('users/login', $data);
-        } else {
-            $this->view('users/login');
-        }
-    }
-    
-    public function logout()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-        }
-        session_destroy();
-        header('Location: ' . URL_ROOT);
-        exit;
-    }
+            // 1. Validate thông tin cơ bản
+            if (empty($data['full_name'])) $data['full_name_err'] = 'Vui lòng nhập tên.';
+            if (empty($data['email'])) $data['email_err'] = 'Vui lòng nhập email.';
 
-    // public function index() {
-    //     // Chuyển hướng thẳng sang hàm profile để tránh viết lặp code
-    //     $this->profile();
-    // }
-
-    // Hàm edit() hồ sơ
-// File: app/controllers/UsersController.php
-
-public function edit()
-{
-    if (!isset($_SESSION['user_id'])) {
-        header('Location: ' . URL_ROOT . '/users/login');
-        exit;
-    }
-
-    $userId = $_SESSION['user_id'];
-    
-    // Lấy thông tin user hiện tại từ DB (để lấy pass cũ và hiển thị form)
-    $currentUser = $this->userModel->getUserById($userId);
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Sanitize POST data
-        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
-
-        $data = [
-            'user_id' => $userId,
-            'full_name' => trim($_POST['full_name']),
-            'email' => trim($_POST['email']),
-            'phone_number' => trim($_POST['phone_number']),
-            'address' => trim($_POST['address']),
-            
-            // Password fields
-            'current_password' => $_POST['current_password'],
-            'new_password' => $_POST['new_password'],
-            'confirm_password' => $_POST['confirm_password'],
-            
-            // Password mặc định là password cũ (nếu không đổi)
-            'password' => $currentUser->password_hash, 
-            
-            // Errors
-            'full_name_err' => '',
-            'email_err' => '',
-            'password_err' => '',
-            'user' => $currentUser // Giữ lại object user để view dùng nếu có lỗi
-        ];
-
-        // 1. Validate thông tin cơ bản
-        if (empty($data['full_name'])) $data['full_name_err'] = 'Vui lòng nhập tên.';
-        if (empty($data['email'])) $data['email_err'] = 'Vui lòng nhập email.';
-
-        // 2. Validate đổi mật khẩu (Chỉ chạy khi người dùng nhập mật khẩu mới)
-        if (!empty($data['new_password'])) {
-            // Kiểm tra mật khẩu hiện tại có đúng không
-            if (password_verify($data['current_password'], $currentUser->password_hash)) {
-                // Kiểm tra pass mới và confirm pass
-                if ($data['new_password'] == $data['confirm_password']) {
-                    // Nếu pass mới quá ngắn (tuỳ chọn)
-                    if (strlen($data['new_password']) < 6) {
-                        $data['password_err'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+            // 2. Validate đổi mật khẩu (Chỉ chạy khi người dùng nhập mật khẩu mới)
+            if (!empty($data['new_password'])) {
+                // Kiểm tra mật khẩu hiện tại có đúng không
+                if (password_verify($data['current_password'], $currentUser->password_hash)) {
+                    // Kiểm tra pass mới và confirm pass
+                    if ($data['new_password'] == $data['confirm_password']) {
+                        // Nếu pass mới quá ngắn (tuỳ chọn)
+                        if (strlen($data['new_password']) < 6) {
+                            $data['password_err'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+                        } else {
+                            // Mọi thứ ok -> Hash pass mới để chuẩn bị lưu
+                            $data['password'] = password_hash($data['new_password'], PASSWORD_DEFAULT);
+                        }
                     } else {
-                        // Mọi thứ ok -> Hash pass mới để chuẩn bị lưu
-                        $data['password'] = password_hash($data['new_password'], PASSWORD_DEFAULT);
+                        $data['password_err'] = 'Mật khẩu nhập lại không khớp';
                     }
                 } else {
-                    $data['password_err'] = 'Mật khẩu nhập lại không khớp';
+                    $data['password_err'] = 'Mật khẩu hiện tại không đúng';
                 }
-            } else {
-                $data['password_err'] = 'Mật khẩu hiện tại không đúng';
             }
-        }
 
-        // 3. Kiểm tra tổng thể lỗi
-        if (empty($data['full_name_err']) && empty($data['email_err']) && empty($data['password_err'])) {
-            // Update User (Gọi Model)
-            if ($this->userModel->updateUser($data)) {
-                // Cập nhật lại Session tên nếu người dùng đổi tên
-                $_SESSION['user_name'] = $data['full_name'];
-                
-                header('Location: ' . URL_ROOT . '/users/profile?status=success');
-                exit; // QUAN TRỌNG: Phải có exit sau header
+            // 3. Kiểm tra tổng thể lỗi
+            if (empty($data['full_name_err']) && empty($data['email_err']) && empty($data['password_err'])) {
+                // Update User (Gọi Model)
+                if ($this->userModel->updateUser($data)) {
+                    // Cập nhật lại Session tên nếu người dùng đổi tên
+                    $_SESSION['user_name'] = $data['full_name'];
+                    
+                    header('Location: ' . URL_ROOT . '/users/profile?status=success');
+                    exit; // QUAN TRỌNG: Phải có exit sau header
+                } else {
+                    die('Đã xảy ra lỗi hệ thống (Database Error).');
+                }
+
             } else {
-                die('Đã xảy ra lỗi hệ thống (Database Error).');
+                // Có lỗi -> Load lại view edit với các lỗi
+                $this->view('profile/edit', $data);
             }
 
         } else {
-            // Có lỗi -> Load lại view edit với các lỗi
+            // GET Request: Load form lần đầu
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Chỉnh sửa hồ sơ',
+                'full_name_err' => '',
+                'email_err' => '',
+                'password_err' => ''
+            ];
             $this->view('profile/edit', $data);
         }
-
-    } else {
-        // GET Request: Load form lần đầu
-        $data = [
-            'user' => $currentUser,
-            'title' => 'Chỉnh sửa hồ sơ',
-            'full_name_err' => '',
-            'email_err' => '',
-            'password_err' => ''
-        ];
-        $this->view('profile/edit', $data);
     }
-}
 }

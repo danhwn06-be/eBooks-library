@@ -5,14 +5,22 @@ class ReservationController extends Controller
     private $reservationModel;
     private $userModel;
 
+    /**
+     * Khởi tạo Controller và load các Model cần thiết
+     */
     public function __construct()
     {
-        $this->reservationModel = $this->model("reservation");
+        $this->reservationModel = $this->model("Reservation");
         $this->userModel = $this->model("User");
     }
 
-    // HIỂN THỊ FORM
-        public function create($bookId = null)
+    // 1. USER ACTIONS
+
+    /**
+     * Hiển thị trang xác nhận đặt trước sách
+     * @param int|null $bookId ID sách cần đặt
+     */
+    public function create($bookId = null)
     {
         // 1. Kiểm tra đăng nhập
         if (!isset($_SESSION['user_id'])) {
@@ -48,7 +56,9 @@ class ReservationController extends Controller
         $this->view('reservation/confirm', $data);
     }
 
-    // LƯU RESERVATION
+    /**
+     * Xử lý lưu đơn đặt trước (POST)
+     */
     public function store()
     {
         if (!isset($_SESSION['user_id'])) {

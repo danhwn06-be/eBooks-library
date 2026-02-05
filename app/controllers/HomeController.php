@@ -1,21 +1,34 @@
 <?php
 class HomeController extends Controller
 {
+    private $bookModel;
+    private $categoryModel;
+
+    /**
+     * Khởi tạo Controller và load các Model cần thiết
+     */
+    public function __construct()
+    {
+        $this->bookModel = $this->model('Book');
+        $this->categoryModel = $this->model('Category');
+    }
+
+    // 1. PUBLIC VIEWS
+
+    /**
+     * Trang chủ hiển thị danh sách sách (có phân trang)
+     */
     public function index()
     {
-        $bookModel = $this->model('Book');
-        $categoryModel = $this->model('Category');
-
         // Giới hạn số sách trong 1 trang
         $limit = 6;
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        if ($page < 1) $page = 1;
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $offset = ($page - 1) * $limit;
 
-        $books = $bookModel->getBooksWithPagination($limit, $offset);
-        $totalBooks = $bookModel->getTotalBookCount();
+        $books = $this->bookModel->getBooksWithPagination($limit, $offset);
+        $totalBooks = $this->bookModel->getTotalBookCount();
         $totalPages = ceil($totalBooks / $limit);
-        $categories = $categoryModel->getAllCategories();
+        $categories = $this->categoryModel->getAllCategories();
 
         $data = [
             'title' => 'Home Page',

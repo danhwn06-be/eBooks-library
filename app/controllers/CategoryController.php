@@ -2,10 +2,19 @@
 class CategoryController extends Controller {
     private $bookModel;
 
+    /**
+     * Khởi tạo Controller và load Model
+     */
     public function __construct() {
         $this->bookModel = $this->model('Book');
     }
 
+    // 1. PUBLIC VIEWS
+
+    /**
+     * Hiển thị danh sách sách theo danh mục (hoặc tất cả nếu không chọn)
+     * @param int|null $cat_id ID danh mục
+     */
     public function index($cat_id = null) {
         $categories = $this->bookModel->getAllCategories();
         
