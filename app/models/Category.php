@@ -2,35 +2,36 @@
 class Category
 {
     private $db;
-    private $cache;
 
+    /**
+     * Khởi tạo kết nối Database
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
-        require_once APP_ROOT . '/app/core/Cache.php';
-        $this->cache = new Cache();
     }
 
-    // Lấy danh sách tất cả danh mục
+    /**
+     * Lấy danh sách tất cả danh mục
+     * @return array Danh sách các danh mục
+     */
     public function getAllCategories()
     {
-        $cacheKey = 'all_categories_list';
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) return $cachedData;
-
         $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
         try {
             $stmt = $this->db->getConnection()->prepare($sql);
             $stmt->execute();
-            $result = $stmt->fetchAll();
-            $this->cache->set($cacheKey, $result, 86400); // Cache 24h
-            return $result;
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
             return [];
         }
     }
 
-    // Lấy tên Category theo ID
+    /**
+     * Lấy tên Category theo ID
+     * @param int $cat_id ID của danh mục
+     * @return string Tên danh mục hoặc chuỗi rỗng nếu không tìm thấy
+     */
     public function getCategoryNameById($cat_id)
     {
         $sql = "SELECT category_name FROM Categories WHERE category_id = :cat_id";

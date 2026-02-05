@@ -4,12 +4,22 @@ class Loan
 {
     private $db;
 
+    /**
+     * Khởi tạo kết nối Database
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
-    // 1. Đếm số sách ĐANG mượn (Reading) - Chưa trả
+
+    // 1. USER PROFILE & HISTORY
+
+    /**
+     * Đếm số sách ĐANG mượn (Reading) - Chưa trả
+     * @param int $userId ID người dùng
+     * @return int Số lượng sách đang mượn
+     */
     public function countReading($userId) {
         $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id AND status = 'Active'";
         $stmt = $this->db->getConnection()->prepare($sql);
@@ -19,7 +29,11 @@ class Loan
         return $result ? $result->count : 0;
     }
 
-    // 2. Đếm tổng số sách ĐÃ mượn trong quá khứ
+    /**
+     * Đếm tổng số sách ĐÃ mượn trong quá khứ
+     * @param int $userId ID người dùng
+     * @return int Tổng số sách đã mượn
+     */
     public function countTotalBorrowed($userId)
     {
         $sql = "SELECT COUNT(*) as count FROM Loans WHERE user_id = :user_id";
@@ -30,7 +44,11 @@ class Loan
         return $result ? $result->count : 0;
     }
 
-    // 3. Lấy lịch sử mượn trả (Chi tiết hơn hàm cũ)
+    /**
+     * Lấy lịch sử mượn trả chi tiết
+     * @param int $userId ID người dùng
+     * @return array Danh sách lịch sử mượn
+     */
     public function getBorrowHistory($userId)
     {
         $sql = "SELECT DISTINCT b.book_id, b.title, l.loan_id, l.borrow_date, l.due_date, l.return_date, l.status
@@ -49,10 +67,11 @@ class Loan
         }
     }
 
-    private function conn() {
-        return $this->db->getConnection();
-    }
-
+    /**
+     * Lấy danh sách sách đang mượn của user (chưa trả)
+     * @param int $userId
+     * @return array
+     */
     public function getCurrentBorrowByUser($userId)
     {
         $sql = "SELECT l.loan_id, bk.title, l.borrow_date, l.due_date
@@ -70,6 +89,11 @@ class Loan
         }   
     }
 
+    /**
+     * Lấy lịch sử sách đã trả của user
+     * @param int $userId
+     * @return array
+     */
     public function getBorrowHistoryByUser($userId)
     {
         $sql = "SELECT bk.title, l.borrow_date, l.return_date
@@ -87,6 +111,12 @@ class Loan
         }
     }
 
+    // 2. LOAN PROCESS (ADMIN)
+
+    /**
+     * Lấy danh sách các bản sao sách có sẵn để mượn
+     * @return array
+     */
     public function getAvailableCopies() {
         $sql = "SELECT bc.copy_id, b.title, b.book_id 
                 FROM BookCopies bc 
@@ -97,6 +127,11 @@ class Loan
         return $stmt->fetchAll(PDO::FETCH_OBJ); 
     }
 
+    /**
+     * Kiểm tra thành viên có tồn tại qua mã thành viên
+     * @param string $member_code
+     * @return mixed Object user hoặc false
+     */
     public function checkMemberExist($member_code) {
         $sql = "SELECT user_id FROM Users WHERE member_code = :code";
         $stmt = $this->conn()->prepare($sql);
@@ -106,6 +141,11 @@ class Loan
         return $stmt->fetch(PDO::FETCH_OBJ); // Trả về object hoặc false nếu không thấy
     }
 
+    /**
+     * Tạo phiếu mượn sách mới (Transaction)
+     * @param array $data Thông tin mượn
+     * @return mixed True nếu thành công, string lỗi nếu thất bại
+     */
     public function createLoan($data) {
         try {
             // Bắt đầu Transaction để đảm bảo dữ liệu đồng nhất
@@ -165,6 +205,13 @@ class Loan
         }
     }
 
+    // 3. RETURN PROCESS (ADMIN)
+
+    /**
+     * Lấy danh sách sách đang mượn theo mã thành viên
+     * @param string $member_code
+     * @return array
+     */
     public function getActiveLoansByMember($member_code) {
         // Lấy kết nối PDO trực tiếp từ Singleton Database
         $conn = $this->db->getConnection();
@@ -188,24 +235,15 @@ class Loan
         }
     }
 
-    public function getReservations() {
-        $conn = $this->db->getConnection();
-        $sql = "SELECT r.*, u.member_code, b.title 
-                FROM Reservations r
-                JOIN Users u ON r.user_id = u.user_id
-                JOIN Books b ON r.book_id = b.book_id
-                ORDER BY r.reservation_date DESC";
-        
-        try {
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
 
-
+    /**
+     * Cập nhật trả sách (Transaction)
+     * @param int $loan_id
+     * @param int $copy_id
+     * @param string $return_date
+     * @param string|null $note
+     * @return bool
+     */
     public function updateReturn($loan_id, $copy_id, $return_date, $note = null) {
         try {
             $this->conn()->beginTransaction();
@@ -236,6 +274,12 @@ class Loan
         }
     }
 
+    // 4. ADMIN DASHBOARD & TRACKING
+
+    /**
+     * Lấy tất cả phiếu mượn (Lịch sử toàn hệ thống)
+     * @return array
+     */
     public function getAllLoans() {
         $sql = "SELECT l.*, u.member_code, b.title, l.copy_id 
                 FROM Loans l
@@ -248,6 +292,31 @@ class Loan
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+    /**
+     * Lấy danh sách các đơn đặt trước (Reservations)
+     * @return array
+     */
+    public function getReservations() {
+        $conn = $this->db->getConnection();
+        $sql = "SELECT r.*, u.member_code, b.title 
+                FROM Reservations r
+                JOIN Users u ON r.user_id = u.user_id
+                JOIN Books b ON r.book_id = b.book_id
+                ORDER BY r.reservation_date DESC";
+        
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Lấy thống kê mượn trả cho Dashboard
+     * @return array
+     */
     public function getLoanStats() {
         $stats = ['total' => 0, 'overdue' => 0, 'reservations' => 0];
         
@@ -270,5 +339,14 @@ class Loan
         $stats['reservations'] = $stmt3->fetch(PDO::FETCH_OBJ)->count;
 
         return $stats;
+    }
+
+    // 5. HELPERS
+
+    /**
+     * Helper lấy kết nối PDO
+     */
+    private function conn() {
+        return $this->db->getConnection();
     }
 }

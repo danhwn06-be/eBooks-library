@@ -4,11 +4,22 @@ class Reservation
 {
     private $db;
 
+    /**
+     * Khởi tạo kết nối Database
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
+    // 1. USER METHODS
+
+    /**
+     * Tạo đơn đặt trước sách (Transaction)
+     * @param int $userId ID người dùng
+     * @param int $bookId ID sách
+     * @return bool True nếu thành công
+     */
     public function createReservation($userId, $bookId)
     {
         try {
@@ -47,9 +58,12 @@ class Reservation
         }
     }
 
-    // ================================
-    // ADMIN: LẤY DANH SÁCH RESERVATIONS
-    // ================================
+    // 2. ADMIN METHODS
+
+    /**
+     * Lấy danh sách tất cả các đơn đặt trước (Admin)
+     * @return array Danh sách reservations
+     */
     public function getAllReservations()
     {
         $sql = "

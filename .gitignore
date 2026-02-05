@@ -3,3 +3,4 @@
 
 # Bỏ cache
 app/cache/
+vendor/

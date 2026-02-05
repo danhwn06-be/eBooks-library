@@ -3,46 +3,23 @@
 class Book
 {
     private $db;
-    private $cache;
 
+    /**
+     * Khởi tạo kết nối Database
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
-        require_once APP_ROOT . '/app/core/Cache.php';
-        $this->cache = new Cache();
     }
 
-    // Đếm tổng số sách (để tính số trang)
-    public function getTotalBookCount()
-    {
-        $cacheKey = 'total_book_count';
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) return $cachedData;
+    // 1. CÁC HÀM ĐỌC DỮ LIỆU (READ) - DÀNH CHO NGƯỜI DÙNG (USER FRONTEND)
 
-        $sql = "SELECT COUNT(*) AS total
-            FROM Books";
-        try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->execute();
-            $row = $stmt->fetch();
-            $total = $row['total'];
-            
-            $this->cache->set($cacheKey, $total, 3600);
-            return $total;
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-
-    // Hiển thị tất cả sách (Basic list)
-    public function getAllBooks()
-    {
-        $sql = "SELECT * FROM Books";
-        $stmt = $this->db->getConnection()->query($sql);
-        return $stmt->fetchAll();
-    }
-
-    // Lấy danh sách có phân trang (Trang chủ)
+    /**
+     * Lấy danh sách sách có phân trang (Hiển thị Trang chủ)
+     * @param int $limit Số lượng sách mỗi trang
+     * @param int $offset Vị trí bắt đầu
+     * @return array Danh sách sách
+     */
     public function getBooksWithPagination($limit, $offset)
     {
         $sql = "SELECT 
@@ -63,59 +40,11 @@ class Book
         }
     }
 
-    // Lấy chi tiết 1 cuốn sách theo ID
-    public function getBookById($id)
-    {
-        $cacheKey = 'book_detail_' . $id;
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) return $cachedData;
-
-        $sql = "SELECT 
-                b.*,
-                c.category_name,
-                COUNT(bc.copy_id) AS total_copies,
-                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies
-            FROM Books b
-            LEFT JOIN Categories c ON b.category_id = c.category_id
-            LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
-            WHERE b.book_id = :id
-            GROUP BY b.book_id";
-
-        try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->bindValue(':id', $id);
-            $stmt->execute();
-            $result = $stmt->fetch();
-            
-            if ($result) $this->cache->set($cacheKey, $result, 86400);
-            return $result;
-        } catch (PDOException) {
-            return false;
-        };
-    }
-
-    // Lấy tất cả danh mục sách (Bổ sung để hỗ trợ Controller và Cache) -- test
-    public function getAllCategories()
-    {
-        $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
-        $stmt = $this->db->getConnection()->query($sql);
-        $categories = $stmt->fetchAll();
-
-        return $categories;
-    }
-
-    // Lấy tên danh mục theo ID (Bổ sung)
-    public function getCategoryNameById($id)
-    {
-        $sql = "SELECT category_name FROM Categories WHERE category_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        return $result ? $result['category_name'] : 'Unknown Category';
-    }
-
-    //Tìm kiếm sách (Title, Author, ISBN)
+    /**
+     * Tìm kiếm sách theo Tiêu đề, Tác giả hoặc ISBN
+     * @param string $keyword Từ khóa tìm kiếm
+     * @return array Danh sách sách tìm thấy
+     */
     public function searchBooks($keyword)
     {
         $sql = "SELECT b.*, 
@@ -131,7 +60,39 @@ class Book
         return $stmt->fetchAll();
     }
 
-    // Lọc sách theo nhiều tiêu chí
+    /**
+     * Lấy chi tiết 1 cuốn sách theo ID
+     * @param int $id ID của sách
+     * @return mixed Mảng thông tin sách hoặc false nếu không tìm thấy
+     */
+    public function getBookById($id)
+    {
+        $sql = "SELECT 
+                b.*,
+                c.category_name,
+                COUNT(bc.copy_id) AS total_copies,
+                COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies
+            FROM Books b
+            LEFT JOIN Categories c ON b.category_id = c.category_id
+            LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
+            WHERE b.book_id = :id
+            GROUP BY b.book_id";
+
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->bindValue(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch();
+        } catch (PDOException) {
+            return false;
+        };
+    }
+
+    /**
+     * Lọc sách theo nhiều tiêu chí (Category, Year, Author)
+     * @param array $f Mảng chứa các bộ lọc
+     * @return array Danh sách sách đã lọc
+     */
     public function getFilteredBooks($f)
     {
         $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
@@ -157,7 +118,43 @@ class Book
         return $stmt->fetchAll();
     }
 
-    // Lấy sách theo Category ID
+    /**
+     * Đếm tổng số sách trong hệ thống (Hỗ trợ phân trang)
+     * @return int Tổng số sách
+     */
+    public function getTotalBookCount()
+    {
+        $sql = "SELECT COUNT(*) AS total
+            FROM Books";
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch();
+            $total = $row['total'];
+            return $total;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Hiển thị tất cả sách (Danh sách cơ bản, không phân trang)
+     * @return array
+     */
+    public function getAllBooks()
+    {
+        $sql = "SELECT * FROM Books";
+        $stmt = $this->db->getConnection()->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    // 2. CÁC HÀM LIÊN QUAN ĐẾN DANH MỤC (CATEGORY RELATED)
+
+    /**
+     * Lấy danh sách sách theo ID danh mục (Không phân trang)
+     * @param int $cat_id ID danh mục
+     * @return array
+     */
     public function getBooksByCategoryId($cat_id)
     {
         $sql = "SELECT b.book_id, b.title, b.author, b.image_url, 
@@ -173,29 +170,13 @@ class Book
         return $stmt->fetchAll();
     }
 
-
-    // Đếm số sách trong 1 danh mục
-    public function getBookCountByCategoryId($cat_id)
-    {
-        $cacheKey = 'cat_count_' . $cat_id;
-        $cached = $this->cache->get($cacheKey);
-        if ($cached !== false) return $cached;
-
-        $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
-        try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
-            $stmt->execute();
-            $row = $stmt->fetch();
-            $total = $row['total'];
-            $this->cache->set($cacheKey, $total, 3600);
-            return $total;
-        } catch (PDOException $e) {
-            return 0;
-        }
-    }
-
-    // Lấy sách theo danh mục có phân trang
+    /**
+     * Lấy danh sách sách theo danh mục có phân trang
+     * @param int $cat_id ID danh mục
+     * @param int $limit Số lượng mỗi trang
+     * @param int $offset Vị trí bắt đầu
+     * @return array
+     */
     public function getBooksByCategoryIdPaginated($cat_id, $limit, $offset)
     {
         $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
@@ -220,27 +201,62 @@ class Book
         }
     }
 
-    // Lấy sách để hiển thị cho dashboard
-    public function getBooksForAdmin()
+    /**
+     * Đếm số lượng sách trong một danh mục (Hỗ trợ phân trang)
+     * @param int $cat_id ID danh mục
+     * @return int Số lượng sách
+     */
+    public function getBookCountByCategoryId($cat_id)
     {
-        $cacheKey = 'admin_books_list';
-        $cachedData = $this->cache->get($cacheKey);
-        if ($cachedData !== false) return $cachedData;
-
-        $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
-                FROM Books b
-                LEFT JOIN Categories c ON b.category_id = c.category_id
-                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
-                GROUP BY b.book_id
-                ORDER BY b.book_id DESC";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        $this->cache->set($cacheKey, $result, 3600);
-        return $result;
+        $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch();
+            return $row['total'];
+        } catch (PDOException $e) {
+            return 0;
+        }
     }
 
-    // Lấy sách cho admin có phân trang (Không cache để đảm bảo dữ liệu realtime)
+    /**
+     * Lấy tất cả danh mục sách
+     * @return array Danh sách danh mục
+     */
+    public function getAllCategories()
+    {
+        $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
+        $stmt = $this->db->getConnection()->query($sql);
+        $categories = $stmt->fetchAll();
+
+        return $categories;
+    }
+
+    /**
+     * Lấy tên danh mục dựa trên ID
+     * @param int $id ID danh mục
+     * @return string Tên danh mục
+     */
+    public function getCategoryNameById($id)
+    {
+        $sql = "SELECT category_name FROM Categories WHERE category_id = :id";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result ? $result['category_name'] : 'Unknown Category';
+    }
+
+
+    // 3. CÁC HÀM QUẢN TRỊ (ADMIN READ)
+
+    /**
+     * Lấy danh sách sách cho Admin có phân trang (Không Cache - Realtime)
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
     public function getBooksForAdminPaginated($limit, $offset)
     {
         $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
@@ -258,7 +274,32 @@ class Book
         return $stmt->fetchAll();
     }
 
-    // Thêm sách mới
+    /**
+     * Lấy toàn bộ sách cho Dashboard hoặc Export
+     * @return array
+     */
+    public function getBooksForAdmin()
+    {
+        $sql = "SELECT b.*, c.category_name, COUNT(bc.copy_id) as total_copies
+                FROM Books b
+                LEFT JOIN Categories c ON b.category_id = c.category_id
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
+                GROUP BY b.book_id
+                ORDER BY b.book_id DESC";
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+
+    // 4. CÁC HÀM GHI DỮ LIỆU (WRITE - CRUD)
+
+
+    /**
+     * Thêm sách mới vào hệ thống
+     * @param array $data Mảng dữ liệu sách
+     * @return mixed ID sách vừa tạo hoặc false
+     */
     public function addBook($data)
     {
         $sql = "INSERT INTO Books (title, author, isbn, category_id, publisher, publication_year, description, image_url) 
@@ -275,21 +316,18 @@ class Book
         $stmt->bindValue(':image', $data['image_url']); // Lưu tên file ảnh
 
         if ($stmt->execute()) {
-            $this->cache->delete('admin_books_list');
-            $this->cache->delete('total_book_count');
-            $this->cache->delete('cat_count_' . $data['category_id']);
             return $this->db->getConnection()->lastInsertId();
         }
         return false;
     }
 
-    // Cập nhật sách
+    /**
+     * Cập nhật thông tin sách
+     * @param array $data Mảng dữ liệu cập nhật
+     * @return bool True nếu thành công
+     */
     public function updateBook($data)
     {
-        // Lấy thông tin cũ để xử lý cache category nếu có thay đổi
-        $oldBook = $this->getBookById($data['book_id']); // Lưu ý: hàm này giờ đã có cache, nên rất nhanh
-        $oldCatId = $oldBook ? $oldBook['category_id'] : 0;
-
         // Nếu người dùng không upload ảnh mới ($data['image_url'] rỗng), ta không update cột image_url
         if (empty($data['image_url'])) {
             $sql = "UPDATE Books SET 
@@ -322,33 +360,23 @@ class Book
         }
 
         if ($stmt->execute()) {
-            $this->cache->delete('book_detail_' . $data['book_id']);
-            $this->cache->delete('admin_books_list');
-            
-            if ($oldCatId) $this->cache->delete('cat_count_' . $oldCatId);
-            if ($data['category_id'] && $data['category_id'] != $oldCatId) {
-                $this->cache->delete('cat_count_' . $data['category_id']);
-            }
             return true;
         }
         return false;
     }
 
-    // Xóa sách
+    /**
+     * Xóa sách khỏi hệ thống
+     * @param int $id ID sách cần xóa
+     * @return bool True nếu xóa thành công
+     */
     public function deleteBook($id)
     {
-        $book = $this->getBookById($id);
-        $catId = $book['category_id'] ?? 0;
-
         $sql = "DELETE FROM Books WHERE book_id = :id";
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':id', $id);
         
         if ($stmt->execute()) {
-            $this->cache->delete('book_detail_' . $id);
-            $this->cache->delete('admin_books_list');
-            $this->cache->delete('total_book_count');
-            if ($catId) $this->cache->delete('cat_count_' . $catId);
             return true;
         }
         return false;
