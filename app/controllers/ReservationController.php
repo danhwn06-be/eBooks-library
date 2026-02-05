@@ -24,7 +24,7 @@ class ReservationController extends Controller
     {
         // 1. Kiểm tra đăng nhập
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT . '/users/login');
+            header('Location: ' . URL_ROOT . '/user/login');
             exit;
         }
 
@@ -62,7 +62,7 @@ class ReservationController extends Controller
     public function store()
     {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT . '/users/login');
+            header('Location: ' . URL_ROOT . '/user/login');
             exit;
         }
 
@@ -83,7 +83,7 @@ class ReservationController extends Controller
             if ($this->reservationModel->createReservation($userId, $bookId)) {
                 echo "<script>
                     alert('Reservation created successfully!');
-                    window.location.href = '" . URL_ROOT . "/users/profile';
+                    window.location.href = '" . URL_ROOT . "/user/profile';
                 </script>";
             } else {
                 echo "<script>

@@ -96,7 +96,7 @@ class UserController extends Controller
             if (empty($data['error'])) {
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
                 if ($this->userModel->register($data)) {
-                    header('Location: ' . URL_ROOT . '/users/login?status=success');
+                    header('Location: ' . URL_ROOT . '/user/login?status=success');
                     exit;
                 } else {
                     $data['error'] = "Something went wrong during registration.";
@@ -136,7 +136,7 @@ class UserController extends Controller
         // 1. Kiểm tra đăng nhập
         
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT . '/users/login');
+            header('Location: ' . URL_ROOT . '/user/login');
             return;
         }
 
@@ -178,7 +178,7 @@ class UserController extends Controller
     public function edit()
     {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URL_ROOT . '/users/login');
+            header('Location: ' . URL_ROOT . '/user/login');
             exit;
         }
 
@@ -245,7 +245,7 @@ class UserController extends Controller
                     // Cập nhật lại Session tên nếu người dùng đổi tên
                     $_SESSION['user_name'] = $data['full_name'];
                     
-                    header('Location: ' . URL_ROOT . '/users/profile?status=success');
+                    header('Location: ' . URL_ROOT . '/user/profile?status=success');
                     exit; // QUAN TRỌNG: Phải có exit sau header
                 } else {
                     die('Đã xảy ra lỗi hệ thống (Database Error).');

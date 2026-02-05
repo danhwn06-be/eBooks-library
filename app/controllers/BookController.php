@@ -11,9 +11,7 @@ class BookController extends Controller
         $this->bookModel = $this->model('Book');
     }
 
-    // =========================================================================
     // 1. PUBLIC VIEWS (CATALOG & SEARCH)
-    // =========================================================================
 
     /**
      * Trang chủ / Danh sách sách (Hỗ trợ Phân trang & Lọc)
@@ -128,7 +126,7 @@ class BookController extends Controller
     {
     // Chưa login → login trước
     if (!isset($_SESSION['user_id'])) {
-        header("Location: " . URL_ROOT . "/users/login");
+        header("Location: " . URL_ROOT . "/user/login");
         exit;
     }
 
@@ -154,7 +152,7 @@ class BookController extends Controller
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $reservationModel = $this->model('Reservation');
         if ($reservationModel->createReservation($_SESSION['user_id'], $bookId)) {
-            header("Location: " . URL_ROOT . "/users/profile?status=reserved");
+            header("Location: " . URL_ROOT . "/user/profile?status=reserved");
         } else {
             header("Location: " . URL_ROOT . "/book/detail/$bookId?error=failed");
         }
