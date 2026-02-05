@@ -15,6 +15,27 @@ class Reservation
     // 1. USER METHODS
 
     /**
+     * Lấy thông tin chi tiết để hiển thị trên trang xác nhận
+     * @param int $userId ID người dùng
+     * @param int $bookId ID sách
+     * @return mixed Object thông tin hoặc null
+     */
+    public function getReservationDetails($userId, $bookId) {
+        // Đã đổi u.phone thành u.phone_number để khớp với bảng Users của bạn
+        $sql = "SELECT u.email, u.address, u.member_code, u.phone_number, b.title 
+                FROM Users u, Books b 
+                WHERE u.user_id = :user_id AND b.book_id = :book_id";
+        
+        try {
+            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt->execute([':user_id' => $userId, ':book_id' => $bookId]);
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    /**
      * Tạo đơn đặt trước sách (Transaction)
      * @param int $userId ID người dùng
      * @param int $bookId ID sách
@@ -64,28 +85,6 @@ class Reservation
     /**
      * Lấy danh sách tất cả các đơn đặt trước (Admin)
      * @return array Danh sách reservations
-     */
-    /**
-     * LẤY THÔNG TIN CHI TIẾT ĐỂ HIỂN THỊ TRÊN TRANG XÁC NHẬN
-     * Đã đồng bộ cột phone_number theo Database thực tế
-     */
-    public function getReservationDetails($userId, $bookId) {
-        // Đã đổi u.phone thành u.phone_number để khớp với bảng Users của bạn
-        $sql = "SELECT u.email, u.address, u.member_code, u.phone_number, b.title 
-                FROM Users u, Books b 
-                WHERE u.user_id = :user_id AND b.book_id = :book_id";
-        
-        try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->execute([':user_id' => $userId, ':book_id' => $bookId]);
-            return $stmt->fetch(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            return null;
-        }
-    }
-
-    /**
-     * ADMIN: LẤY DANH SÁCH TẤT CẢ ĐƠN ĐẶT TRƯỚC
      */
     public function getAllReservations()
     {
