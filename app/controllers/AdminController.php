@@ -440,7 +440,6 @@ public function import_books() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['import_file'])) {
             $file = $_FILES['import_file']['tmp_name'];
 
-            // Kiểm tra có file tải lên không
             if (!file_exists($file)) {
                 die("No file uploaded");
             }
@@ -453,7 +452,7 @@ public function import_books() {
 
                 // 2. Duyệt qua từng dòng (Bỏ qua dòng đầu tiên là Header)
                 foreach ($rows as $index => $row) {
-                    if ($index === 0) continue; // Bỏ qua header
+                    if ($index === 0)
 
                     // Cấu trúc file mẫu: 
                     // [0]ISBN | [1]Title | [2]Author | [3]Category ID | [4]Image URL | [5]Publisher | [6]Year | [7]Created At | [8]Desc
@@ -492,16 +491,14 @@ public function import_books() {
                         'image_url'        => $imageName,
                         'publisher'        => $row[5],
                         'publication_year' => (int)$row[6],
-                        // row[7] Created At (Bỏ qua vì hệ thống tự sinh)
                         'description'      => $row[8]
                     ];
 
                     // 3. Gọi Model để lưu
-                    // Sử dụng try-catch để nếu trùng ISBN thì không chết chương trình
+                    // Sử dụng try-catch để nếu trùng ISBN
                     try {
                         $this->bookModel->addBook($bookData);
                     } catch (Exception $e) {
-                        // Có thể ghi log lỗi ở đây: "Lỗi dòng $index: " . $e->getMessage();
                         continue; 
                     }
                 }

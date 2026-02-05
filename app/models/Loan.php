@@ -119,7 +119,7 @@ class Loan
             $user = $stmtUser->fetch(PDO::FETCH_OBJ);
 
             if (!$user) {
-                return "User not found"; // Trả về lỗi nếu member code sai
+                return "User not found";
             }
 
             // 2. Chèn dữ liệu vào bảng Loans

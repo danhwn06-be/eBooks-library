@@ -127,7 +127,6 @@ public function profile()
             }
 
             $data['error'] = 'Email or password is incorrect! Please try again.';
-            // ĐÚNG: Vào thư mục views/users/login.php
             $this->view('users/login', $data);
         } else {
             $this->view('users/login');
