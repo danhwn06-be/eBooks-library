@@ -1,16 +1,16 @@
 <?php
 // Thông số kết nối Database
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'library_db');
+define('DB_HOST', $_ENV['DB_HOST']);
+define('DB_USER', $_ENV['DB_USER']);
+define('DB_PASS', $_ENV['DB_PASS']);
+define('DB_NAME', $_ENV['DB_NAME']);
 
 // Thông tin chung về ứng dụng
 define('APP_NAME', 'eBooks Library');
 define('APP_VERSION', '1.0.0');
 
 // URL gốc của ứng dụng (dùng cho các liên kết frontend như css, js, ảnh)
-define('URL_ROOT', '/eBooks-library/public');
+define('URL_ROOT', $_ENV['URL_ROOT']);
 
 // Đường dẫn vật lý đến thư mục gốc (dùng để include/require các file PHP)
 define('APP_ROOT', dirname(dirname(__FILE__)));
@@ -30,4 +30,8 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 // Cấu hình hiển thị lỗi (Dành cho môi trường Development, nên tắt khi Production)
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Đây là cấu hình hiển thị lỗi cho môi trường Production
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 ini_set('display_errors', 1);

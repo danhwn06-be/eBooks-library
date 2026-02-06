@@ -1,0 +1,6 @@
+# Bảo mật
+.env
+
+# Bỏ thư viện vendor và images books sau khi update
+vendor/
+images/books/
