@@ -103,7 +103,7 @@ document.querySelector(".login-form").addEventListener("submit", function (e) {
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/;
+  const phoneRegex = /^(0|84)[35789][0-9]{8}$/;
 
   if (!emailRegex.test(email)) {
     alert("Invalid email format.");

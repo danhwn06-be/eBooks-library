@@ -19,6 +19,12 @@ class AdminController extends Controller
      */
     public function __construct()
     {
+        // Bảo mật: Kiểm tra quyền Admin trước khi cho phép truy cập bất kỳ route nào
+        if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
+            header('Location: ' . URL_ROOT . '/user/login');
+            exit;
+        }
+
         $this->bookModel = $this->model('Book');
         $this->userModel = $this->model('User');
         $this->categoryModel = $this->model('Category');
@@ -236,7 +242,7 @@ class AdminController extends Controller
 
                                 if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
                                     $newFilename = time() . '_' . uniqid() . '.' . $ext;
-                                    $savePath = APP_ROOT . '/public/images/books/' . $newFilename;
+                                    $savePath = APP_ROOT . DS . 'public' . DS . 'images' . DS . 'books' . DS . $newFilename;
                                     file_put_contents($savePath, $fileContent);
                                     $imageName = $newFilename;
                                 }
@@ -310,8 +316,8 @@ class AdminController extends Controller
             if (in_array($ext, $allowed)) {
                 // Đặt tên file mới để tránh trùng lặp: time_tenfile.jpg
                 $newFilename = time() . '_' . $filename;
-                // Đường dẫn thư mục public/images/books/
-                $destination = 'images/books/' . $newFilename;
+                // Đường dẫn vật lý tuyệt đối đến thư mục public/images/books/
+                $destination = APP_ROOT . DS . 'public' . DS . 'images' . DS . 'books' . DS . $newFilename;
 
                 if (move_uploaded_file($filetmp, $destination)) {
                     return $newFilename;

@@ -1,16 +1,7 @@
 <?php
 
-class Reservation
+class Reservation extends Model
 {
-    private $db;
-
-    /**
-     * Khởi tạo kết nối Database
-     */
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
 
     // 1. USER METHODS
 
@@ -27,7 +18,7 @@ class Reservation
                 WHERE u.user_id = :user_id AND b.book_id = :book_id";
         
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId, ':book_id' => $bookId]);
             return $stmt->fetch(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
@@ -44,38 +35,36 @@ class Reservation
     public function createReservation($userId, $bookId)
     {
         try {
-            $this->db->getConnection()->beginTransaction();
+            $this->db->beginTransaction();
 
             // 1. Tìm bản sao sách đang có sẵn (Available) để giữ chỗ
             $sqlCheck = "SELECT copy_id FROM BookCopies WHERE book_id = :book_id AND status = 'Available' LIMIT 1 FOR UPDATE";
-            $stmtCheck = $this->db->getConnection()->prepare($sqlCheck);
-            $stmtCheck->bindValue(':book_id', $bookId);
-            $stmtCheck->execute();
+            $stmtCheck = $this->db->prepare($sqlCheck);
+            $stmtCheck->execute([':book_id' => $bookId]);
             $copy = $stmtCheck->fetch(PDO::FETCH_OBJ);
 
             if (!$copy) {
-                $this->db->getConnection()->rollBack();
+                $this->db->rollBack();
                 return false; // Không còn sách để đặt
             }
 
             // 2. Cập nhật trạng thái bản sao thành 'Reserved'
             $sqlUpdate = "UPDATE BookCopies SET status = 'Reserved' WHERE copy_id = :copy_id";
-            $stmtUpdate = $this->db->getConnection()->prepare($sqlUpdate);
-            $stmtUpdate->bindValue(':copy_id', $copy->copy_id);
-            $stmtUpdate->execute();
+            $stmtUpdate = $this->db->prepare($sqlUpdate);
+            $stmtUpdate->execute([':copy_id' => $copy->copy_id]);
 
             // 3. Tạo đơn đặt trước (Mặc định status là 'Waiting' theo DB của bạn)
             $sql = "INSERT INTO Reservations (user_id, book_id, reservation_date, status) 
                     VALUES (:user_id, :book_id, NOW(), 'Waiting')";
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':user_id' => $userId,
                 ':book_id' => $bookId
             ]);
             
-            return $this->db->getConnection()->commit();
+            return $this->db->commit();
         } catch (PDOException $e) {
-            $this->db->getConnection()->rollBack();
+            $this->db->rollBack();
             return false;
         }
     }
@@ -102,7 +91,7 @@ class Reservation
         ";
 
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_OBJ);
         } catch (PDOException $e) {

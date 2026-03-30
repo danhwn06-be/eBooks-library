@@ -190,10 +190,10 @@ INSERT INTO
     )
 VALUES (
         'ADMIN01',
-        'Quản Trị Viên',
         'admin',
-        'admin@library.com',
-        '$2y$10$FYm.0r6OV9uXCxY3zJs1neWk/EjLsXHMZDxhs2OVsEorNMqX8dXci',
+        'admin',
+        'admin@ebookslibrary.com',
+        '$2y$10$vezQUkAJRwBnYVraHPKCf.kWG0k2y8LtXpgC.8D7JjUPC1g4xg846', --Zxc@123$gHjk
         '0909000111',
         'Admin'
     ),
@@ -202,7 +202,7 @@ VALUES (
         'Nguyễn Văn A',
         'member1',
         'member1@email.com',
-        '$2y$10$FYm.0r6OV9uXCxY3zJs1neWk/EjLsXHMZDxhs2OVsEorNMqX8dXci',
+        '$2y$10$vezQUkAJRwBnYVraHPKCf.kWG0k2y8LtXpgC.8D7JjUPC1g4xg846', --Zxc@123$gHjk
         '0909000222',
         'Member'
     ),

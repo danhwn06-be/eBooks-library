@@ -1,14 +1,6 @@
 <?php
-class BookCopy {
-    private $db;
-
-    /**
-     * Khởi tạo kết nối Database
-     */
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
+class BookCopy extends Model
+{
 
     // 1. READ METHODS
 
@@ -22,9 +14,8 @@ class BookCopy {
         $sql = "SELECT *
             FROM BookCopies
             WHERE book_id = :book_id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':book_id', $bookId);
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':book_id' => $bookId]);
         return $stmt->fetchAll();
     }
 
@@ -36,9 +27,8 @@ class BookCopy {
     public function getCopyById($id)
     {
         $sql = "SELECT * FROM BookCopies WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
 
@@ -54,13 +44,15 @@ class BookCopy {
         $sql = "INSERT INTO BookCopies (book_id, copy_code, status, condition_note) 
                 VALUES (:book_id, :copy_code, :status, :quality)";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':book_id', $data['book_id']);
-        $stmt->bindValue(':copy_code', $data['copy_code']);
-        $stmt->bindValue(':status', $data['status']);
-        $stmt->bindValue(':quality', $data['condition_note']); // Lưu ý: Database dùng cột 'quality' hay 'condition_note' hãy kiểm tra lại, ở đây tôi dùng 'quality' theo code cũ của bạn
+        $stmt = $this->db->prepare($sql);
+        $params = [
+            ':book_id' => $data['book_id'],
+            ':copy_code' => $data['copy_code'],
+            ':status' => $data['status'],
+            ':quality' => $data['condition_note']
+        ];
 
-        if ($stmt->execute()) {
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -74,12 +66,14 @@ class BookCopy {
     public function updateCopy($data)
     {
         $sql = "UPDATE BookCopies SET status = :status, condition_note = :quality WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':status', $data['status']);
-        $stmt->bindValue(':quality', $data['quality']);
-        $stmt->bindValue(':id', $data['copy_id']);
+        $stmt = $this->db->prepare($sql);
+        $params = [
+            ':status' => $data['status'],
+            ':quality' => $data['quality'],
+            ':id' => $data['copy_id']
+        ];
         
-        if ($stmt->execute()) {
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -93,10 +87,9 @@ class BookCopy {
     public function deleteCopy($id)
     {
         $sql = "DELETE FROM BookCopies WHERE copy_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
+        $stmt = $this->db->prepare($sql);
         
-        if ($stmt->execute()) {
+        if ($stmt->execute([':id' => $id])) {
             return true;
         }
         return false;

@@ -16,12 +16,12 @@ define('URL_ROOT', $_ENV['URL_ROOT']);
 define('APP_ROOT', dirname(dirname(__FILE__)));
 
 // Cấu hình bảo mật cho Session
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 0); // Đặt thành 1 nếu chạy trên HTTPS
-
 // Khởi động Session nếu chưa bắt đầu
 if (session_status() === PHP_SESSION_NONE) {
+    // Các cài đặt ini cho session phải được gọi trước session_start()
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 0); // Đặt thành 1 nếu chạy trên HTTPS
     session_start();
 }
 

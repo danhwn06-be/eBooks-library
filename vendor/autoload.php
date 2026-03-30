@@ -17,6 +17,11 @@ if (PHP_VERSION_ID < 50600) {
     throw new RuntimeException($err);
 }
 
+// if(preg_match('/^Lib/i',$classname)) {
+//     $file = APP_ROOT . DS. 'app'. DS. 'libs' . DS . $className . '.php';
+//     require_once($file);
+// } -> this is models on this project, don't need to create
+
 require_once __DIR__ . '/composer/autoload_real.php';
 
 return ComposerAutoloaderInite875ae8441d070d7dda5f4b47a2117aa::getLoader();

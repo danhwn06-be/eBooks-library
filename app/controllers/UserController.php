@@ -58,26 +58,26 @@ class UserController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'email'        => trim($_POST['email']),
-                'phone_number' => trim($_POST['phone_number']),
-                'full_name'    => trim($_POST['full_name']),
-                'user_name'    => trim($_POST['user_name']),
-                'address'      => trim($_POST['address']),
-                'password'     => $_POST['password'],
-                'confirm_password' => $_POST['confirm_password'],
+                'email'        => trim($_POST['email'] ?? ''),
+                'phone_number' => trim($_POST['phone_number'] ?? ''),
+                'full_name'    => trim($_POST['full_name'] ?? ''),
+                'user_name'    => trim($_POST['user_name'] ?? ''),
+                'address'      => trim($_POST['address'] ?? ''),
+                'password'     => $_POST['password'] ?? '',
+                'confirm_password' => $_POST['confirm_password'] ?? '',
                 'error'        => ''
             ];
 
             // Kiểm tra không được để trống các trường bắt buộc
-            if (empty($data['email']) || empty($data['phone_number']) || empty($data['user_name']) || empty($data['full_name'])) {
+            if (empty($data['email']) || empty($data['phone_number']) || empty($data['user_name']) || empty($data['full_name']) || empty($data['password'])) {
                 $data['error'] = "Please fill in all required fields (Email, Phone, Username, Fullname).";
-            } 
+            }
             // Kiểm tra định dạng Email
             elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 $data['error'] = "Invalid email format.";
             }
             // Kiểm tra định dạng Phone
-            elseif (!preg_match('/^(0|84)[3|5|7|8|9][0-9]{8}$/', $data['phone_number'])) {
+            elseif (!preg_match('/^(0|84)[35789][0-9]{8}$/', $data['phone_number'])) {
                 $data['error'] = "Invalid Vietnamese phone number format.";
             }
             // Kiểm tra Username tồn tại
@@ -91,6 +91,10 @@ class UserController extends Controller
             // Kiểm tra Password 
             elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $data['password'])) {
                 $data['error'] = "Password must be at least 8 characters with uppercase, number and symbol.";
+            }
+            // Kiểm tra Confirm Password
+            elseif ($data['password'] !== $data['confirm_password']) {
+                $data['error'] = "Passwords do not match.";
             }
 
             if (empty($data['error'])) {
@@ -134,17 +138,17 @@ class UserController extends Controller
     public function profile()
     {
         // 1. Kiểm tra đăng nhập
-        
+
         if (!isset($_SESSION['user_id'])) {
             header('Location: ' . URL_ROOT . '/user/login');
             return;
         }
 
         $userId = $_SESSION['user_id'];
-        
+
         // 2. Lấy thông tin User
         $user = $this->userModel->getUserById($userId);
-        
+
         // 3. Lấy dữ liệu thống kê & Lịch sử
         $borrowHistory = $this->loanModel->getBorrowHistory($userId);
         $countReading = $this->loanModel->countReading($userId);       // Số sách đang đọc
@@ -165,9 +169,9 @@ class UserController extends Controller
     /**
      * Trang mặc định (Chuyển hướng sang đăng ký hoặc login tùy logic)
      */
-    public function index() 
+    public function index()
     {
-        $this->register(); 
+        $this->register();
     }
     
     // 3. USER ACTIONS (UPDATE)
@@ -183,7 +187,7 @@ class UserController extends Controller
         }
 
         $userId = $_SESSION['user_id'];
-        
+
         // Lấy thông tin user hiện tại từ DB (để lấy pass cũ và hiển thị form)
         $currentUser = $this->userModel->getUserById($userId);
 
@@ -197,15 +201,15 @@ class UserController extends Controller
                 'email' => trim($_POST['email']),
                 'phone_number' => trim($_POST['phone_number']),
                 'address' => trim($_POST['address']),
-                
+
                 // Password fields
                 'current_password' => $_POST['current_password'],
                 'new_password' => $_POST['new_password'],
                 'confirm_password' => $_POST['confirm_password'],
-                
-                // Password mặc định là password cũ (nếu không đổi)
-                'password' => $currentUser->password_hash, 
-                
+
+                // Bỏ trống password mặc định để Model kích hoạt truy vấn động
+                'password' => '',
+
                 // Errors
                 'full_name_err' => '',
                 'email_err' => '',
@@ -244,18 +248,16 @@ class UserController extends Controller
                 if ($this->userModel->updateUser($data)) {
                     // Cập nhật lại Session tên nếu người dùng đổi tên
                     $_SESSION['user_name'] = $data['full_name'];
-                    
+
                     header('Location: ' . URL_ROOT . '/user/profile?status=success');
                     exit; // QUAN TRỌNG: Phải có exit sau header
                 } else {
                     die('Đã xảy ra lỗi hệ thống (Database Error).');
                 }
-
             } else {
                 // Có lỗi -> Load lại view edit với các lỗi
                 $this->view('profile/edit', $data);
             }
-
         } else {
             // GET Request: Load form lần đầu
             $data = [

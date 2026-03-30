@@ -1,16 +1,7 @@
 <?php
 
-class User
+class User extends Model
 {
-    private $db;
-
-    /**
-     * Khởi tạo kết nối Database
-     */
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
 
     // 1. AUTHENTICATION & REGISTRATION
 
@@ -23,9 +14,8 @@ class User
     public function login($account, $password)
     {
         $sql = "SELECT * FROM users WHERE email = :acc OR phone_number = :acc OR user_name = :acc LIMIT 1";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindParam(':acc', $account);
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':acc' => $account]);
 
         $user = $stmt->fetch(PDO::FETCH_OBJ);
         if ($user && password_verify($password, $user->password_hash)) {
@@ -46,16 +36,19 @@ class User
         $sql = "INSERT INTO users (member_code, email, phone_number, full_name, user_name, address, password_hash, role)
                 VALUES (:member_code, :email, :phone, :full_name, :user_name, :address, :password, 'Member')";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindParam(':member_code', $member_code);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':phone', $data['phone_number']);
-        $stmt->bindParam(':full_name', $data['full_name']);
-        $stmt->bindParam(':user_name', $data['user_name']);
-        $stmt->bindParam(':address', $data['address']);
-        $stmt->bindParam(':password', $data['password']);
+        $stmt = $this->db->prepare($sql);
 
-        if ($stmt->execute()) {
+        $params = [
+            ':member_code' => $member_code,
+            ':email' => $data['email'],
+            ':phone' => $data['phone_number'],
+            ':full_name' => $data['full_name'],
+            ':user_name' => $data['user_name'],
+            ':address' => $data['address'],
+            ':password' => $data['password']
+        ];
+
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -70,9 +63,8 @@ class User
     public function findUserByField($field, $value)
     {
         $sql = "SELECT * FROM users WHERE $field = :value";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindParam(':value', $value);
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':value' => $value]);
         return $stmt->rowCount() > 0;
     }
 
@@ -89,9 +81,8 @@ class User
                 FROM users
                 WHERE user_id = :user_id";
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->bindValue(':user_id', $id);
-            $stmt->execute();
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':user_id' => $id]);
             return $stmt->fetch(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
             return false;
@@ -105,36 +96,32 @@ class User
      */
     public function updateUser($data)
     {
+        $setParts = [
+            'full_name = :full_name',
+            'email = :email',
+            'phone_number = :phone_number',
+            'address = :address'
+        ];
+
+        $params = [
+            ':full_name' => $data['full_name'],
+            ':email' => $data['email'],
+            ':phone_number' => $data['phone_number'],
+            ':address' => $data['address'],
+            ':id' => $data['user_id']
+        ];
+
+        // Nếu có mật khẩu mới được cung cấp, thêm nó vào truy vấn và tham số
         if (!empty($data['password'])) {
-            $sql = "UPDATE users
-                    SET full_name = :full_name,
-                        email = :email,
-                        phone_number = :phone_number,
-                        address = :address,
-                        password_hash = :password
-                    WHERE user_id = :id";
-        } else {
-            $sql = "UPDATE users
-                    SET full_name = :full_name,
-                        email = :email,
-                        phone_number = :phone_number,
-                        address = :address
-                    WHERE user_id = :id";
+            $setParts[] = 'password_hash = :password';
+            $params[':password'] = $data['password'];
         }
 
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $sql = "UPDATE users SET " . implode(', ', $setParts) . " WHERE user_id = :id";
 
-        $stmt->bindValue(':id', $data['user_id']);
-        $stmt->bindValue(':full_name', $data['full_name']);
-        $stmt->bindValue(':email', $data['email']);
-        $stmt->bindValue(':phone_number', $data['phone_number']);
-        $stmt->bindValue(':address', $data['address']);
+        $stmt = $this->db->prepare($sql);
 
-        if (!empty($data['password'])) {
-            $stmt->bindValue(':password', $data['password']);
-        }
-
-        if ($stmt->execute()) {
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -149,7 +136,7 @@ class User
     public function getAllUsers()
     {
         $sql = "SELECT user_id, member_code, full_name, user_name, email, password_hash, phone_number, address, role, created_at, updated_at FROM users ORDER BY created_at DESC";
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -166,16 +153,18 @@ class User
         $sql = "INSERT INTO users (member_code, full_name, email, address, phone_number, password_hash, created_at)
                 VALUES (:member_code, :full_name, :email, :address, :phone_number, :password, NOW())";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt = $this->db->prepare($sql);
 
-        $stmt->bindValue(':member_code', $newMemberCode);
-        $stmt->bindValue(':full_name', $data['full_name']);
-        $stmt->bindValue(':email', $data['email']);
-        $stmt->bindValue(':address', $data['address']);
-        $stmt->bindValue(':phone_number', $data['phone_number']);
-        $stmt->bindValue(':password', $data['password']);
+        $params = [
+            ':member_code' => $newMemberCode,
+            ':full_name' => $data['full_name'],
+            ':email' => $data['email'],
+            ':address' => $data['address'],
+            ':phone_number' => $data['phone_number'],
+            ':password' => $data['password']
+        ];
 
-        if ($stmt->execute()) {
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -189,10 +178,9 @@ class User
     public function deleteUser($id)
     {
         $sql = "DELETE FROM users WHERE user_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt = $this->db->prepare($sql);
         
-        if ($stmt->execute()) {
+        if ($stmt->execute([':id' => $id])) {
             return true;
         }
         return false;
@@ -203,7 +191,7 @@ class User
     private function generateMemberCode()
     {
         $sql = "SELECT member_code FROM users ORDER BY member_code DESC LIMIT 1";
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $lastUser = $stmt->fetch(PDO::FETCH_ASSOC);
 

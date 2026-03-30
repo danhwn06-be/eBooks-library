@@ -1,16 +1,7 @@
 <?php
 
-class Book
+class Book extends Model
 {
-    private $db;
-
-    /**
-     * Khởi tạo kết nối Database
-     */
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
 
     // 1. CÁC HÀM ĐỌC DỮ LIỆU (READ) - DÀNH CHO NGƯỜI DÙNG (USER FRONTEND)
 
@@ -30,7 +21,7 @@ class Book
             LIMIT :limit OFFSET :offset";
 
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
             $stmt->execute();
@@ -52,11 +43,12 @@ class Book
                 COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies
                 FROM Books b
                 LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
-                WHERE b.title LIKE :kw OR b.author LIKE :kw OR b.isbn LIKE :kw
+                WHERE b.title LIKE :kw1 OR b.author LIKE :kw2 OR b.isbn LIKE :kw3
                 GROUP BY b.book_id";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->execute(['kw' => "%$keyword%"]);
+        $stmt = $this->db->prepare($sql);
+        $term = "%" . $keyword . "%";
+        $stmt->execute([':kw1' => $term, ':kw2' => $term, ':kw3' => $term]);
         return $stmt->fetchAll();
     }
 
@@ -79,9 +71,8 @@ class Book
             GROUP BY b.book_id";
 
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->bindValue(':id', $id);
-            $stmt->execute();
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':id' => $id]);
             return $stmt->fetch();
         } catch (PDOException) {
             return false;
@@ -96,9 +87,8 @@ class Book
     public function checkIsbnExists($isbn)
     {
         $sql = "SELECT COUNT(*) as count FROM Books WHERE isbn = :isbn";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':isbn', $isbn);
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':isbn' => $isbn]);
         $row = $stmt->fetch();
         return $row['count'] > 0;
     }
@@ -108,28 +98,40 @@ class Book
      * @param array $f Mảng chứa các bộ lọc
      * @return array Danh sách sách đã lọc
      */
-    public function getFilteredBooks($f)
+    public function getFilteredBooks($filters)
     {
         $sql = "SELECT b.book_id, b.title, b.author, b.isbn, b.image_url, 
                 COUNT(bc.copy_id) AS total_copies, 
                 COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies 
                 FROM Books b 
-                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
-                WHERE 1=1";
+                LEFT JOIN BookCopies bc ON b.book_id = bc.book_id";
 
-        if (!empty($f['category'])) $sql .= " AND b.category_id = :cat";
-        if (!empty($f['year']))     $sql .= " AND b.publication_year = :year";
-        if (!empty($f['author']))   $sql .= " AND b.author LIKE :auth";
+        $conditions = [];
+        $params = [];
+
+        if (!empty($filters['category'])) {
+            $conditions[] = "b.category_id = :category";
+            $params[':category'] = $filters['category'];
+        }
+
+        if (!empty($filters['year'])) {
+            $conditions[] = "b.publication_year = :year";
+            $params[':year'] = $filters['year'];
+        }
+
+        if (!empty($filters['author'])) {
+            $conditions[] = "b.author LIKE :author";
+            $params[':author'] = "%" . $filters['author'] . "%";
+        }
+
+        if (count($conditions) > 0) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
 
         $sql .= " GROUP BY b.book_id ORDER BY b.created_at DESC";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-
-        if (!empty($f['category'])) $stmt->bindValue(':cat', $f['category']);
-        if (!empty($f['year']))     $stmt->bindValue(':year', $f['year']);
-        if (!empty($f['author']))   $stmt->bindValue(':auth', "%" . $f['author'] . "%");
-
-        $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
@@ -142,7 +144,7 @@ class Book
         $sql = "SELECT COUNT(*) AS total
             FROM Books";
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $row = $stmt->fetch();
             $total = $row['total'];
@@ -159,7 +161,7 @@ class Book
     public function getAllBooks()
     {
         $sql = "SELECT * FROM Books";
-        $stmt = $this->db->getConnection()->query($sql);
+        $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
 
@@ -179,7 +181,7 @@ class Book
                 LEFT JOIN BookCopies bc ON b.book_id = bc.book_id 
                 WHERE b.category_id = :cat_id
                 GROUP BY b.book_id";
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -203,9 +205,9 @@ class Book
                 GROUP BY b.book_id
                 ORDER BY b.created_at DESC
                 LIMIT :limit OFFSET :offset";
-        
+
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
             $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
@@ -225,7 +227,7 @@ class Book
     {
         $sql = "SELECT COUNT(*) as total FROM Books WHERE category_id = :cat_id";
         try {
-            $stmt = $this->db->getConnection()->prepare($sql);
+            $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':cat_id', $cat_id, PDO::PARAM_INT);
             $stmt->execute();
             $row = $stmt->fetch();
@@ -233,34 +235,6 @@ class Book
         } catch (PDOException $e) {
             return 0;
         }
-    }
-
-    /**
-     * Lấy tất cả danh mục sách
-     * @return array Danh sách danh mục
-     */
-    public function getAllCategories()
-    {
-        $sql = "SELECT * FROM Categories ORDER BY category_name ASC";
-        $stmt = $this->db->getConnection()->query($sql);
-        $categories = $stmt->fetchAll();
-
-        return $categories;
-    }
-
-    /**
-     * Lấy tên danh mục dựa trên ID
-     * @param int $id ID danh mục
-     * @return string Tên danh mục
-     */
-    public function getCategoryNameById($id)
-    {
-        $sql = "SELECT category_name FROM Categories WHERE category_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        return $result ? $result['category_name'] : 'Unknown Category';
     }
 
 
@@ -281,8 +255,8 @@ class Book
                 GROUP BY b.book_id
                 ORDER BY b.book_id DESC
                 LIMIT :limit OFFSET :offset";
-        
-        $stmt = $this->db->getConnection()->prepare($sql);
+
+        $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -301,7 +275,7 @@ class Book
                 LEFT JOIN BookCopies bc ON b.book_id = bc.book_id
                 GROUP BY b.book_id
                 ORDER BY b.book_id DESC";
-        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -317,22 +291,33 @@ class Book
      */
     public function addBook($data)
     {
-        $sql = "INSERT INTO Books (title, author, isbn, category_id, publisher, publication_year, description, image_url) 
-                VALUES (:title, :author, :isbn, :category_id, :publisher, :year, :desc, :image)";
+        $columns = ['title', 'author', 'isbn', 'category_id', 'publisher', 'publication_year', 'description'];
+        $placeholders = [':title', ':author', ':isbn', ':category_id', ':publisher', ':year', ':desc'];
+        $params = [
+            ':title' => $data['title'],
+            ':author' => $data['author'],
+            ':isbn' => $data['isbn'],
+            ':category_id' => $data['category_id'],
+            ':publisher' => $data['publisher'],
+            ':year' => $data['publication_year'],
+            ':desc' => $data['description']
+        ];
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':title', $data['title']);
-        $stmt->bindValue(':author', $data['author']);
-        $stmt->bindValue(':isbn', $data['isbn']);
-        $stmt->bindValue(':category_id', $data['category_id']);
-        $stmt->bindValue(':publisher', $data['publisher']);
-        $stmt->bindValue(':year', $data['publication_year']);
-        $stmt->bindValue(':desc', $data['description']);
-        $stmt->bindValue(':image', $data['image_url']); // Lưu tên file ảnh
-
-        if ($stmt->execute()) {
-            return $this->db->getConnection()->lastInsertId();
+        // Nếu có image_url thì mới thêm vào câu lệnh INSERT
+        if (!empty($data['image_url'])) {
+            $columns[] = 'image_url';
+            $placeholders[] = ':image';
+            $params[':image'] = $data['image_url'];
         }
+
+        $sql = "INSERT INTO Books (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+
+        $stmt = $this->db->prepare($sql);
+
+        if ($stmt->execute($params)) {
+            return $this->db->lastInsertId();
+        }
+
         return false;
     }
 
@@ -343,38 +328,37 @@ class Book
      */
     public function updateBook($data)
     {
-        // Nếu người dùng không upload ảnh mới ($data['image_url'] rỗng), ta không update cột image_url
-        if (empty($data['image_url'])) {
-            $sql = "UPDATE Books SET 
-                    title = :title, author = :author, isbn = :isbn, 
-                    category_id = :category_id, publisher = :publisher, 
-                    publication_year = :year, description = :desc
-                    WHERE book_id = :id";
-        } else {
-            // Nếu có ảnh mới, update cả cột image_url
-            $sql = "UPDATE Books SET 
-                    title = :title, author = :author, isbn = :isbn, 
-                    category_id = :category_id, publisher = :publisher, 
-                    publication_year = :year, description = :desc,
-                    image_url = :image
-                    WHERE book_id = :id";
-        }
+        $sql = "UPDATE Books SET
+                title = :title,
+                author = :author,
+                isbn = :isbn,
+                category_id = :category_id,
+                publisher = :publisher,
+                publication_year = :year,
+                description = :desc";
 
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':title', $data['title']);
-        $stmt->bindValue(':author', $data['author']);
-        $stmt->bindValue(':isbn', $data['isbn']);
-        $stmt->bindValue(':category_id', $data['category_id']);
-        $stmt->bindValue(':publisher', $data['publisher']);
-        $stmt->bindValue(':year', $data['publication_year']);
-        $stmt->bindValue(':desc', $data['description']);
-        $stmt->bindValue(':id', $data['book_id']);
+        $params = [
+            ':title' => $data['title'],
+            ':author' => $data['author'],
+            ':isbn' => $data['isbn'],
+            ':category_id' => $data['category_id'],
+            ':publisher' => $data['publisher'],
+            ':year' => $data['publication_year'],
+            ':desc' => $data['description'],
+            ':id' => $data['book_id']
+        ];
 
+        // Nếu có ảnh mới thì thêm vào câu lệnh SQL và tham số
         if (!empty($data['image_url'])) {
-            $stmt->bindValue(':image', $data['image_url']);
+            $sql .= ", image_url = :image";
+            $params[':image'] = $data['image_url'];
         }
 
-        if ($stmt->execute()) {
+        $sql .= " WHERE book_id = :id";
+
+        $stmt = $this->db->prepare($sql);
+
+        if ($stmt->execute($params)) {
             return true;
         }
         return false;
@@ -388,10 +372,9 @@ class Book
     public function deleteBook($id)
     {
         $sql = "DELETE FROM Books WHERE book_id = :id";
-        $stmt = $this->db->getConnection()->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        
-        if ($stmt->execute()) {
+        $stmt = $this->db->prepare($sql);
+
+        if ($stmt->execute([':id' => $id])) {
             return true;
         }
         return false;

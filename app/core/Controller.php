@@ -12,7 +12,7 @@ class Controller
      */
     public function model($model)
     {
-        require_once APP_ROOT . "/app/models/" . $model . ".php";
+        require_once APP_ROOT . DS . 'app' . DS . 'models' . DS . $model . '.php';
         return new $model;
     }
 
@@ -23,8 +23,8 @@ class Controller
      */
     public function view($view, $data = [])
     {
-        if (file_exists(APP_ROOT . "/app/views/" . $view . ".php")) {
-            require_once APP_ROOT . "/app/views/" . $view . ".php";
+        if (file_exists(APP_ROOT . DS . 'app' . DS . 'views' . DS . $view . '.php')) {
+            require_once APP_ROOT . DS . 'app' . DS . 'views' . DS . $view . '.php';
         } else {
             die("View does not exist");
         }

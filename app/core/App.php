@@ -43,7 +43,7 @@ class App
         $url = $this->getUrl();
 
         // 1. Xử lý Controller: Kiểm tra file controller có tồn tại không
-        if (isset($url[0]) && file_exists(APP_ROOT . '/app/controllers/' . ucfirst($url[0]) . 'Controller.php')) {
+        if (isset($url[0]) && file_exists(APP_ROOT . DS . 'app' . DS . 'controllers' . DS . ucfirst($url[0]) . 'Controller.php')) {
             $this->controller = ucfirst($url[0]) . 'Controller';
             unset($url[0]);
         } elseif (isset($url[0]) && !empty($url[0])) {
@@ -52,7 +52,7 @@ class App
         }
 
         // Require file controller và khởi tạo đối tượng
-        require_once APP_ROOT . '/app/controllers/' . $this->controller . '.php';
+        require_once APP_ROOT . DS . 'app' . DS . 'controllers' . DS . $this->controller . '.php';
         $this->controller = new $this->controller;
 
         // 2. Xử lý Method: Kiểm tra method có tồn tại trong controller không
